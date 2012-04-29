@@ -40,7 +40,7 @@ import static com.fsck.k9.mail.K9MailLib.LOG_TAG;
  * </pre>
  */
 public class ImapStore extends RemoteStore {
-    private Set<Flag> permanentFlagsIndex = EnumSet.noneOf(Flag.class);
+    private Set<Flag> permanentFlagsIndex = new HashSet<>();
     private ConnectivityManager connectivityManager;
 
     private String host;
@@ -390,7 +390,6 @@ public class ImapStore extends RemoteStore {
     public Pusher getPusher(PushReceiver receiver) {
         return new ImapPusher(this, receiver);
     }
-
 
     private class StoreImapSettings implements ImapSettings {
         @Override
