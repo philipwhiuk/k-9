@@ -385,7 +385,7 @@ public class ImapStore extends RemoteStore {
     Set<Flag> getPermanentFlagsIndex() {
         return permanentFlagsIndex;
     }
-
+    
     @Override
     public Pusher getPusher(PushReceiver receiver) {
         return new ImapPusher(this, receiver);
