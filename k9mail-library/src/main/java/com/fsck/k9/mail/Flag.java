@@ -3,35 +3,35 @@ package com.fsck.k9.mail;
 
 /**
  * Flags that can be applied to Messages.
- * 
+ *
  * Update: to support IMAP keywords ( custom flags ) this enum became
  * a class. This class was constructed to resemble enums. Since Java
- * enums are objects internally anyway ( implemented similar to these ) 
+ * enums are objects internally anyway ( implemented similar to these )
  * this will not be noticably slower.
- * 
+ *
  * The extra field bCustom denotes custom flags. These get an prefix
  * attached internally. When using the flags with external servers,..
  * one should use the realName() method.
  */
 public class Flag {
-	
-	/*
-	 * IMPORTANT!!
-	 * 
-	 * INTERNAL NAME MUST EQUAL THE NAME OF THE FIELD!!!
-	 */
-	
-	/*
-	 * IMAP Spec flags.
-	 */
+
+    /*
+     * IMPORTANT!!
+     *
+     * INTERNAL NAME MUST EQUAL THE NAME OF THE FIELD!!!
+     */
+
+    /*
+     * IMAP Spec flags.
+     */
     public static final Flag DELETED = new Flag("DELETED", "\\Deleted");
     public static final Flag SEEN = new Flag("SEEN", "\\Seen");
     public static final Flag ANSWERED = new Flag("ANSWERED", "\\Answered");
     public static final Flag FLAGGED = new Flag("FLAGGED", "\\Flagged");
-    
+
     public static final Flag DRAFT = new Flag("DRAFT", "\\Draft");
     public static final Flag RECENT = new Flag("RECENT", "\\Recent");
-    
+
     private static final Flag[] IMAP_FLAGS = new Flag[] {DELETED, SEEN, ANSWERED, FLAGGED, DRAFT, RECENT};
 
     /*
@@ -80,17 +80,17 @@ public class Flag {
     public static final Flag X_MIGRATED_FROM_V50 = new Flag("X_MIGRATED_FROM_V50");
 
     public static final Flag X_GOT_ALL_HEADERS = new Flag("X_GOT_ALL_HEADERS");
-    
+
     /*
      * Predefined Prefixes
      */
     private static final String USER_PREFIX = "USER_";
-    
+
     private final String mName;				// for use towards third party 	ex. "\\Deleted"
-    										// when internal name = name we refer to it as just name
+    // when internal name = name we refer to it as just name
     private final String mInternalName;		// for internal use in database,...   ex. "DELETED"
     protected boolean mCustom;
-    
+
     /**
      * When a Flag is created dynamically we know it's a custom flag.
      * 
@@ -106,28 +106,28 @@ public class Flag {
     private Flag(String name){
     	this(name, name);
     }
-    
+
     /**
      * Create a new Flag. This doesn't create a custom flag, it's used to define
      * the predefined flags.
-     * 
-     * @param internal_name Name for internal use in database,...   ex. "DELETED"
+     *
+     * @param internalName Name for internal use in database,...   ex. "DELETED"
      * @param name Name for use towards third party ( ex. "\\Deleted" )
      */
-    private Flag(String internal_name, String name){
-    	this.mName = name;
-    	this.mCustom = false;
-    	this.mInternalName = internal_name;
+    private Flag(String internalName, String name) {
+        this.mName = name;
+        this.mCustom = false;
+        this.mInternalName = internalName;
     }
-    
-    /** 
+
+    /**
      * Returns the predefined static flag object if any. Otherwise a new
      * custom flag is created and returned.
-     * 
+     *
      * When the name starts with the USER_PREFIX we don't add it again to
      * create a new one. This is the case for example when this is called with
      * strings retrieved from the database.
-     * 
+     *
      * IMPORTANT remember the name of the field of predefined flags must equal the
      * internal name!
      * 
@@ -147,48 +147,52 @@ public class Flag {
 			throw new IllegalArgumentException(e);
 		}
     }
-    
+
     /**
-     * Returns the predefined flag matching the given "real name". For 
+     * Returns the predefined flag matching the given "real name". For
      * example "\\Deleted" will return the DELETED flag. When no such
      * flag exists we assume it's a custom flag and create it.
-     * 
-     * ! this could be faster this way: 
+     *
+     * ! this could be faster this way:
      * http://java.dzone.com/articles/enum-tricks-customized-valueof
      * Since it's only used once I don't see the point.
-     * 
+     *
      * @param name Real name to look for.
      * @return The flag that was found or created.
      */
-    public static Flag valueOfByRealName(String name){
-    	for( Flag f : IMAP_FLAGS )
-    		if(f.mName.equalsIgnoreCase(name))
-    			return f;
-    	return Flag.createFlag(name);
+    public static Flag valueOfByRealName(String name) {
+        for( Flag f : IMAP_FLAGS )
+            if(f.mName.equalsIgnoreCase(name))
+                return f;
+        return Flag.createFlag(name);
     }
-    
+
     @Override
-    public String toString() { return mInternalName; }
-    
-    public String name() { return mInternalName; }
-    
+    public String toString() {
+        return mInternalName;
+    }
+
+    public String name() {
+        return mInternalName;
+    }
+
     /**
      * Returns the real keyword name without user prefix. This is
      * for non-internal use ( syncing with IMAP for example ).
-     * 
+     *
      * @return Real keyword string.
      */
-    public String realName(){
-    	return mName;
+    public String realName() {
+        return mName;
     }
 
     @Override
     public boolean equals(Object o) {
-    	if ( o instanceof Flag ){
-    		Flag f = (Flag)o;
-    		return ( (f) == this ||
-    				(f.mCustom == this.mCustom && f.mInternalName == this.mInternalName 
-    				&& f.mName == this.mName));
-    	} else return false;
+        if ( o instanceof Flag ) {
+            Flag f = (Flag)o;
+            return ( (f) == this ||
+                     (f.mCustom == this.mCustom && f.mInternalName == this.mInternalName
+                      && f.mName == this.mName));
+        } else return false;
     }
 }
