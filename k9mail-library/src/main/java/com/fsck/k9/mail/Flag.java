@@ -17,7 +17,7 @@ import java.util.Set;
  * attached internally. When using the flags with external servers,..
  * one should use the realName() method.
  */
-public class Flag {
+public final class Flag {
 
     /*
      * IMPORTANT WARNING!!
