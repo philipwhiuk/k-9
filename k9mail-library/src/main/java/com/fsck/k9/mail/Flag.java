@@ -120,7 +120,7 @@ public final class Flag {
 
     /**
      * When a Flag is created dynamically we know it's a custom flag.
-     * 
+     *
      * @param name Internal name of the flag.
      * @return Newly created Flag object.
      */
@@ -161,7 +161,7 @@ public final class Flag {
      * IMPORTANT remember the name of the field of predefined flags must equal the
      * internal name!
      *
-     * @param mName Name of Flag wanted.
+     * @param internalName Name of Flag wanted.
      * @return  Predefined Flag object if any otherwise new custom Flag.
      * @throws IllegalArgumentException Thrown when the field is not accessible.
      */
