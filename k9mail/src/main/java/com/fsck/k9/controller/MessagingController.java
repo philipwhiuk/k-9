@@ -4029,6 +4029,9 @@ public class MessagingController implements Runnable {
                 }
                 synchronizeFolder(account, folder, ignoreLastCheckedTime, accountInterval, listener);
             }
+
+            /* Now synchronize the mappings (db -> memory) */
+            localStore.updateTagMappings();
         } catch (MessagingException e) {
             Log.e(K9.LOG_TAG, "Unable to synchronize account " + account.getName(), e);
             addErrorMessage(account, null, e);
