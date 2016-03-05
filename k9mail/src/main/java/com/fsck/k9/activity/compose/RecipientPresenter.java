@@ -30,6 +30,7 @@ import com.fsck.k9.mail.Address;
 import com.fsck.k9.mail.Message;
 import com.fsck.k9.mail.Message.RecipientType;
 import com.fsck.k9.mail.MessagingException;
+import com.fsck.k9.mail.RecepientAddressParser;
 import com.fsck.k9.mailstore.LocalMessage;
 import com.fsck.k9.view.RecipientSelectView.Recipient;
 import org.openintents.openpgp.util.OpenPgpApi;
@@ -113,14 +114,8 @@ public class RecipientPresenter implements PermissionPingCallback {
     }
 
     public void initFromReplyToMessage(Message message) {
-        Address[] replyToAddresses;
-        if (message.getReplyTo().length > 0) {
-            replyToAddresses = message.getReplyTo();
-        } else {
-            replyToAddresses = message.getFrom();
-        }
-
         try {
+            Address[] replyToAddresses = RecepientAddressParser.parseReplyAddresses(message);
             // if we're replying to a message we sent, we probably meant
             // to reply to the recipient of that message
             if (account.isAnIdentity(replyToAddresses)) {

@@ -290,11 +290,7 @@ public class MimeMessage extends Message {
     @Override
     public Address[] getReplyTo() {
         if (mReplyTo == null) {
-            String list = MimeUtility.unfold(getFirstHeader("Reply-to"));
-            if (list == null || list.length() == 0) {
-                list = MimeUtility.unfold(getFirstHeader("List-Post"));
-            }
-            mReplyTo = Address.parse(list);
+            mReplyTo = Address.parse(MimeUtility.unfold(getFirstHeader("Reply-to")));
         }
         return mReplyTo;
     }
