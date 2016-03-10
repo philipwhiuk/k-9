@@ -4540,8 +4540,6 @@ public class MessagingController implements Runnable {
                         } else {
                             Log.e(K9.LOG_TAG, "Unable to set failed status on localFolder - failed to retrieve localFolder from store", e);
                         }
-                        // Oddly enough, using a local variable gets rid of a
-                        // potential null pointer access warning with Eclipse.
                     } catch (Exception se) {
                         Log.e(K9.LOG_TAG, "Unable to set failed status on localFolder", se);
                     }
