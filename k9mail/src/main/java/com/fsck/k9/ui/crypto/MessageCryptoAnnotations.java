@@ -2,6 +2,7 @@ package com.fsck.k9.ui.crypto;
 
 
 import java.util.HashMap;
+import java.util.List;
 
 import android.support.annotation.VisibleForTesting;
 

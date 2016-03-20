@@ -30,6 +30,7 @@ import com.fsck.k9.ui.crypto.MessageCryptoHelper;
 import com.fsck.k9.ui.message.LocalMessageExtractorLoader;
 import com.fsck.k9.ui.message.LocalMessageLoader;
 import org.openintents.openpgp.OpenPgpDecryptionResult;
+import org.openintents.smime.SMimeDecryptionResult;
 
 
 /** This class is responsible for loading a message start to finish, and
@@ -85,7 +86,8 @@ public class MessageLoaderHelper {
 
     private LocalMessage localMessage;
     private MessageCryptoAnnotations messageCryptoAnnotations;
-    private OpenPgpDecryptionResult cachedDecryptionResult;
+    private OpenPgpDecryptionResult cachedOpenPgpDecryptionResult;
+    private SMimeDecryptionResult cachedSMimeDecryptionResult;
 
     private MessageCryptoHelper messageCryptoHelper;
 
@@ -108,7 +110,9 @@ public class MessageLoaderHelper {
 
         if (cachedDecryptionResult != null) {
             if (cachedDecryptionResult instanceof OpenPgpDecryptionResult) {
-                this.cachedDecryptionResult = (OpenPgpDecryptionResult) cachedDecryptionResult;
+                this.cachedOpenPgpDecryptionResult = (OpenPgpDecryptionResult) cachedDecryptionResult;
+            } else if (cachedDecryptionResult instanceof SMimeDecryptionResult) {
+                this.cachedSMimeDecryptionResult = (SMimeDecryptionResult) cachedDecryptionResult;
             } else {
                 Log.e(K9.LOG_TAG, "Got decryption result of unknown type - ignoring");
             }
@@ -262,11 +266,11 @@ public class MessageLoaderHelper {
         if (retainCryptoHelperFragment.hasData()) {
             messageCryptoHelper = retainCryptoHelperFragment.getData();
         } else {
-            messageCryptoHelper = new MessageCryptoHelper(context, account.getOpenPgpProvider());
+            messageCryptoHelper = new MessageCryptoHelper(context, account.getOpenPgpProvider(), account.getSMimeProvider());
             retainCryptoHelperFragment.setData(messageCryptoHelper);
         }
         messageCryptoHelper.asyncStartOrResumeProcessingMessage(
-                localMessage, messageCryptoCallback, cachedDecryptionResult);
+                localMessage, messageCryptoCallback, cachedOpenPgpDecryptionResult, cachedSMimeDecryptionResult);
     }
 
     private void cancelAndClearCryptoOperation() {

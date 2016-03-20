@@ -474,16 +474,37 @@
         android:title="@string/account_settings_crypto"
         android:key="crypto">
 
-        <org.openintents.openpgp.util.OpenPgpAppPreference
-            android:persistent="false"
-            android:key="crypto_app"
-            android:title="@string/account_settings_crypto_app" />
+        <PreferenceScreen
+            android:title="@string/account_settings_openpgp"
+            android:key="openpgp">
 
-        <org.openintents.openpgp.util.OpenPgpKeyPreference
-            android:persistent="false"
-            android:key="crypto_key"
-            android:title="@string/account_settings_crypto_key" />
+            <org.openintents.openpgp.util.OpenPgpAppPreference
+                android:persistent="false"
+                android:key="openpgp_app"
+                android:title="@string/account_settings_openpgp_app" />
 
+            <org.openintents.openpgp.util.OpenPgpKeyPreference
+                android:persistent="false"
+                android:key="openpgp_key"
+                android:title="@string/account_settings_openpgp_key" />
+
+        </PreferenceScreen>
+
+        <PreferenceScreen
+            android:title="@string/account_settings_smime"
+            android:key="smime">
+
+            <org.openintents.smime.util.SMimeAppPreference
+                android:persistent="false"
+                android:key="smime_app"
+                android:title="@string/account_settings_smime_app" />
+
+            <org.openintents.smime.util.SMimeCertificatePreference
+                android:persistent="false"
+                android:key="smime_certificate"
+                android:title="@string/account_settings_smime_key" />
+
+        </PreferenceScreen>
     </PreferenceScreen>
 
 </PreferenceScreen>

@@ -410,7 +410,7 @@ public class PgpMessageBuilderTest {
         return new ComposeCryptoStatusBuilder()
                 .setEnablePgpInline(false)
                 .setSigningKeyId(TEST_SIGN_KEY_ID)
-                .setSelfEncryptId(TEST_SELF_ENCRYPT_KEY_ID)
+                .setSelfEncryptKeyId(TEST_SELF_ENCRYPT_KEY_ID)
                 .setRecipients(new ArrayList<Recipient>())
                 .setCryptoProviderState(CryptoProviderState.OK);
     }

@@ -94,6 +94,19 @@ import com.fsck.k9.ui.EolConvertingEditText;
 import com.fsck.k9.ui.compose.QuotedMessageMvpView;
 import com.fsck.k9.ui.compose.QuotedMessagePresenter;
 
+import com.fsck.k9.message.SMimeMessageBuilder;
+import com.fsck.k9.provider.AttachmentProvider;
+import com.fsck.k9.ui.EolConvertingEditText;
+import com.fsck.k9.view.MessageWebView;
+import org.htmlcleaner.CleanerProperties;
+import org.htmlcleaner.HtmlCleaner;
+import org.htmlcleaner.SimpleHtmlSerializer;
+import org.htmlcleaner.TagNode;
+import org.openintents.openpgp.IOpenPgpService2;
+import org.openintents.openpgp.util.OpenPgpApi;
+import org.openintents.openpgp.util.OpenPgpServiceConnection;
+import org.openintents.openpgp.util.OpenPgpServiceConnection.OnBound;
+import org.openintents.smime.util.SMimeApi;
 
 @SuppressWarnings("deprecation")
 public class MessageCompose extends K9Activity implements OnClickListener,
@@ -715,16 +728,26 @@ public class MessageCompose extends K9Activity implements OnClickListener,
         recipientPresenter.updateCryptoStatus();
         ComposeCryptoStatus cryptoStatus = recipientPresenter.getCurrentCryptoStatus();
         // TODO encrypt drafts for storage
-        if(!isDraft && cryptoStatus.shouldUsePgpMessageBuilder()) {
+        if(!isDraft && cryptoStatus.shouldUseOpenPgpMessageBuilder()) {
             SendErrorState maybeSendErrorState = cryptoStatus.getSendErrorStateOrNull();
             if (maybeSendErrorState != null) {
-                recipientPresenter.showPgpSendError(maybeSendErrorState);
+                recipientPresenter.showCryptoSendError(maybeSendErrorState);
                 return null;
             }
 
             PgpMessageBuilder pgpBuilder = PgpMessageBuilder.newInstance();
             recipientPresenter.builderSetProperties(pgpBuilder);
             builder = pgpBuilder;
+        } else if(!isDraft && cryptoStatus.shouldUseSMimeMessageBuilder()) {
+            SendErrorState maybeSendErrorState = cryptoStatus.getSendErrorStateOrNull();
+            if (maybeSendErrorState != null) {
+                recipientPresenter.showCryptoSendError(maybeSendErrorState);
+                return null;
+            }
+
+            SMimeMessageBuilder sMimeBuilder = SMimeMessageBuilder.newInstance();
+            recipientPresenter.builderSetProperties(sMimeBuilder);
+            builder = sMimeBuilder;
         } else {
             builder = SimpleMessageBuilder.newInstance();
         }

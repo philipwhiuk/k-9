@@ -5,7 +5,9 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import android.annotation.SuppressLint;
 import android.app.LoaderManager;
@@ -39,6 +41,7 @@ import com.fsck.k9.activity.AlternateRecipientAdapter.AlternateRecipientListener
 import com.fsck.k9.activity.compose.RecipientAdapter;
 import com.fsck.k9.activity.compose.RecipientLoader;
 import com.fsck.k9.mail.Address;
+import com.fsck.k9.ui.crypto.CryptoMethod;
 import com.fsck.k9.view.RecipientSelectView.Recipient;
 import com.tokenautocomplete.TokenCompleteTextView;
 import org.apache.james.mime4j.util.CharsetUtil;
@@ -57,8 +60,12 @@ public class RecipientSelectView extends TokenCompleteTextView<Recipient> implem
 
     private RecipientAdapter adapter;
     @Nullable
-    private String cryptoProvider;
+    private String openPgpProvider;
     @Nullable
+    private String sMimeProvider;
+    @Nullable
+    private CryptoMethod cryptoMethod = CryptoMethod.OPENPGP; //TODO: Get the default from somewhere
+
     private LoaderManager loaderManager;
 
     private ListPopupWindow alternatesPopup;
@@ -127,20 +134,20 @@ public class RecipientSelectView extends TokenCompleteTextView<Recipient> implem
 
         RecipientAdapter.setContactPhotoOrPlaceholder(getContext(), holder.vContactPhoto, recipient);
 
-        boolean hasCryptoProvider = cryptoProvider != null;
-        if (!hasCryptoProvider) {
+        boolean isSelectedCryptoMethod = cryptoMethod != CryptoMethod.NONE;
+        if (!isSelectedCryptoMethod) {
             holder.cryptoStatusRed.setVisibility(View.GONE);
             holder.cryptoStatusOrange.setVisibility(View.GONE);
             holder.cryptoStatusGreen.setVisibility(View.GONE);
-        } else if (recipient.cryptoStatus == RecipientCryptoStatus.UNAVAILABLE) {
+        } else if (recipient.cryptoStatuses.get(cryptoMethod) == RecipientCryptoStatus.UNAVAILABLE) {
             holder.cryptoStatusRed.setVisibility(View.VISIBLE);
             holder.cryptoStatusOrange.setVisibility(View.GONE);
             holder.cryptoStatusGreen.setVisibility(View.GONE);
-        } else if (recipient.cryptoStatus == RecipientCryptoStatus.AVAILABLE_UNTRUSTED) {
+        } else if (recipient.cryptoStatuses.get(cryptoMethod) == RecipientCryptoStatus.AVAILABLE_UNTRUSTED) {
             holder.cryptoStatusRed.setVisibility(View.GONE);
             holder.cryptoStatusOrange.setVisibility(View.VISIBLE);
             holder.cryptoStatusGreen.setVisibility(View.GONE);
-        } else if (recipient.cryptoStatus == RecipientCryptoStatus.AVAILABLE_TRUSTED) {
+        } else if (recipient.cryptoStatuses.get(cryptoMethod) == RecipientCryptoStatus.AVAILABLE_TRUSTED) {
             holder.cryptoStatusRed.setVisibility(View.GONE);
             holder.cryptoStatusOrange.setVisibility(View.GONE);
             holder.cryptoStatusGreen.setVisibility(View.VISIBLE);
@@ -260,8 +267,16 @@ public class RecipientSelectView extends TokenCompleteTextView<Recipient> implem
         loaderManager.restartLoader(LOADER_ID_FILTERING, args, this);
     }
 
-    public void setCryptoProvider(@Nullable String cryptoProvider) {
-        this.cryptoProvider = cryptoProvider;
+    public void setOpenPgpProvider(@Nullable String openPgpProvider) {
+        this.openPgpProvider = openPgpProvider;
+    }
+
+    public void setSMimeProvider(@Nullable String sMimeProvider) {
+        this.sMimeProvider = sMimeProvider;
+    }
+
+    public void setCurrentCryptoMethod(@Nullable CryptoMethod method) {
+        this.cryptoMethod = method;
     }
 
     public void addRecipients(Recipient... recipients) {
@@ -327,14 +342,14 @@ public class RecipientSelectView extends TokenCompleteTextView<Recipient> implem
             case LOADER_ID_FILTERING: {
                 String query = args != null && args.containsKey(ARG_QUERY) ? args.getString(ARG_QUERY) : "";
                 adapter.setHighlight(query);
-                return new RecipientLoader(getContext(), cryptoProvider, query);
+                return new RecipientLoader(getContext(), openPgpProvider, sMimeProvider, query);
             }
             case LOADER_ID_ALTERNATES: {
                 Uri contactLookupUri = alternatesPopupRecipient.getContactLookupUri();
                 if (contactLookupUri != null) {
-                    return new RecipientLoader(getContext(), cryptoProvider, contactLookupUri, true);
+                    return new RecipientLoader(getContext(), openPgpProvider, sMimeProvider, contactLookupUri, true);
                 } else {
-                    return new RecipientLoader(getContext(), cryptoProvider, alternatesPopupRecipient.address);
+                    return new RecipientLoader(getContext(), openPgpProvider, sMimeProvider, alternatesPopupRecipient.address);
                 }
             }
         }
@@ -406,7 +421,8 @@ public class RecipientSelectView extends TokenCompleteTextView<Recipient> implem
 
         currentRecipient.address = alternateAddress.address;
         currentRecipient.addressLabel = alternateAddress.addressLabel;
-        currentRecipient.cryptoStatus = alternateAddress.cryptoStatus;
+        currentRecipient.cryptoStatuses.clear();
+        currentRecipient.cryptoStatuses.putAll(alternateAddress.cryptoStatuses);
 
         View recipientTokenView = getTokenViewForRecipient(currentRecipient);
         if (recipientTokenView == null) {
@@ -524,12 +540,12 @@ public class RecipientSelectView extends TokenCompleteTextView<Recipient> implem
         public transient Uri photoThumbnailUri;
 
         @NonNull
-        private RecipientCryptoStatus cryptoStatus;
+        private Map<CryptoMethod, RecipientCryptoStatus> cryptoStatuses;
 
         public Recipient(@NonNull Address address) {
             this.address = address;
             this.contactId = null;
-            this.cryptoStatus = RecipientCryptoStatus.UNDEFINED;
+            this.cryptoStatuses = new HashMap<>();
             this.contactLookupKey = null;
         }
 
@@ -537,7 +553,7 @@ public class RecipientSelectView extends TokenCompleteTextView<Recipient> implem
             this.address = new Address(email, name);
             this.contactId = contactId;
             this.addressLabel = addressLabel;
-            this.cryptoStatus = RecipientCryptoStatus.UNDEFINED;
+            this.cryptoStatuses = new HashMap<>();
             this.contactLookupKey = lookupKey;
         }
 
@@ -586,12 +602,13 @@ public class RecipientSelectView extends TokenCompleteTextView<Recipient> implem
         }
 
         @NonNull
-        public RecipientCryptoStatus getCryptoStatus() {
-            return cryptoStatus;
+        public RecipientCryptoStatus getCryptoStatus(CryptoMethod method) {
+            return cryptoStatuses.get(method) != null ? cryptoStatuses.get(method)
+                    : RecipientCryptoStatus.UNDEFINED;
         }
 
-        public void setCryptoStatus(@NonNull RecipientCryptoStatus cryptoStatus) {
-            this.cryptoStatus = cryptoStatus;
+        public void setCryptoStatus(@NonNull CryptoMethod method, @NonNull RecipientCryptoStatus cryptoStatus) {
+            this.cryptoStatuses.put(method, cryptoStatus);
         }
 
         @Nullable

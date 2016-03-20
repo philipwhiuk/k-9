@@ -208,4 +208,21 @@ public class MessageDecryptVerifier {
         return !TextUtils.isEmpty(text) && text.startsWith(PGP_INLINE_START_MARKER);
     }
 
+    public static boolean isSMimeEncryptedOrSignedPart(Part part) {
+        /**
+        //TODO: SMIME
+        String contentType = part.getContentType();
+        String protocolParameter = MimeUtility.getHeaderParameter(contentType, PROTOCOL_PARAMETER);
+
+        boolean isPgpEncrypted = isSameMimeType(part.getMimeType(), MULTIPART_ENCRYPTED) &&
+                APPLICATION_PGP_ENCRYPTED.equalsIgnoreCase(protocolParameter);
+        boolean isPgpSigned = isSameMimeType(part.getMimeType(), MULTIPART_SIGNED) &&
+                APPLICATION_PGP_SIGNATURE.equalsIgnoreCase(protocolParameter);
+
+        return isPgpEncrypted || isPgpSigned;
+         **/
+        return false;
+    }
+
+
 }

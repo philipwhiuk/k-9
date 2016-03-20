@@ -670,6 +670,7 @@ public class MessageViewFragment extends Fragment implements ConfirmationDialogF
             }
 
             requestCode |= REQUEST_MASK_CRYPTO_PRESENTER;
+
             getActivity().startIntentSenderForResult(
                     si, requestCode, fillIntent, flagsMask, flagValues, extraFlags);
         }

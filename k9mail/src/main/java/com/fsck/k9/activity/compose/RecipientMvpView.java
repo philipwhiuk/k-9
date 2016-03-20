@@ -19,6 +19,7 @@ import com.fsck.k9.activity.MessageCompose;
 import com.fsck.k9.activity.compose.RecipientPresenter.CryptoMode;
 import com.fsck.k9.mail.Address;
 import com.fsck.k9.mail.Message.RecipientType;
+import com.fsck.k9.ui.crypto.CryptoMethod;
 import com.fsck.k9.view.RecipientSelectView;
 import com.fsck.k9.view.RecipientSelectView.Recipient;
 import com.fsck.k9.view.RecipientSelectView.TokenListener;
@@ -152,10 +153,23 @@ public class RecipientMvpView implements OnFocusChangeListener, OnClickListener 
         bccView.addTextChangedListener(textWatcher);
     }
 
-    public void setCryptoProvider(String openPgpProvider) {
-        toView.setCryptoProvider(openPgpProvider);
-        ccView.setCryptoProvider(openPgpProvider);
-        bccView.setCryptoProvider(openPgpProvider);
+    public void setOpenPgpProvider(String openPgpProvider) {
+        toView.setOpenPgpProvider(openPgpProvider);
+        ccView.setOpenPgpProvider(openPgpProvider);
+        bccView.setOpenPgpProvider(openPgpProvider);
+    }
+
+    public void setSmimeProvider(String smimeProvider) {
+        toView.setSMimeProvider(smimeProvider);
+        ccView.setSMimeProvider(smimeProvider);
+        bccView.setSMimeProvider(smimeProvider);
+    }
+
+    //TODO: Call this when changing CryptoMethod
+    public void setCurrentCryptoMethod(CryptoMethod method) {
+        toView.setCurrentCryptoMethod(method);
+        ccView.setCurrentCryptoMethod(method);
+        bccView.setCurrentCryptoMethod(method);
     }
 
     public void requestFocusOnToField() {
@@ -312,6 +326,14 @@ public class RecipientMvpView implements OnFocusChangeListener, OnClickListener 
     }
 
     public void showErrorOpenPgpUserInteractionRequired() {
+        Toast.makeText(activity, R.string.error_crypto_provider_ui_required, Toast.LENGTH_LONG).show();
+    }
+
+    public void showErrorSmimeConnection() {
+        Toast.makeText(activity, R.string.error_crypto_provider_connect, Toast.LENGTH_LONG).show();
+    }
+
+    public void showErrorSmimeUserInteractionRequired() {
         Toast.makeText(activity, R.string.error_crypto_provider_ui_required, Toast.LENGTH_LONG).show();
     }
 

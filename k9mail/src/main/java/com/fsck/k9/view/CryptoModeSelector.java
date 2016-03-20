@@ -66,7 +66,7 @@ public class CryptoModeSelector extends FrameLayout implements OnSeekBarChangeLi
 
     @Override
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-        int grey = ThemeUtils.getStyledColor(getContext(), R.attr.openpgp_grey);
+        int grey = ThemeUtils.getStyledColor(getContext(), R.attr.crypto_grey);
 
         float crossfadeValue1, crossfadeValue2, crossfadeValue3, crossfadeValue4;
 
@@ -78,7 +78,6 @@ public class CryptoModeSelector extends FrameLayout implements OnSeekBarChangeLi
         } else {
             crossfadeValue1 = 0.0f;
         }
-
 
         if (progress > CROSSFADE_THRESH_2_LOW && progress < CROSSFADE_THRESH_2_HIGH) {
             crossfadeValue2 = (progress -CROSSFADE_THRESH_2_LOW) / CROSSFADE_DIVISOR_2;
@@ -106,16 +105,16 @@ public class CryptoModeSelector extends FrameLayout implements OnSeekBarChangeLi
 
         int crossfadedColor;
 
-        crossfadedColor = crossfadeColor(grey, ThemeUtils.getStyledColor(getContext(), R.attr.openpgp_dark_grey), crossfadeValue1);
+        crossfadedColor = crossfadeColor(grey, ThemeUtils.getStyledColor(getContext(), R.attr.crypto_dark_grey), crossfadeValue1);
         modeIcon1.setColorFilter(crossfadedColor, PorterDuff.Mode.SRC_ATOP);
 
-        crossfadedColor = crossfadeColor(grey, ThemeUtils.getStyledColor(getContext(), R.attr.openpgp_blue), crossfadeValue2);
+        crossfadedColor = crossfadeColor(grey, ThemeUtils.getStyledColor(getContext(), R.attr.crypto_blue), crossfadeValue2);
         modeIcon2.setColorFilter(crossfadedColor, PorterDuff.Mode.SRC_ATOP);
 
-        crossfadedColor = crossfadeColor(grey, ThemeUtils.getStyledColor(getContext(), R.attr.openpgp_orange), crossfadeValue3);
+        crossfadedColor = crossfadeColor(grey, ThemeUtils.getStyledColor(getContext(), R.attr.crypto_orange), crossfadeValue3);
         modeIcon3.setColorFilter(crossfadedColor, PorterDuff.Mode.SRC_ATOP);
 
-        crossfadedColor = crossfadeColor(grey, ThemeUtils.getStyledColor(getContext(), R.attr.openpgp_green), crossfadeValue4);
+        crossfadedColor = crossfadeColor(grey, ThemeUtils.getStyledColor(getContext(), R.attr.crypto_green), crossfadeValue4);
         modeIcon4.setColorFilter(crossfadedColor, PorterDuff.Mode.SRC_ATOP);
     }
 

@@ -18,6 +18,7 @@ import android.provider.ContactsContract.Contacts.Data;
 
 import com.fsck.k9.R;
 import com.fsck.k9.mail.Address;
+import com.fsck.k9.ui.crypto.CryptoMethod;
 import com.fsck.k9.view.RecipientSelectView.Recipient;
 import com.fsck.k9.view.RecipientSelectView.RecipientCryptoStatus;
 
@@ -64,37 +65,41 @@ public class RecipientLoader extends AsyncTaskLoader<List<Recipient>> {
     private final Address[] addresses;
     private final Uri contactUri;
     private final Uri lookupKeyUri;
-    private final String cryptoProvider;
+    private final String openPgpProvider;
+    private final String sMimeProvider;
 
     private List<Recipient> cachedRecipients;
     private ForceLoadContentObserver observerContact, observerKey;
 
 
-    public RecipientLoader(Context context, String cryptoProvider, String query) {
+    public RecipientLoader(Context context, String openPgpProvider, String smimeProvider, String query) {
         super(context);
         this.query = query;
         this.lookupKeyUri = null;
         this.addresses = null;
         this.contactUri = null;
-        this.cryptoProvider = cryptoProvider;
+        this.openPgpProvider = openPgpProvider;
+        this.sMimeProvider = smimeProvider;
     }
 
-    public RecipientLoader(Context context, String cryptoProvider, Address... addresses) {
+    public RecipientLoader(Context context, String openPgpProvider, String sMimeProvider,  Address... addresses) {
         super(context);
         this.query = null;
         this.addresses = addresses;
         this.contactUri = null;
-        this.cryptoProvider = cryptoProvider;
+        this.openPgpProvider = openPgpProvider;
+        this.sMimeProvider = sMimeProvider;
         this.lookupKeyUri = null;
     }
 
-    public RecipientLoader(Context context, String cryptoProvider, Uri contactUri, boolean isLookupKey) {
+    public RecipientLoader(Context context, String openPgpProvider, String sMimeProvider, Uri contactUri, boolean isLookupKey) {
         super(context);
         this.query = null;
         this.addresses = null;
         this.contactUri = isLookupKey ? null : contactUri;
         this.lookupKeyUri = isLookupKey ? contactUri : null;
-        this.cryptoProvider = cryptoProvider;
+        this.openPgpProvider = openPgpProvider;
+        this.sMimeProvider = sMimeProvider;
     }
 
     @Override
@@ -118,8 +123,12 @@ public class RecipientLoader extends AsyncTaskLoader<List<Recipient>> {
             return recipients;
         }
 
-        if (cryptoProvider != null) {
-            fillCryptoStatusData(recipientMap);
+        if (openPgpProvider != null) {
+            fillCryptoStatusData(recipientMap, CryptoMethod.OPENPGP);
+        }
+
+        if (sMimeProvider != null) {
+            fillCryptoStatusData(recipientMap, CryptoMethod.SMIME);
         }
 
         return recipients;
@@ -251,12 +260,21 @@ public class RecipientLoader extends AsyncTaskLoader<List<Recipient>> {
         cursor.close();
     }
 
-    private void fillCryptoStatusData(Map<String, Recipient> recipientMap) {
+    private void fillCryptoStatusData(Map<String, Recipient> recipientMap, CryptoMethod method) {
         List<String> recipientList = new ArrayList<>(recipientMap.keySet());
         String[] recipientAddresses = recipientList.toArray(new String[recipientList.size()]);
 
         Cursor cursor;
-        Uri queryUri = Uri.parse("content://" + cryptoProvider + ".provider.exported/email_status");
+        String provider;
+        if (method == CryptoMethod.OPENPGP) {
+            provider = openPgpProvider;
+        } else if (method == CryptoMethod.SMIME) {
+            provider = sMimeProvider;
+        } else {
+            throw new AssertionError("Unexpected CryptoMethod:" + method);
+        }
+
+        Uri queryUri = Uri.parse("content://" + provider + ".provider.exported/email_status");
         try {
             cursor = getContext().getContentResolver().query(queryUri, PROJECTION_CRYPTO_STATUS, null,
                     recipientAddresses, null);
@@ -265,7 +283,7 @@ public class RecipientLoader extends AsyncTaskLoader<List<Recipient>> {
             return;
         }
 
-        initializeCryptoStatusForAllRecipients(recipientMap);
+        initializeCryptoStatusForAllRecipients(method, recipientMap);
 
         if (cursor == null) {
             return;
@@ -281,14 +299,14 @@ public class RecipientLoader extends AsyncTaskLoader<List<Recipient>> {
                     Recipient recipient = recipientMap.get(emailAddress);
                     switch (status) {
                         case CRYPTO_PROVIDER_STATUS_UNTRUSTED: {
-                            if (recipient.getCryptoStatus() == RecipientCryptoStatus.UNAVAILABLE) {
-                                recipient.setCryptoStatus(RecipientCryptoStatus.AVAILABLE_UNTRUSTED);
+                            if (recipient.getCryptoStatus(method) == RecipientCryptoStatus.UNAVAILABLE) {
+                                recipient.setCryptoStatus(method, RecipientCryptoStatus.AVAILABLE_UNTRUSTED);
                             }
                             break;
                         }
                         case CRYPTO_PROVIDER_STATUS_TRUSTED: {
-                            if (recipient.getCryptoStatus() != RecipientCryptoStatus.AVAILABLE_TRUSTED) {
-                                recipient.setCryptoStatus(RecipientCryptoStatus.AVAILABLE_TRUSTED);
+                            if (recipient.getCryptoStatus(method) != RecipientCryptoStatus.AVAILABLE_TRUSTED) {
+                                recipient.setCryptoStatus(method, RecipientCryptoStatus.AVAILABLE_TRUSTED);
                             }
                             break;
                         }
@@ -304,9 +322,9 @@ public class RecipientLoader extends AsyncTaskLoader<List<Recipient>> {
         }
     }
 
-    private void initializeCryptoStatusForAllRecipients(Map<String, Recipient> recipientMap) {
+    private void initializeCryptoStatusForAllRecipients(CryptoMethod method, Map<String, Recipient> recipientMap) {
         for (Recipient recipient : recipientMap.values()) {
-            recipient.setCryptoStatus(RecipientCryptoStatus.UNAVAILABLE);
+            recipient.setCryptoStatus(method, RecipientCryptoStatus.UNAVAILABLE);
         }
     }
 

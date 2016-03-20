@@ -62,7 +62,6 @@ public class PgpMessageBuilder extends MessageBuilder {
         super(context, messageIdGenerator, boundaryGenerator);
     }
 
-
     public void setOpenPgpApi(OpenPgpApi openPgpApi) {
         this.openPgpApi = openPgpApi;
     }

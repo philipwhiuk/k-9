@@ -187,13 +187,13 @@ public class MessageTopView extends LinearLayout {
         displayViewOnLoadFinished(false);
     }
 
-    private void setCryptoProviderIcon(Drawable openPgpApiProviderIcon, View view) {
+    private void setCryptoProviderIcon(Drawable cryptoApiProviderIcon, View view) {
         ImageView cryptoProviderIcon = (ImageView) view.findViewById(R.id.crypto_error_icon);
-        if (openPgpApiProviderIcon != null) {
-            cryptoProviderIcon.setImageDrawable(openPgpApiProviderIcon);
+        if (cryptoApiProviderIcon != null) {
+            cryptoProviderIcon.setImageDrawable(cryptoApiProviderIcon);
         } else {
             cryptoProviderIcon.setImageResource(R.drawable.status_lock_error);
-            cryptoProviderIcon.setColorFilter(ThemeUtils.getStyledColor(getContext(), R.attr.openpgp_red));
+            cryptoProviderIcon.setColorFilter(ThemeUtils.getStyledColor(getContext(), R.attr.crypto_red));
         }
     }
 
