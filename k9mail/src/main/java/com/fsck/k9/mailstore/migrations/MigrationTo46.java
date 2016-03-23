@@ -41,35 +41,35 @@ class MigrationTo46 {
                         try {
                             Flag flag = Flag.valueOf(flagStr);
 
-                            switch (flag) {
-                                case ANSWERED: {
+                            switch (flag.realName()) {
+                                case "ANSWERED": {
                                     answered = true;
                                     break;
                                 }
-                                case DELETED: {
+                                case "DELETED": {
                                     // Don't store this in column 'flags'
                                     break;
                                 }
-                                case FLAGGED: {
+                                case "FLAGGED": {
                                     flagged = true;
                                     break;
                                 }
-                                case FORWARDED: {
+                                case "FORWARDED": {
                                     forwarded = true;
                                     break;
                                 }
-                                case SEEN: {
+                                case "SEEN": {
                                     read = true;
                                     break;
                                 }
-                                case DRAFT:
-                                case RECENT:
-                                case X_DESTROYED:
-                                case X_DOWNLOADED_FULL:
-                                case X_DOWNLOADED_PARTIAL:
-                                case X_REMOTE_COPY_STARTED:
-                                case X_SEND_FAILED:
-                                case X_SEND_IN_PROGRESS: {
+                                case "DRAFT":
+                                case "RECENT":
+                                case "X_DESTROYED":
+                                case "X_DOWNLOADED_FULL":
+                                case "X_DOWNLOADED_PARTIAL":
+                                case "X_REMOTE_COPY_STARTED":
+                                case "X_SEND_FAILED":
+                                case "X_SEND_IN_PROGRESS": {
                                     extraFlags.add(flag);
                                     break;
                                 }

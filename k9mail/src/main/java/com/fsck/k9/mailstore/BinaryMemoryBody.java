@@ -8,6 +8,8 @@ import java.io.OutputStream;
 
 import com.fsck.k9.mail.Body;
 import com.fsck.k9.mail.MessagingException;
+import com.fsck.k9.mail.filter.Base64;
+import com.fsck.k9.mail.internet.MimeMessage;
 import com.fsck.k9.mail.internet.RawDataBody;
 import com.fsck.k9.mail.internet.SizeAware;
 
@@ -33,6 +35,7 @@ public class BinaryMemoryBody implements Body, RawDataBody, SizeAware {
 
     @Override
     public void setEncoding(String encoding) throws UnavailableStorageException, MessagingException {
+
         throw new RuntimeException("nope"); //FIXME
     }
 

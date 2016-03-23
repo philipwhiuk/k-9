@@ -206,7 +206,6 @@ class StoreSchemaDefinition implements LockableDatabase.SchemaDefinition {
     private static class RealMigrationsHelper implements MigrationsHelper {
         private final LocalStore localStore;
 
-
         public RealMigrationsHelper(LocalStore localStore) {
             this.localStore = localStore;
         }
