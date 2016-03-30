@@ -122,7 +122,7 @@ public class MessageExtractor {
         Body body = part.getBody();
         if (body instanceof Multipart) {
             Multipart multipart = (Multipart) body;
-            if (isSameMimeType(part.getMimeType(), "multipart/alternative")) {
+                if (isSameMimeType(part.getMimeType(), "multipart/alternative")) {
                 /*
                  * For multipart/alternative parts we try to find a text/plain and a text/html
                  * child. Everything else we find is put into 'attachments'.
