@@ -1,5 +1,6 @@
 package com.fsck.k9.mail.store;
 
+import android.accounts.AccountManager;
 import android.content.Context;
 import android.net.ConnectivityManager;
 
@@ -51,7 +52,8 @@ public abstract class RemoteStore extends Store {
             if (uri.startsWith("imap")) {
                 store = new ImapStore(storeConfig,
                         new DefaultTrustedSocketFactory(context),
-                        (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE));
+                        (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE),
+                        AccountManager.get(context));
             } else if (uri.startsWith("pop3")) {
                 store = new Pop3Store(storeConfig,
                         new DefaultTrustedSocketFactory(context));

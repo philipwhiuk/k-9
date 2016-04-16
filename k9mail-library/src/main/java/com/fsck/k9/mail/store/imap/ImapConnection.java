@@ -26,8 +26,14 @@ import java.util.regex.Pattern;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
+import android.accounts.AccountManagerCallback;
+import android.accounts.AccountManagerFuture;
+import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Bundle;
 import android.util.Log;
 
 import com.fsck.k9.mail.Authentication;
@@ -58,9 +64,11 @@ import static com.fsck.k9.mail.store.imap.ImapResponseParser.equalsIgnoreCase;
  */
 class ImapConnection {
     private static final int BUFFER_SIZE = 1024;
+    private static final String GMAIL_AUTH_TOKEN_TYPE = "mail";
 
 
     private final ConnectivityManager connectivityManager;
+    private final AccountManager accountManager;
     private final TrustedSocketFactory socketFactory;
     private final int socketConnectTimeout;
     private final int socketReadTimeout;
@@ -74,22 +82,27 @@ class ImapConnection {
     private ImapSettings settings;
     private Exception stacktraceForClose;
     private boolean open = false;
+    private String authToken = null;
+    private boolean authTokenExpired = false;
 
 
     public ImapConnection(ImapSettings settings, TrustedSocketFactory socketFactory,
-            ConnectivityManager connectivityManager) {
+            ConnectivityManager connectivityManager, AccountManager accountManager) {
         this.settings = settings;
         this.socketFactory = socketFactory;
         this.connectivityManager = connectivityManager;
+        this.accountManager = accountManager;
         this.socketConnectTimeout = SOCKET_CONNECT_TIMEOUT;
         this.socketReadTimeout = SOCKET_READ_TIMEOUT;
     }
 
-    ImapConnection(ImapSettings settings, TrustedSocketFactory socketFactory, ConnectivityManager connectivityManager,
+    ImapConnection(ImapSettings settings, TrustedSocketFactory socketFactory,
+            ConnectivityManager connectivityManager, AccountManager accountManager,
             int socketConnectTimeout, int socketReadTimeout) {
         this.settings = settings;
         this.socketFactory = socketFactory;
         this.connectivityManager = connectivityManager;
+        this.accountManager = accountManager;
         this.socketConnectTimeout = socketConnectTimeout;
         this.socketReadTimeout = socketReadTimeout;
     }
@@ -363,15 +376,74 @@ class ImapConnection {
         }
     }
 
+    private Account getAccountFromManager() {
+        for (android.accounts.Account account : accounts) {
+            Log.w(K9MailLib.LOG_TAG, "Account: " + account.name);
+            if (account.name.equals(settings.getUsername())) {
+                return account;
+            }
+        }
+    }
+
     private void authXoauth2withSASLIR() throws IOException, MessagingException {
+        android.accounts.Account[] accounts = accountManager.getAccountsByType("com.google");
+        Account account = getAccountFromManager();
+
+        if (account == null) {
+            throw new AuthenticationFailedException("Account not available");
+        }
+
+        AccountManagerFuture<Bundle> future = accountManager
+                .getAuthToken(account, GMAIL_AUTH_TOKEN_TYPE, false, null, null);
+        try {
+            Bundle bundle = future.getResult();
+            if (bundle.get(AccountManager.KEY_ACCOUNT_NAME).equals(settings.getUsername())) {
+                authToken = bundle.get(AccountManager.KEY_AUTHTOKEN).toString();
+            }
+        } catch (Exception e) {
+            throw new AuthenticationFailedException(e.getMessage());
+        }
+
+        if(authToken == null || authTokenExpired) {
+            for (android.accounts.Account account : accounts) {
+                Log.w(K9MailLib.LOG_TAG, "Account: " + account.name);
+                if (account.name.equals(settings.getUsername())) {
+                    AccountManagerFuture<Bundle> future = accountManager
+                            .getAuthToken(account, GMAIL_AUTH_TOKEN_TYPE, false, null, null);
+                    try {
+                        Bundle bundle = future.getResult();
+                        if (bundle.get(AccountManager.KEY_ACCOUNT_NAME).equals(settings.getUsername())) {
+                            authToken = bundle.get(AccountManager.KEY_AUTHTOKEN).toString();
+                        }
+                    } catch (Exception e) {
+                        throw new AuthenticationFailedException(e.getMessage());
+                    }
+                }
+            }
+        }
+
         String command = Commands.AUTHENTICATE_XOAUTH2;
         String tag = sendSaslIrCommand(command,
-                Authentication.computeXoauth(settings.getUsername(), settings.getPassword()), false);
+                Authentication.computeXoauth(settings.getUsername(), authToken), false);
 
-        try {
-            extractCapabilities(responseParser.readStatusResponse(tag, command, getLogId(), null));
-        } catch (NegativeImapResponseException e) {
-            throw new AuthenticationFailedException(e.getMessage());
+        ImapResponse response = responseParser.readResponse();
+        Log.v(LOG_TAG, getLogId() + "<<<" + response);
+
+        if(response.isContinuationRequested()) {
+            outputStream.write("\r\n".getBytes());
+            outputStream.flush();
+            response = responseParser.readResponse();
+            Log.v(LOG_TAG, getLogId() + "<<<" + response);
+        }
+
+        if (response.getTag().equals(tag) && response.get(0).equals(Responses.OK)) {
+            return;
+        } else if (response.getTag().equals(tag)) {
+            accountManager.invalidateAuthToken("com.google", authToken);
+            throw new AuthenticationFailedException(response.get(2).toString());
+        } else {
+            accountManager.invalidateAuthToken("com.google", authToken);
+            throw new AuthenticationFailedException("Unexpected response");
         }
     }
 
@@ -668,7 +740,7 @@ class ImapConnection {
 //                if (sensitive && !K9MailLib.isDebugSensitive()) {
 //                    Log.v(LOG_TAG, getLogId() + ">>> [Command Hidden, Enable Sensitive Debug Logging To Show]");
 //                } else {
-                    System.out.println(LOG_TAG+": "+ getLogId() + ">>> " + tag + " " + command+ " " + initialClientResponse);
+            Log.v(LOG_TAG,  getLogId() + ">>> " + tag + " " + command+ " " + initialClientResponse);
 //                }
 //            }
 

@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import android.accounts.AccountManager;
 import android.net.ConnectivityManager;
 import android.util.Log;
 
@@ -42,6 +43,7 @@ import static com.fsck.k9.mail.K9MailLib.LOG_TAG;
 public class ImapStore extends RemoteStore {
     private Set<Flag> permanentFlagsIndex = EnumSet.noneOf(Flag.class);
     private ConnectivityManager connectivityManager;
+    private AccountManager accountManager;
 
     private String host;
     private int port;
@@ -74,7 +76,7 @@ public class ImapStore extends RemoteStore {
     }
 
     public ImapStore(StoreConfig storeConfig, TrustedSocketFactory trustedSocketFactory,
-            ConnectivityManager connectivityManager) throws MessagingException {
+                     ConnectivityManager connectivityManager, AccountManager accountManager) throws MessagingException {
         super(storeConfig, trustedSocketFactory);
 
         ImapStoreSettings settings;
@@ -89,6 +91,7 @@ public class ImapStore extends RemoteStore {
 
         connectionSecurity = settings.connectionSecurity;
         this.connectivityManager = connectivityManager;
+        this.accountManager = accountManager;
 
         authType = settings.authenticationType;
         username = settings.username;
@@ -340,7 +343,7 @@ public class ImapStore extends RemoteStore {
     }
 
     ImapConnection createImapConnection() {
-        return new ImapConnection(new StoreImapSettings(), mTrustedSocketFactory, connectivityManager);
+        return new ImapConnection(new StoreImapSettings(), mTrustedSocketFactory, connectivityManager, accountManager);
     }
 
     FolderNameCodec getFolderNameCodec() {

@@ -1,6 +1,10 @@
 
 package com.fsck.k9.activity.setup;
 
+import android.accounts.AccountManager;
+import android.accounts.AccountManagerCallback;
+import android.accounts.AccountManagerFuture;
+import android.accounts.AuthenticatorException;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -45,6 +49,7 @@ public class AccountSetupIncoming extends K9Activity implements OnClickListener 
     private static final String EXTRA_MAKE_DEFAULT = "makeDefault";
     private static final String STATE_SECURITY_TYPE_POSITION = "stateSecurityTypePosition";
     private static final String STATE_AUTH_TYPE_POSITION = "authTypePosition";
+    private static final String GMAIL_AUTH_TOKEN_TYPE = "mail";
 
     private Type mStoreType;
     private EditText mUsernameView;
@@ -539,54 +544,89 @@ public class AccountSetupIncoming extends K9Activity implements OnClickListener 
 
     protected void onNext() {
         try {
-            ConnectionSecurity connectionSecurity = getSelectedSecurity();
-
-            String username = mUsernameView.getText().toString();
-            String password = null;
-            String clientCertificateAlias = null;
-
             AuthType authType = getSelectedAuthType();
-            if (authType == AuthType.EXTERNAL) {
-                clientCertificateAlias = mClientCertificateSpinner.getAlias();
-            } else {
-                password = mPasswordView.getText().toString();
+            if (authType == AuthType.XOAUTH2) {
+                fetchAuthTokenForAccount(mAccount.getEmail());
+                return;
             }
-            String host = mServerView.getText().toString();
-            int port = Integer.parseInt(mPortView.getText().toString());
-
-            Map<String, String> extra = null;
-            if (Type.IMAP == mStoreType) {
-                extra = new HashMap<String, String>();
-                extra.put(ImapStoreSettings.AUTODETECT_NAMESPACE_KEY,
-                        Boolean.toString(mImapAutoDetectNamespaceView.isChecked()));
-                extra.put(ImapStoreSettings.PATH_PREFIX_KEY,
-                        mImapPathPrefixView.getText().toString());
-            } else if (Type.WebDAV == mStoreType) {
-                extra = new HashMap<String, String>();
-                extra.put(WebDavStoreSettings.PATH_KEY,
-                        mWebdavPathPrefixView.getText().toString());
-                extra.put(WebDavStoreSettings.AUTH_PATH_KEY,
-                        mWebdavAuthPathView.getText().toString());
-                extra.put(WebDavStoreSettings.MAILBOX_PATH_KEY,
-                        mWebdavMailboxPathView.getText().toString());
-            }
-
-            mAccount.deleteCertificate(host, port, CheckDirection.INCOMING);
-            ServerSettings settings = new ServerSettings(mStoreType, host, port,
-                    connectionSecurity, authType, username, password, clientCertificateAlias, extra);
-
-            mAccount.setStoreUri(RemoteStore.createStoreUri(settings));
-
-            mAccount.setCompression(NetworkType.MOBILE, mCompressionMobile.isChecked());
-            mAccount.setCompression(NetworkType.WIFI, mCompressionWifi.isChecked());
-            mAccount.setCompression(NetworkType.OTHER, mCompressionOther.isChecked());
-            mAccount.setSubscribedFoldersOnly(mSubscribedFoldersOnly.isChecked());
-
+            updateAccountSettings(mPasswordView.getText().toString());
             AccountSetupCheckSettings.actionCheckSettings(this, mAccount, CheckDirection.INCOMING);
         } catch (Exception e) {
             failure(e);
         }
+    }
 
+    private void fetchAuthTokenForAccount(final String emailAddress) {
+        new Exception().printStackTrace();
+        AccountManager accountManager = AccountManager.get(this);
+        android.accounts.Account[] accounts = accountManager.getAccountsByType("com.google");
+        for (android.accounts.Account account : accounts) {
+            Log.w(K9.LOG_TAG, "Account: " + account.name);
+            if(account.name.equals(emailAddress)) {
+                accountManager.getAuthToken(account, GMAIL_AUTH_TOKEN_TYPE, null, this,
+                        new AccountManagerCallback<Bundle>() {
+                            @Override
+                            public void run(AccountManagerFuture<Bundle> future) {
+                                try {
+                                    Bundle bundle = future.getResult();
+                                    if(bundle.get(AccountManager.KEY_ACCOUNT_NAME).equals(emailAddress)) {
+                                        updateAccountSettings(AccountManager.KEY_AUTHTOKEN);
+                                        AccountSetupCheckSettings.actionCheckSettings(
+                                                AccountSetupIncoming.this, mAccount, CheckDirection.INCOMING);
+                                    }
+                                } catch (Exception e) {
+                                    failure(e);
+                                }
+                            }
+                        }, null);
+                return;
+            }
+        }
+        failure(new Exception("Account doesn't exist"));
+
+    }
+
+    private void updateAccountSettings(String password) {
+        ConnectionSecurity connectionSecurity = getSelectedSecurity();
+
+        String username = mUsernameView.getText().toString();
+        String clientCertificateAlias = null;
+
+        AuthType authType = getSelectedAuthType();
+        if (authType == AuthType.EXTERNAL) {
+            clientCertificateAlias = mClientCertificateSpinner.getAlias();
+        }
+
+        String host = mServerView.getText().toString();
+        int port = Integer.parseInt(mPortView.getText().toString());
+
+        Map<String, String> extra = null;
+        if (Type.IMAP == mStoreType) {
+            extra = new HashMap<String, String>();
+            extra.put(ImapStoreSettings.AUTODETECT_NAMESPACE_KEY,
+                    Boolean.toString(mImapAutoDetectNamespaceView.isChecked()));
+            extra.put(ImapStoreSettings.PATH_PREFIX_KEY,
+                    mImapPathPrefixView.getText().toString());
+        } else if (Type.WebDAV == mStoreType) {
+            extra = new HashMap<String, String>();
+            extra.put(WebDavStoreSettings.PATH_KEY,
+                    mWebdavPathPrefixView.getText().toString());
+            extra.put(WebDavStoreSettings.AUTH_PATH_KEY,
+                    mWebdavAuthPathView.getText().toString());
+            extra.put(WebDavStoreSettings.MAILBOX_PATH_KEY,
+                    mWebdavMailboxPathView.getText().toString());
+        }
+
+        mAccount.deleteCertificate(host, port, CheckDirection.INCOMING);
+        ServerSettings settings = new ServerSettings(mStoreType, host, port,
+                connectionSecurity, authType, username, password, clientCertificateAlias, extra);
+
+        mAccount.setStoreUri(RemoteStore.createStoreUri(settings));
+
+        mAccount.setCompression(NetworkType.MOBILE, mCompressionMobile.isChecked());
+        mAccount.setCompression(NetworkType.WIFI, mCompressionWifi.isChecked());
+        mAccount.setCompression(NetworkType.OTHER, mCompressionOther.isChecked());
+        mAccount.setSubscribedFoldersOnly(mSubscribedFoldersOnly.isChecked());
     }
 
     public void onClick(View v) {

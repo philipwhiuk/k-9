@@ -425,7 +425,6 @@ public class EmailProvider extends ContentProvider {
                         query.append(SqlQueryBuilder.addPrefixToSelection(
                                 FIXUP_AGGREGATED_MESSAGES_COLUMNS, "a.", sortOrder));
                     }
-
                     return db.rawQuery(query.toString(), selectionArgs);
                 }
             });
