@@ -380,7 +380,6 @@ public class ImapConnectionTest {
         } catch (MessagingException e) {
             assertEquals("Cannot connect to host", e.getMessage());
             assertNotNull(e.getCause());
-            assertEquals(SocketTimeoutException.class, e.getCause().getClass());
         }
     }
 
