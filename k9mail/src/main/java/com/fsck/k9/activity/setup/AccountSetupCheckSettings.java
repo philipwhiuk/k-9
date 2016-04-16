@@ -18,6 +18,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.fsck.k9.*;
+import com.fsck.k9.account.AndroidAccountOAuth2TokenStore;
 import com.fsck.k9.activity.K9Activity;
 import com.fsck.k9.controller.MessagingController;
 import com.fsck.k9.fragment.ConfirmationDialogFragment;
@@ -475,7 +476,8 @@ public class AccountSetupCheckSettings extends K9Activity implements OnClickList
             if (!(account.getRemoteStore() instanceof WebDavStore)) {
                 publishProgress(R.string.account_setup_check_settings_check_outgoing_msg);
             }
-            Transport transport = Transport.getInstance(K9.app, account);
+            Transport transport = Transport.getInstance(K9.app, account,
+                    new AndroidAccountOAuth2TokenStore(AccountSetupCheckSettings.this));
             transport.close();
             try {
                 transport.open();

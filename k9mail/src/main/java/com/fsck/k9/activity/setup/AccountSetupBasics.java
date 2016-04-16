@@ -209,7 +209,7 @@ public class AccountSetupBasics extends K9Activity
             // hide username and password fields, show account spinner
             mEmailView.setVisibility(View.GONE);
             mAccountSpinner.setVisibility(View.VISIBLE);
-            mOAuth2CheckBox.setEnabled(false);
+            mClientCertificateCheckBox.setEnabled(false);
             mShowPasswordCheckBox.setVisibility(View.GONE);
             mPasswordView.setVisibility(View.GONE);
         } else {
@@ -219,6 +219,8 @@ public class AccountSetupBasics extends K9Activity
             mPasswordView.setVisibility(View.VISIBLE);
             mShowPasswordCheckBox.setVisibility(View.VISIBLE);
             mClientCertificateSpinner.setVisibility(View.GONE);
+            mClientCertificateCheckBox.setEnabled(true);
+            mOAuth2CheckBox.setEnabled(true);
         }
     }
 
@@ -344,7 +346,7 @@ public class AccountSetupBasics extends K9Activity
 
                 String outgoingUserInfo = outgoingUsername + ":" + passwordEnc;
                 if (usingXOAuth2) {
-                    outgoingUserInfo = AuthType.XOAUTH2 + ":" + outgoingUserInfo;
+                    outgoingUserInfo = outgoingUserInfo + ":" + AuthType.XOAUTH2;
                 }
                 outgoingUri = new URI(outgoingUriTemplate.getScheme(), outgoingUserInfo,
                         outgoingUriTemplate.getHost(), outgoingUriTemplate.getPort(), null,
