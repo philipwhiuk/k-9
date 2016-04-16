@@ -376,55 +376,18 @@ class ImapConnection {
         }
     }
 
-    private Account getAccountFromManager() {
-        for (android.accounts.Account account : accounts) {
-            Log.w(K9MailLib.LOG_TAG, "Account: " + account.name);
-            if (account.name.equals(settings.getUsername())) {
-                return account;
-            }
-        }
-    }
-
     private void authXoauth2withSASLIR() throws IOException, MessagingException {
-        android.accounts.Account[] accounts = accountManager.getAccountsByType("com.google");
-        Account account = getAccountFromManager();
-
-        if (account == null) {
-            throw new AuthenticationFailedException("Account not available");
-        }
-
-        AccountManagerFuture<Bundle> future = accountManager
-                .getAuthToken(account, GMAIL_AUTH_TOKEN_TYPE, false, null, null);
-        try {
-            Bundle bundle = future.getResult();
-            if (bundle.get(AccountManager.KEY_ACCOUNT_NAME).equals(settings.getUsername())) {
-                authToken = bundle.get(AccountManager.KEY_AUTHTOKEN).toString();
-            }
-        } catch (Exception e) {
-            throw new AuthenticationFailedException(e.getMessage());
-        }
-
         if(authToken == null || authTokenExpired) {
-            for (android.accounts.Account account : accounts) {
-                Log.w(K9MailLib.LOG_TAG, "Account: " + account.name);
-                if (account.name.equals(settings.getUsername())) {
-                    AccountManagerFuture<Bundle> future = accountManager
-                            .getAuthToken(account, GMAIL_AUTH_TOKEN_TYPE, false, null, null);
-                    try {
-                        Bundle bundle = future.getResult();
-                        if (bundle.get(AccountManager.KEY_ACCOUNT_NAME).equals(settings.getUsername())) {
-                            authToken = bundle.get(AccountManager.KEY_AUTHTOKEN).toString();
-                        }
-                    } catch (Exception e) {
-                        throw new AuthenticationFailedException(e.getMessage());
-                    }
-                }
+            Account account = getAccountFromManager();
+            if (account == null) {
+                throw new AuthenticationFailedException("Account not available");
             }
+            fetchNewAuthToken(account);
         }
 
         String command = Commands.AUTHENTICATE_XOAUTH2;
         String tag = sendSaslIrCommand(command,
-                Authentication.computeXoauth(settings.getUsername(), authToken), false);
+                Authentication.computeXoauth(settings.getUsername(), authToken), true);
 
         ImapResponse response = responseParser.readResponse();
         Log.v(LOG_TAG, getLogId() + "<<<" + response);
@@ -439,12 +402,41 @@ class ImapConnection {
         if (response.getTag().equals(tag) && response.get(0).equals(Responses.OK)) {
             return;
         } else if (response.getTag().equals(tag)) {
-            accountManager.invalidateAuthToken("com.google", authToken);
+            expireAuthToken();
             throw new AuthenticationFailedException(response.get(2).toString());
         } else {
-            accountManager.invalidateAuthToken("com.google", authToken);
+            expireAuthToken();
             throw new AuthenticationFailedException("Unexpected response");
         }
+    }
+
+    private Account getAccountFromManager() {
+        android.accounts.Account[] accounts = accountManager.getAccountsByType("com.google");
+        for (android.accounts.Account account : accounts) {
+            Log.w(K9MailLib.LOG_TAG, "Account: " + account.name);
+            if (account.name.equals(settings.getUsername())) {
+                return account;
+            }
+        }
+        return null;
+    }
+
+    private void fetchNewAuthToken(Account account) throws AuthenticationFailedException {
+        try {
+            AccountManagerFuture<Bundle> future = accountManager
+                    .getAuthToken(account, GMAIL_AUTH_TOKEN_TYPE, false, null, null);
+            Bundle bundle = future.getResult();
+            if (bundle.get(AccountManager.KEY_ACCOUNT_NAME).equals(settings.getUsername())) {
+                authToken = bundle.get(AccountManager.KEY_AUTHTOKEN).toString();
+            }
+        } catch (Exception e) {
+            throw new AuthenticationFailedException(e.getMessage());
+        }
+    }
+
+    private void expireAuthToken() {
+        accountManager.invalidateAuthToken("com.google", authToken);
+        authTokenExpired = true;
     }
 
     private void authCramMD5() throws MessagingException, IOException {
@@ -736,13 +728,13 @@ class ImapConnection {
             outputStream.write(commandToSend.getBytes());
             outputStream.flush();
 
-//            if (K9MailLib.isDebug() && DEBUG_PROTOCOL_IMAP) {
-//                if (sensitive && !K9MailLib.isDebugSensitive()) {
-//                    Log.v(LOG_TAG, getLogId() + ">>> [Command Hidden, Enable Sensitive Debug Logging To Show]");
-//                } else {
+            if (K9MailLib.isDebug() && DEBUG_PROTOCOL_IMAP) {
+                if (sensitive && !K9MailLib.isDebugSensitive()) {
+                    Log.v(LOG_TAG, getLogId() + ">>> [Command Hidden, Enable Sensitive Debug Logging To Show]");
+                } else {
             Log.v(LOG_TAG,  getLogId() + ">>> " + tag + " " + command+ " " + initialClientResponse);
-//                }
-//            }
+                }
+            }
 
             return tag;
         } catch (IOException | MessagingException e) {
