@@ -384,6 +384,12 @@ class ImapConnection {
             outputStream.flush();
             response = responseParser.readResponse();
             Log.v(LOG_TAG, getLogId() + "<<<" + response);
+        } else if(tag.equals(response.getTag())) {
+            if (response.get(0).equals(Responses.OK)) {
+                return;
+            } else {
+                throw new AuthenticationFailedException(response.getAlertText());
+            }
         }
 
         try {

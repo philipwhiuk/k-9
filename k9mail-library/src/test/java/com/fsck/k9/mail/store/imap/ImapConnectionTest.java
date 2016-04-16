@@ -4,6 +4,7 @@ package com.fsck.k9.mail.store.imap;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
@@ -377,10 +378,9 @@ public class ImapConnectionTest {
             imapConnection.open();
             fail("Expected exception");
         } catch (MessagingException e) {
-            //FIXME: Throw ConnectException
             assertEquals("Cannot connect to host", e.getMessage());
             assertNotNull(e.getCause());
-            assertEquals(ConnectException.class, e.getCause().getClass());
+            assertEquals(SocketTimeoutException.class, e.getCause().getClass());
         }
     }
 
