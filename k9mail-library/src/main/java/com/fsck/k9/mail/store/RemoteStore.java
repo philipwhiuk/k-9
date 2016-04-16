@@ -8,6 +8,7 @@ import com.fsck.k9.mail.MessagingException;
 import com.fsck.k9.mail.ServerSettings;
 import com.fsck.k9.mail.ServerSettings.Type;
 import com.fsck.k9.mail.Store;
+import com.fsck.k9.mail.oauth.OAuth2TokenProvider;
 import com.fsck.k9.mail.ssl.DefaultTrustedSocketFactory;
 import com.fsck.k9.mail.ssl.TrustedSocketFactory;
 import com.fsck.k9.mail.store.imap.ImapStore;
@@ -39,8 +40,9 @@ public abstract class RemoteStore extends Store {
     /**
      * Get an instance of a remote mail store.
      */
-    public synchronized static Store getInstance(Context context,
-                                                 StoreConfig storeConfig) throws MessagingException {
+    public synchronized static Store getInstance(Context context, StoreConfig storeConfig,
+                                                 OAuth2TokenProvider oAuth2TokenProvider)
+            throws MessagingException {
         String uri = storeConfig.getStoreUri();
 
         if (uri.startsWith("local")) {
@@ -52,8 +54,10 @@ public abstract class RemoteStore extends Store {
             if (uri.startsWith("imap")) {
                 store = new ImapStore(storeConfig,
                         new DefaultTrustedSocketFactory(context),
-                        (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE),
-                        AccountManager.get(context));
+                        (ConnectivityManager) context.getSystemService(
+                                Context.CONNECTIVITY_SERVICE),
+                        oAuth2TokenProvider
+                        );
             } else if (uri.startsWith("pop3")) {
                 store = new Pop3Store(storeConfig,
                         new DefaultTrustedSocketFactory(context));

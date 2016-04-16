@@ -27,6 +27,7 @@ import com.fsck.k9.mail.NetworkType;
 import com.fsck.k9.mail.PushReceiver;
 import com.fsck.k9.mail.Pusher;
 import com.fsck.k9.mail.ServerSettings;
+import com.fsck.k9.mail.oauth.OAuth2TokenProvider;
 import com.fsck.k9.mail.ssl.TrustedSocketFactory;
 import com.fsck.k9.mail.store.RemoteStore;
 import com.fsck.k9.mail.store.StoreConfig;
@@ -43,7 +44,7 @@ import static com.fsck.k9.mail.K9MailLib.LOG_TAG;
 public class ImapStore extends RemoteStore {
     private Set<Flag> permanentFlagsIndex = EnumSet.noneOf(Flag.class);
     private ConnectivityManager connectivityManager;
-    private AccountManager accountManager;
+    private OAuth2TokenProvider oauthTokenProvider;
 
     private String host;
     private int port;
@@ -75,8 +76,10 @@ public class ImapStore extends RemoteStore {
         return ImapStoreUriCreator.create(server);
     }
 
-    public ImapStore(StoreConfig storeConfig, TrustedSocketFactory trustedSocketFactory,
-                     ConnectivityManager connectivityManager, AccountManager accountManager) throws MessagingException {
+    public ImapStore(StoreConfig storeConfig,
+                     TrustedSocketFactory trustedSocketFactory,
+                     ConnectivityManager connectivityManager,
+                     OAuth2TokenProvider oauthTokenProvider) throws MessagingException {
         super(storeConfig, trustedSocketFactory);
 
         ImapStoreSettings settings;
@@ -91,7 +94,7 @@ public class ImapStore extends RemoteStore {
 
         connectionSecurity = settings.connectionSecurity;
         this.connectivityManager = connectivityManager;
-        this.accountManager = accountManager;
+        this.oauthTokenProvider = oauthTokenProvider;
 
         authType = settings.authenticationType;
         username = settings.username;
@@ -343,7 +346,11 @@ public class ImapStore extends RemoteStore {
     }
 
     ImapConnection createImapConnection() {
-        return new ImapConnection(new StoreImapSettings(), mTrustedSocketFactory, connectivityManager, accountManager);
+        return new ImapConnection(
+                new StoreImapSettings(),
+                mTrustedSocketFactory,
+                connectivityManager,
+                oauthTokenProvider);
     }
 
     FolderNameCodec getFolderNameCodec() {

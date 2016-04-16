@@ -26,14 +26,8 @@ import java.util.regex.Pattern;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
 
-import android.accounts.Account;
-import android.accounts.AccountManager;
-import android.accounts.AccountManagerCallback;
-import android.accounts.AccountManagerFuture;
-import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.Bundle;
 import android.util.Log;
 
 import com.fsck.k9.mail.Authentication;
@@ -45,6 +39,7 @@ import com.fsck.k9.mail.MessagingException;
 import com.fsck.k9.mail.NetworkType;
 import com.fsck.k9.mail.filter.Base64;
 import com.fsck.k9.mail.filter.PeekableInputStream;
+import com.fsck.k9.mail.oauth.OAuth2TokenProvider;
 import com.fsck.k9.mail.ssl.TrustedSocketFactory;
 import com.jcraft.jzlib.JZlib;
 import com.jcraft.jzlib.ZOutputStream;
@@ -64,11 +59,10 @@ import static com.fsck.k9.mail.store.imap.ImapResponseParser.equalsIgnoreCase;
  */
 class ImapConnection {
     private static final int BUFFER_SIZE = 1024;
-    private static final String GMAIL_AUTH_TOKEN_TYPE = "mail";
 
 
     private final ConnectivityManager connectivityManager;
-    private final AccountManager accountManager;
+    private final OAuth2TokenProvider oauthTokenProvider;
     private final TrustedSocketFactory socketFactory;
     private final int socketConnectTimeout;
     private final int socketReadTimeout;
@@ -87,22 +81,22 @@ class ImapConnection {
 
 
     public ImapConnection(ImapSettings settings, TrustedSocketFactory socketFactory,
-            ConnectivityManager connectivityManager, AccountManager accountManager) {
+            ConnectivityManager connectivityManager, OAuth2TokenProvider oauthTokenProvider) {
         this.settings = settings;
         this.socketFactory = socketFactory;
         this.connectivityManager = connectivityManager;
-        this.accountManager = accountManager;
+        this.oauthTokenProvider = oauthTokenProvider;
         this.socketConnectTimeout = SOCKET_CONNECT_TIMEOUT;
         this.socketReadTimeout = SOCKET_READ_TIMEOUT;
     }
 
     ImapConnection(ImapSettings settings, TrustedSocketFactory socketFactory,
-            ConnectivityManager connectivityManager, AccountManager accountManager,
+            ConnectivityManager connectivityManager, OAuth2TokenProvider oauthTokenProvider,
             int socketConnectTimeout, int socketReadTimeout) {
         this.settings = settings;
         this.socketFactory = socketFactory;
         this.connectivityManager = connectivityManager;
-        this.accountManager = accountManager;
+        this.oauthTokenProvider = oauthTokenProvider;
         this.socketConnectTimeout = socketConnectTimeout;
         this.socketReadTimeout = socketReadTimeout;
     }
@@ -377,17 +371,10 @@ class ImapConnection {
     }
 
     private void authXoauth2withSASLIR() throws IOException, MessagingException {
-        if(authToken == null || authTokenExpired) {
-            Account account = getAccountFromManager();
-            if (account == null) {
-                throw new AuthenticationFailedException("Account not available");
-            }
-            fetchNewAuthToken(account);
-        }
-
         String command = Commands.AUTHENTICATE_XOAUTH2;
         String tag = sendSaslIrCommand(command,
-                Authentication.computeXoauth(settings.getUsername(), authToken), true);
+                Authentication.computeXoauth(settings.getUsername(),
+                        oauthTokenProvider.getToken(settings.getUsername())), true);
 
         ImapResponse response = responseParser.readResponse();
         Log.v(LOG_TAG, getLogId() + "<<<" + response);
@@ -399,44 +386,11 @@ class ImapConnection {
             Log.v(LOG_TAG, getLogId() + "<<<" + response);
         }
 
-        if (response.getTag().equals(tag) && response.get(0).equals(Responses.OK)) {
-            return;
-        } else if (response.getTag().equals(tag)) {
-            expireAuthToken();
-            throw new AuthenticationFailedException(response.get(2).toString());
-        } else {
-            expireAuthToken();
-            throw new AuthenticationFailedException("Unexpected response");
-        }
-    }
-
-    private Account getAccountFromManager() {
-        android.accounts.Account[] accounts = accountManager.getAccountsByType("com.google");
-        for (android.accounts.Account account : accounts) {
-            Log.w(K9MailLib.LOG_TAG, "Account: " + account.name);
-            if (account.name.equals(settings.getUsername())) {
-                return account;
-            }
-        }
-        return null;
-    }
-
-    private void fetchNewAuthToken(Account account) throws AuthenticationFailedException {
         try {
-            AccountManagerFuture<Bundle> future = accountManager
-                    .getAuthToken(account, GMAIL_AUTH_TOKEN_TYPE, false, null, null);
-            Bundle bundle = future.getResult();
-            if (bundle.get(AccountManager.KEY_ACCOUNT_NAME).equals(settings.getUsername())) {
-                authToken = bundle.get(AccountManager.KEY_AUTHTOKEN).toString();
-            }
-        } catch (Exception e) {
+            extractCapabilities(responseParser.readStatusResponse(tag, command, getLogId(), null));
+        } catch (NegativeImapResponseException e) {
             throw new AuthenticationFailedException(e.getMessage());
         }
-    }
-
-    private void expireAuthToken() {
-        accountManager.invalidateAuthToken("com.google", authToken);
-        authTokenExpired = true;
     }
 
     private void authCramMD5() throws MessagingException, IOException {

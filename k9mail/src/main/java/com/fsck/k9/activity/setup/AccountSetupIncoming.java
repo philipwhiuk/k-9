@@ -49,7 +49,7 @@ public class AccountSetupIncoming extends K9Activity implements OnClickListener 
     private static final String EXTRA_MAKE_DEFAULT = "makeDefault";
     private static final String STATE_SECURITY_TYPE_POSITION = "stateSecurityTypePosition";
     private static final String STATE_AUTH_TYPE_POSITION = "authTypePosition";
-    private static final String GMAIL_AUTH_TOKEN_TYPE = "mail";
+    private static final String GMAIL_AUTH_TOKEN_TYPE = "oauth2:https://mail.google.com/";
 
     private Type mStoreType;
     private EditText mUsernameView;
@@ -389,16 +389,20 @@ public class AccountSetupIncoming extends K9Activity implements OnClickListener 
     private void updateViewFromAuthType() {
         AuthType authType = getSelectedAuthType();
         boolean isAuthTypeExternal = (AuthType.EXTERNAL == authType);
+        boolean isAuthTypeXOAuth2 = (AuthType.XOAUTH2 == authType);
 
         if (isAuthTypeExternal) {
-
             // hide password fields, show client certificate fields
             mPasswordView.setVisibility(View.GONE);
             mPasswordLabelView.setVisibility(View.GONE);
             mClientCertificateLabelView.setVisibility(View.VISIBLE);
             mClientCertificateSpinner.setVisibility(View.VISIBLE);
+        } else if (isAuthTypeXOAuth2) {
+            mPasswordView.setVisibility(View.GONE);
+            mPasswordLabelView.setVisibility(View.GONE);
+            mClientCertificateLabelView.setVisibility(View.GONE);
+            mClientCertificateSpinner.setVisibility(View.GONE);
         } else {
-
             // show password fields, hide client certificate fields
             mPasswordView.setVisibility(View.VISIBLE);
             mPasswordLabelView.setVisibility(View.VISIBLE);
@@ -415,6 +419,7 @@ public class AccountSetupIncoming extends K9Activity implements OnClickListener 
     private void validateFields() {
         AuthType authType = getSelectedAuthType();
         boolean isAuthTypeExternal = (AuthType.EXTERNAL == authType);
+        boolean isAuthTypeXOAuth2 = (AuthType.XOAUTH2 == authType);
 
         ConnectionSecurity connectionSecurity = getSelectedSecurity();
         boolean hasConnectionSecurity = (connectionSecurity != ConnectionSecurity.NONE);
@@ -461,7 +466,7 @@ public class AccountSetupIncoming extends K9Activity implements OnClickListener 
         boolean hasValidUserName = Utility.requiredFieldValid(mUsernameView);
 
         boolean hasValidPasswordSettings = hasValidUserName
-                && !isAuthTypeExternal
+                && !isAuthTypeExternal && !isAuthTypeXOAuth2
                 && Utility.requiredFieldValid(mPasswordView);
 
         boolean hasValidExternalAuthSettings = hasValidUserName
@@ -469,9 +474,12 @@ public class AccountSetupIncoming extends K9Activity implements OnClickListener 
                 && hasConnectionSecurity
                 && hasValidCertificateAlias;
 
+        boolean hasValidXOAuth2Settings = hasValidUserName
+                && isAuthTypeXOAuth2;
+
         mNextButton.setEnabled(Utility.domainFieldValid(mServerView)
                 && Utility.requiredFieldValid(mPortView)
-                && (hasValidPasswordSettings || hasValidExternalAuthSettings));
+                && (hasValidPasswordSettings || hasValidExternalAuthSettings || hasValidXOAuth2Settings));
         Utility.setCompoundDrawablesAlpha(mNextButton, mNextButton.isEnabled() ? 255 : 128);
     }
 
