@@ -20,6 +20,7 @@ import com.fsck.k9.mail.CertificateValidationException.Reason;
 import com.fsck.k9.mail.ConnectionSecurity;
 import com.fsck.k9.mail.K9MailLib;
 import com.fsck.k9.mail.MessagingException;
+import com.fsck.k9.mail.oauth.OAuth2TokenProvider;
 import com.fsck.k9.mail.ssl.TrustedSocketFactory;
 import com.fsck.k9.mail.store.imap.mockserver.MockImapServer;
 import javax.net.ssl.SSLContext;
@@ -42,6 +43,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 
 @RunWith(RobolectricTestRunner.class)
@@ -57,12 +59,14 @@ public class ImapConnectionTest {
 
     private TrustedSocketFactory socketFactory;
     private ConnectivityManager connectivityManager;
+    private OAuth2TokenProvider oAuth2TokenProvider;
     private SimpleImapSettings settings;
 
 
     @Before
     public void setUp() throws Exception {
         connectivityManager = mock(ConnectivityManager.class);
+        oAuth2TokenProvider = mock(OAuth2TokenProvider.class);
         socketFactory = new TestTrustedSocketFactory();
 
         settings = new SimpleImapSettings();
@@ -277,10 +281,11 @@ public class ImapConnectionTest {
     @Test
     public void open_authXoauthWithSaslIr() throws Exception {
         settings.setAuthType(AuthType.XOAUTH2);
+        when(oAuth2TokenProvider.getToken("user")).thenReturn("token");
         MockImapServer server = new MockImapServer();
         preAuthenticationDialog(server, "SASL-IR AUTH=XOAUTH AUTH=XOAUTH2");
         server.expect("2 AUTHENTICATE XOAUTH2 "+ByteString.encodeUtf8(
-                "user=user\001auth=Bearer 123456\001\001"
+                "user=user\001auth=Bearer token\001\001"
         ).base64());
         server.output("2 OK Success");
         simplePostAuthenticationDialog(server);
@@ -365,7 +370,8 @@ public class ImapConnectionTest {
     public void open_withConnectionError_shouldThrow() throws Exception {
         settings.setHost("127.1.2.3");
         settings.setPort(143);
-        ImapConnection imapConnection = createImapConnection(settings, socketFactory, connectivityManager);
+        ImapConnection imapConnection = createImapConnection(
+                settings, socketFactory, connectivityManager, oAuth2TokenProvider);
 
         try {
             imapConnection.open();
@@ -382,7 +388,8 @@ public class ImapConnectionTest {
     public void open_withInvalidHostname_shouldThrow() throws Exception {
         settings.setHost("host name");
         settings.setPort(143);
-        ImapConnection imapConnection = createImapConnection(settings, socketFactory, connectivityManager);
+        ImapConnection imapConnection = createImapConnection(
+                settings, socketFactory, connectivityManager, oAuth2TokenProvider);
 
         try {
             imapConnection.open();
@@ -550,7 +557,8 @@ public class ImapConnectionTest {
 
     @Test
     public void isConnected_withoutPreviousOpen_shouldReturnFalse() throws Exception {
-        ImapConnection imapConnection = createImapConnection(settings, socketFactory, connectivityManager);
+        ImapConnection imapConnection = createImapConnection(
+                settings, socketFactory, connectivityManager, oAuth2TokenProvider);
 
         boolean result = imapConnection.isConnected();
 
@@ -586,7 +594,8 @@ public class ImapConnectionTest {
 
     @Test
     public void close_withoutOpen_shouldNotThrow() throws Exception {
-        ImapConnection imapConnection = createImapConnection(settings, socketFactory, connectivityManager);
+        ImapConnection imapConnection = createImapConnection(
+                settings, socketFactory, connectivityManager, oAuth2TokenProvider);
 
         imapConnection.close();
     }
@@ -648,16 +657,16 @@ public class ImapConnectionTest {
     }
 
     private ImapConnection createImapConnection(ImapSettings settings, TrustedSocketFactory socketFactory,
-            ConnectivityManager connectivityManager) {
-        return new ImapConnection(settings, socketFactory, connectivityManager, SOCKET_CONNECT_TIMEOUT,
-                SOCKET_READ_TIMEOUT);
+            ConnectivityManager connectivityManager, OAuth2TokenProvider oAuth2TokenProvider) {
+        return new ImapConnection(settings, socketFactory, connectivityManager, oAuth2TokenProvider,
+                SOCKET_CONNECT_TIMEOUT, SOCKET_READ_TIMEOUT);
     }
 
     private ImapConnection startServerAndCreateImapConnection(MockImapServer server) throws IOException {
         server.start();
         settings.setHost(server.getHost());
         settings.setPort(server.getPort());
-        return createImapConnection(settings, socketFactory, connectivityManager);
+        return createImapConnection(settings, socketFactory, connectivityManager, oAuth2TokenProvider);
     }
 
     private ImapConnection simpleOpen(MockImapServer server) throws Exception {
