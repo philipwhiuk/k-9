@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.SynchronousQueue;
 
@@ -22,6 +23,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.StrictMode;
+import android.text.TextUtils;
 import android.text.format.Time;
 import android.util.Log;
 
@@ -96,7 +98,7 @@ public class K9 extends Application {
      * This will be {@code true} once the initialization is complete and {@link #notifyObservers()}
      * was called.
      * Afterwards calls to {@link #registerApplicationAware(com.fsck.k9.K9.ApplicationAware)} will
-     * immediately call {@link com.fsck.k9.K9.ApplicationAware#initializeComponent(K9)} for the
+     * immediately call {@link com.fsck.k9.K9.ApplicationAware#initializeComponent(Application)} for the
      * supplied argument.
      */
     private static boolean sInitialized = false;
@@ -240,6 +242,7 @@ public class K9 extends Application {
     private static boolean mWrapFolderNames = false;
     private static boolean mHideUserAgent = false;
     private static boolean mHideTimeZone = false;
+    private static String mDeviceId = null;
 
     private static SortType mSortType;
     private static Map<SortType, Boolean> mSortAscending = new HashMap<SortType, Boolean>();
@@ -491,7 +494,7 @@ public class K9 extends Application {
         editor.putBoolean("messageViewMoveActionVisible", sMessageViewMoveActionVisible);
         editor.putBoolean("messageViewCopyActionVisible", sMessageViewCopyActionVisible);
         editor.putBoolean("messageViewSpamActionVisible", sMessageViewSpamActionVisible);
-
+        editor.putString("deviceId", mDeviceId);
         fontSizes.save(editor);
     }
 
@@ -726,6 +729,9 @@ public class K9 extends Application {
 
         mAttachmentDefaultPath = storage.getString("attachmentdefaultpath",
                 Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString());
+
+        mDeviceId = storage.getString("deviceId", null);
+
         sUseBackgroundAsUnreadIndicator = storage.getBoolean("useBackgroundAsUnreadIndicator", true);
         sThreadedViewEnabled = storage.getBoolean("threadedView", true);
         fontSizes.load(storage);
@@ -1357,4 +1363,27 @@ public class K9 extends Application {
             editor.commit();
         }
     }
+
+    /**
+     * Generates a uuid that is to identify this application on this device.
+     * The uuid is only generated once, and then persisted.
+     * @return the device Id
+     */
+    public String getDeviceId() {
+        if (TextUtils.isEmpty(mDeviceId)) {
+            // Remove the dashes from the UUID, so that we have alphanumeric characters only.
+            // This increases the likelyhood of compatability with external systems that may
+            // use the ID.
+            mDeviceId = UUID.randomUUID().toString().replace("-", "");
+
+            // This particular setting is not editted through the settings view, but instead only
+            // set in this method. We need to commit it now to ensure it is persisted correctly.
+            final Preferences preferences = Preferences.getPreferences(this);
+            StorageEditor editor = preferences.getStorage().edit();
+            editor.putString("deviceId", mDeviceId);
+            editor.commit();
+        }
+        return mDeviceId;
+    }
+
 }

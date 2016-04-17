@@ -210,9 +210,9 @@ public class AccountSetupIncoming extends K9Activity implements OnClickListener 
                 }
             } else if (Type.WebDAV == settings.type) {
                 serverLabelView.setText(R.string.account_setup_incoming_webdav_server_label);
-                mConnectionSecurityChoices = new ConnectionSecurity[] {
+                mConnectionSecurityChoices = new ConnectionSecurity[]{
                         ConnectionSecurity.NONE,
-                        ConnectionSecurity.SSL_TLS_REQUIRED };
+                        ConnectionSecurity.SSL_TLS_REQUIRED};
 
                 // Hide the unnecessary fields
                 findViewById(R.id.imap_path_prefix_section).setVisibility(View.GONE);
@@ -235,6 +235,18 @@ public class AccountSetupIncoming extends K9Activity implements OnClickListener 
                 if (webDavSettings.mailboxPath != null) {
                     mWebdavMailboxPathView.setText(webDavSettings.mailboxPath);
                 }
+            } else if (Type.EAS == settings.type) {
+                serverLabelView.setText(R.string.account_setup_incoming_eas_server_label);
+                findViewById(R.id.imap_path_prefix_section).setVisibility(View.GONE);
+                findViewById(R.id.account_auth_type_label).setVisibility(View.GONE);
+                findViewById(R.id.account_auth_type).setVisibility(View.GONE);
+                findViewById(R.id.webdav_advanced_header).setVisibility(View.GONE);
+                findViewById(R.id.webdav_mailbox_alias_section).setVisibility(View.GONE);
+                findViewById(R.id.webdav_owa_path_section).setVisibility(View.GONE);
+                findViewById(R.id.webdav_auth_path_section).setVisibility(View.GONE);
+                findViewById(R.id.compression_section).setVisibility(View.GONE);
+                findViewById(R.id.compression_label).setVisibility(View.GONE);
+                mAccount.setDeletePolicy(Account.DeletePolicy.ON_DELETE);
             } else {
                 throw new Exception("Unknown account type: " + mAccount.getStoreUri());
             }

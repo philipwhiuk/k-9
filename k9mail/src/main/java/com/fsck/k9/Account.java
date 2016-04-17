@@ -222,6 +222,9 @@ public class Account implements BaseAccount, StoreConfig {
     private boolean mSyncRemoteDeletions;
     private String mCryptoApp;
     private long mCryptoKey;
+    //TODO: Used only by EAS store - should be moved to store config?
+    private String mSyncKey;
+    private String mSecurityKey;
     private boolean mMarkMessageAsReadOnView;
     private boolean mAlwaysShowCcBcc;
     private boolean mAllowRemoteSearch;
@@ -472,6 +475,8 @@ public class Account implements BaseAccount, StoreConfig {
         mRemoteSearchNumResults = storage.getInt(mUuid + ".remoteSearchNumResults", DEFAULT_REMOTE_SEARCH_NUM_RESULTS);
 
         mEnabled = storage.getBoolean(mUuid + ".enabled", true);
+        mSyncKey = storage.getString(mUuid + ".syncKey", "");
+        mSecurityKey = storage.getString(mUuid + ".securityKey", "");
         mMarkMessageAsReadOnView = storage.getBoolean(mUuid + ".markMessageAsReadOnView", true);
         mAlwaysShowCcBcc = storage.getBoolean(mUuid + ".alwaysShowCcBcc", false);
 
@@ -557,6 +562,8 @@ public class Account implements BaseAccount, StoreConfig {
         editor.remove(mUuid + ".cryptoAutoSignature");
         editor.remove(mUuid + ".cryptoAutoEncrypt");
         editor.remove(mUuid + ".enabled");
+        editor.remove(mUuid + ".syncKey");
+        editor.remove(mUuid + ".securityKey");
         editor.remove(mUuid + ".markMessageAsReadOnView");
         editor.remove(mUuid + ".alwaysShowCcBcc");
         editor.remove(mUuid + ".allowRemoteSearch");
@@ -733,6 +740,8 @@ public class Account implements BaseAccount, StoreConfig {
         editor.putBoolean(mUuid + ".remoteSearchFullText", mRemoteSearchFullText);
         editor.putInt(mUuid + ".remoteSearchNumResults", mRemoteSearchNumResults);
         editor.putBoolean(mUuid + ".enabled", mEnabled);
+        editor.putString(mUuid + ".syncKey", mSyncKey);
+        editor.putString(mUuid + ".securityKey", mSecurityKey);
         editor.putBoolean(mUuid + ".markMessageAsReadOnView", mMarkMessageAsReadOnView);
         editor.putBoolean(mUuid + ".alwaysShowCcBcc", mAlwaysShowCcBcc);
 
@@ -1633,6 +1642,14 @@ public class Account implements BaseAccount, StoreConfig {
     public void setRemoteSearchNumResults(int val) {
         mRemoteSearchNumResults = (val >= 0 ? val : 0);
     }
+
+    public String getSyncKey() { return mSyncKey; }
+
+    public void setSyncKey(String syncKey) { mSyncKey = syncKey; }
+
+    public String getSecurityKey() { return mSecurityKey; }
+
+    public void setSecurityKey(String securityKey) { mSecurityKey = securityKey; }
 
     public String getInboxFolderName() {
         return mInboxFolderName;

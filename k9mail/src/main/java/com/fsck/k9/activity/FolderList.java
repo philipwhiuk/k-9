@@ -273,6 +273,9 @@ public class FolderList extends K9ListActivity {
         });
         registerForContextMenu(mListView);
 
+        TextView progressMsg = (TextView)findViewById(R.id.message);
+        progressMsg.setText(getString(R.string.folder_list_loading_folders));
+
         mListView.setSaveEnabled(true);
 
         mInflater = getLayoutInflater();
