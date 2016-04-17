@@ -371,31 +371,30 @@ class ImapConnection {
     }
 
     private void authXoauth2withSASLIR() throws IOException, MessagingException {
-        String command = Commands.AUTHENTICATE_XOAUTH2;
-        String tag = sendSaslIrCommand(command,
+        try {
+            String command = Commands.AUTHENTICATE_XOAUTH2;
+            String tag = sendSaslIrCommand(command,
                 Authentication.computeXoauth(settings.getUsername(),
                         oauthTokenProvider.getToken(settings.getUsername())), true);
 
-        ImapResponse response = responseParser.readResponse();
-        Log.v(LOG_TAG, getLogId() + "<<<" + response);
 
-        if(response.isContinuationRequested()) {
-            outputStream.write("\r\n".getBytes());
-            outputStream.flush();
-            response = responseParser.readResponse();
-            Log.v(LOG_TAG, getLogId() + "<<<" + response);
-        } else if(tag.equals(response.getTag())) {
-            if (response.get(0).equals(Responses.OK)) {
-                return;
-            } else {
-                throw new AuthenticationFailedException(response.getAlertText());
-            }
-        }
-
-        try {
-            extractCapabilities(responseParser.readStatusResponse(tag, command, getLogId(), null));
+            extractCapabilities(
+                    responseParser.readStatusResponse(tag, command, getLogId(), new UntaggedHandler() {
+                        @Override
+                        public void handleAsyncUntaggedResponse(ImapResponse response) throws IOException {
+                            if(response.isContinuationRequested()) {
+                                outputStream.write("\r\n".getBytes());
+                                outputStream.flush();
+                            }
+                        }
+                    })
+            );
         } catch (NegativeImapResponseException e) {
+            oauthTokenProvider.invalidateToken(settings.getUsername());
             throw new AuthenticationFailedException(e.getMessage());
+        } catch (Exception e) {
+            oauthTokenProvider.invalidateToken(settings.getUsername());
+            throw e;
         }
     }
 
