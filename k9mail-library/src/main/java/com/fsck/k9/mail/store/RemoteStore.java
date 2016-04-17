@@ -57,6 +57,8 @@ public abstract class RemoteStore extends Store {
                         new DefaultTrustedSocketFactory(context));
             } else if (uri.startsWith("webdav")) {
                 store = new WebDavStore(storeConfig, new WebDavHttpClient.WebDavHttpClientFactory());
+            } else if (uri.startsWith("eas")) {
+                store = new EasStore(storeConfig);
             }
 
             if (store != null) {
@@ -97,6 +99,7 @@ public abstract class RemoteStore extends Store {
      * @see com.fsck.k9.mail.store.imap.ImapStore#decodeUri(String)
      * @see com.fsck.k9.mail.store.pop3.Pop3Store#decodeUri(String)
      * @see com.fsck.k9.mail.store.webdav.WebDavStore#decodeUri(String)
+     * @see com.fsck.k9.mail.store.eas.EasStore#decodeUri(String)
      */
     public static ServerSettings decodeStoreUri(String uri) {
         if (uri.startsWith("imap")) {
@@ -105,6 +108,8 @@ public abstract class RemoteStore extends Store {
             return Pop3Store.decodeUri(uri);
         } else if (uri.startsWith("webdav")) {
             return WebDavStore.decodeUri(uri);
+        } else if (uri.startsWith("eas")) {
+            return EasStore.decodeUri(uri);
         } else {
             throw new IllegalArgumentException("Not a valid store URI");
         }
@@ -129,6 +134,8 @@ public abstract class RemoteStore extends Store {
             return Pop3Store.createUri(server);
         } else if (Type.WebDAV == server.type) {
             return WebDavStore.createUri(server);
+        } else if (Type.EAS == server.type) {
+            return EasStore.createUri(server);
         } else {
             throw new IllegalArgumentException("Not a valid store URI");
         }

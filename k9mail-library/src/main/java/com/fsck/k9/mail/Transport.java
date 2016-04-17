@@ -25,6 +25,8 @@ public abstract class Transport {
             return new SmtpTransport(storeConfig, new DefaultTrustedSocketFactory(context));
         } else if (uri.startsWith("webdav")) {
             return new WebDavTransport(storeConfig);
+        } else if (uri.startsWith("eas")) {
+            return new EasTransport(storeConfig);
         } else {
             throw new MessagingException("Unable to locate an applicable Transport for " + uri);
         }
@@ -47,6 +49,8 @@ public abstract class Transport {
             return SmtpTransport.decodeUri(uri);
         } else if (uri.startsWith("webdav")) {
             return WebDavTransport.decodeUri(uri);
+        } else if (uri.startsWith("eas")) {
+            return EasTransport.decodeUri(uri);
         } else {
             throw new IllegalArgumentException("Not a valid transport URI");
         }
@@ -68,6 +72,8 @@ public abstract class Transport {
             return SmtpTransport.createUri(server);
         } else if (Type.WebDAV == server.type) {
             return WebDavTransport.createUri(server);
+        } else if (Type.EAS == server.type) {
+            return EasTransport.createUri(server);
         } else {
             throw new IllegalArgumentException("Not a valid transport URI");
         }
