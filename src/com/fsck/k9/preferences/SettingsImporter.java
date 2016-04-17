@@ -83,7 +83,7 @@ public class SettingsImporter {
         public final boolean overwritten;
 
         private AccountDescriptionPair(AccountDescription original, AccountDescription imported,
-                boolean overwritten) {
+                                       boolean overwritten) {
             this.original = original;
             this.imported = imported;
             this.overwritten = overwritten;
@@ -96,11 +96,11 @@ public class SettingsImporter {
         public final List<AccountDescription> errorneousAccounts;
 
         private ImportResults(boolean globalSettings,
-                List<AccountDescriptionPair> importedAccounts,
-                List<AccountDescription> errorneousAccounts) {
-           this.globalSettings = globalSettings;
-           this.importedAccounts = importedAccounts;
-           this.errorneousAccounts = errorneousAccounts;
+                              List<AccountDescriptionPair> importedAccounts,
+                              List<AccountDescription> errorneousAccounts) {
+            this.globalSettings = globalSettings;
+            this.importedAccounts = importedAccounts;
+            this.errorneousAccounts = errorneousAccounts;
         }
     }
 
@@ -119,7 +119,7 @@ public class SettingsImporter {
      *          In case of an error.
      */
     public static ImportContents getImportStreamContents(InputStream inputStream)
-            throws SettingsImportExportException {
+    throws SettingsImportExportException {
 
         try {
             // Parse the import stream but don't save individual settings (overview=true)
@@ -176,8 +176,7 @@ public class SettingsImporter {
             boolean globalSettings, List<String> accountUuids, boolean overwrite)
     throws SettingsImportExportException {
 
-        try
-        {
+        try {
             boolean globalSettingsImported = false;
             List<AccountDescriptionPair> importedAccounts = new ArrayList<AccountDescriptionPair>();
             List<AccountDescription> errorneousAccounts = new ArrayList<AccountDescription>();
@@ -199,13 +198,13 @@ public class SettingsImporter {
                     if (editor.commit()) {
                         if (K9.DEBUG) {
                             Log.v(K9.LOG_TAG, "Committed global settings to the preference " +
-                                    "storage.");
+                                  "storage.");
                         }
                         globalSettingsImported = true;
                     } else {
                         if (K9.DEBUG) {
                             Log.v(K9.LOG_TAG, "Failed to commit global settings to the " +
-                                    "preference storage");
+                                  "preference storage");
                         }
                     }
                 } catch (Exception e) {
@@ -227,8 +226,8 @@ public class SettingsImporter {
                                 if (editor.commit()) {
                                     if (K9.DEBUG) {
                                         Log.v(K9.LOG_TAG, "Committed settings for account \"" +
-                                                importResult.imported.name +
-                                                "\" to the settings database.");
+                                              importResult.imported.name +
+                                              "\" to the settings database.");
                                     }
 
                                     // Add UUID of the account we just imported to the list of
@@ -255,25 +254,25 @@ public class SettingsImporter {
                                 } else {
                                     if (K9.DEBUG) {
                                         Log.w(K9.LOG_TAG, "Error while committing settings for " +
-                                                "account \"" + importResult.original.name +
-                                                "\" to the settings database.");
+                                              "account \"" + importResult.original.name +
+                                              "\" to the settings database.");
                                     }
                                     errorneousAccounts.add(importResult.original);
                                 }
                             } catch (InvalidSettingValueException e) {
                                 if (K9.DEBUG) {
                                     Log.e(K9.LOG_TAG, "Encountered invalid setting while " +
-                                            "importing account \"" + account.name + "\"", e);
+                                          "importing account \"" + account.name + "\"", e);
                                 }
                                 errorneousAccounts.add(new AccountDescription(account.name, account.uuid));
                             } catch (Exception e) {
                                 Log.e(K9.LOG_TAG, "Exception while importing account \"" +
-                                        account.name + "\"", e);
+                                      account.name + "\"", e);
                                 errorneousAccounts.add(new AccountDescription(account.name, account.uuid));
                             }
                         } else {
                             Log.w(K9.LOG_TAG, "Was asked to import account with UUID " +
-                                    accountUuid + ". But this account wasn't found.");
+                                  accountUuid + ". But this account wasn't found.");
                         }
                     }
 
@@ -382,7 +381,7 @@ public class SettingsImporter {
 
         // Mark account as disabled if the settings file didn't contain a password
         boolean createAccountDisabled = (incoming.password == null ||
-                incoming.password.length() == 0);
+                                         incoming.password.length() == 0);
 
         if (account.outgoing == null && !WebDavStore.STORE_TYPE.equals(account.incoming.type)) {
             // All account types except WebDAV need to provide outgoing server settings
@@ -530,7 +529,7 @@ public class SettingsImporter {
             }
 
             String identityDescription = (identity.description == null) ?
-                    "Imported" : identity.description;
+                                         "Imported" : identity.description;
             if (isIdentityDescriptionUsed(identityDescription, existingIdentities)) {
                 // Identity description is already in use. So generate a new one by appending
                 // " (x)", where x is the first number >= 1 that results in an unused identity
@@ -548,7 +547,7 @@ public class SettingsImporter {
             // Write name used in identity
             String identityName = (identity.name == null) ? "" : identity.name;
             putString(editor, accountKeyPrefix + Account.IDENTITY_NAME_KEY + identitySuffix,
-                    identityName);
+                      identityName);
 
             // Validate email address
             if (!IdentitySettings.isEmailAddressValid(identity.email)) {
@@ -557,11 +556,11 @@ public class SettingsImporter {
 
             // Write email address
             putString(editor, accountKeyPrefix + Account.IDENTITY_EMAIL_KEY + identitySuffix,
-                    identity.email);
+                      identity.email);
 
             // Write identity description
             putString(editor, accountKeyPrefix + Account.IDENTITY_DESCRIPTION_KEY + identitySuffix,
-                    identityDescription);
+                      identityDescription);
 
             if (identity.settings != null) {
                 // Validate identity settings
@@ -615,7 +614,7 @@ public class SettingsImporter {
     }
 
     private static int findIdentity(ImportedIdentity identity,
-            List<Identity> identities) {
+                                    List<Identity> identities) {
         for (int i = 0; i < identities.size(); i++) {
             Identity existingIdentity = identities.get(i);
             if (existingIdentity.getName().equals(identity.name) &&
@@ -650,7 +649,7 @@ public class SettingsImporter {
     }
 
     private static Imported parseSettings(InputStream inputStream, boolean globalSettings,
-            List<String> accountUuids, boolean overview)
+                                          List<String> accountUuids, boolean overview)
     throws SettingsImportExportException {
 
         if (!overview && accountUuids == null) {
@@ -668,7 +667,7 @@ public class SettingsImporter {
             Imported imported = null;
             int eventType = xpp.getEventType();
             while (eventType != XmlPullParser.END_DOCUMENT) {
-                if(eventType == XmlPullParser.START_TAG) {
+                if (eventType == XmlPullParser.START_TAG) {
                     if (SettingsExporter.ROOT_ELEMENT.equals(xpp.getName())) {
                         imported = parseRoot(xpp, globalSettings, accountUuids, overview);
                     } else {
@@ -679,7 +678,7 @@ public class SettingsImporter {
             }
 
             if (imported == null || (overview && imported.globalSettings == null &&
-                    imported.accounts == null)) {
+                                     imported.accounts == null)) {
                 throw new SettingsImportExportException("Invalid import data");
             }
 
@@ -709,13 +708,13 @@ public class SettingsImporter {
     }
 
     private static Imported parseRoot(XmlPullParser xpp, boolean globalSettings,
-            List<String> accountUuids, boolean overview)
+                                      List<String> accountUuids, boolean overview)
     throws XmlPullParserException, IOException, SettingsImportExportException {
 
         Imported result = new Imported();
 
         String fileFormatVersionString = xpp.getAttributeValue(null,
-                SettingsExporter.FILE_FORMAT_ATTRIBUTE);
+                                         SettingsExporter.FILE_FORMAT_ATTRIBUTE);
         validateFileFormatVersion(fileFormatVersionString);
 
         String contentVersionString = xpp.getAttributeValue(null,
@@ -726,7 +725,7 @@ public class SettingsImporter {
         while (!(eventType == XmlPullParser.END_TAG &&
                  SettingsExporter.ROOT_ELEMENT.equals(xpp.getName()))) {
 
-            if(eventType == XmlPullParser.START_TAG) {
+            if (eventType == XmlPullParser.START_TAG) {
                 String element = xpp.getName();
                 if (SettingsExporter.GLOBAL_ELEMENT.equals(element)) {
                     if (overview || globalSettings) {
@@ -762,7 +761,7 @@ public class SettingsImporter {
     }
 
     private static int validateFileFormatVersion(String versionString)
-            throws SettingsImportExportException {
+    throws SettingsImportExportException {
 
         if (versionString == null) {
             throw new SettingsImportExportException("Missing file format version");
@@ -773,19 +772,19 @@ public class SettingsImporter {
             version = Integer.parseInt(versionString);
         } catch (NumberFormatException e) {
             throw new SettingsImportExportException("Invalid file format version: " +
-                    versionString);
+                                                    versionString);
         }
 
         if (version != SettingsExporter.FILE_FORMAT_VERSION) {
             throw new SettingsImportExportException("Unsupported file format version: " +
-                    versionString);
+                                                    versionString);
         }
 
         return version;
     }
 
     private static int validateContentVersion(String versionString)
-            throws SettingsImportExportException {
+    throws SettingsImportExportException {
 
         if (versionString == null) {
             throw new SettingsImportExportException("Missing content version");
@@ -796,12 +795,12 @@ public class SettingsImporter {
             version = Integer.parseInt(versionString);
         } catch (NumberFormatException e) {
             throw new SettingsImportExportException("Invalid content version: " +
-                    versionString);
+                                                    versionString);
         }
 
         if (version < 1 || version > Settings.VERSION) {
             throw new SettingsImportExportException("Unsupported content version: " +
-                    versionString);
+                                                    versionString);
         }
 
         return version;
@@ -815,7 +814,7 @@ public class SettingsImporter {
         int eventType = xpp.next();
         while (!(eventType == XmlPullParser.END_TAG && endTag.equals(xpp.getName()))) {
 
-            if(eventType == XmlPullParser.START_TAG) {
+            if (eventType == XmlPullParser.START_TAG) {
                 String element = xpp.getName();
                 if (SettingsExporter.VALUE_ELEMENT.equals(element)) {
                     String key = xpp.getAttributeValue(null, SettingsExporter.KEY_ATTRIBUTE);
@@ -850,7 +849,7 @@ public class SettingsImporter {
         while (!(eventType == XmlPullParser.END_TAG &&
                  SettingsExporter.ACCOUNTS_ELEMENT.equals(xpp.getName()))) {
 
-            if(eventType == XmlPullParser.START_TAG) {
+            if (eventType == XmlPullParser.START_TAG) {
                 String element = xpp.getName();
                 if (SettingsExporter.ACCOUNT_ELEMENT.equals(element)) {
                     if (accounts == null) {
@@ -865,7 +864,7 @@ public class SettingsImporter {
                         accounts.put(account.uuid, account);
                     } else {
                         Log.w(K9.LOG_TAG, "Duplicate account entries with UUID " + account.uuid +
-                                ". Ignoring!");
+                              ". Ignoring!");
                     }
                 } else {
                     Log.w(K9.LOG_TAG, "Unexpected start tag: " + xpp.getName());
@@ -899,7 +898,7 @@ public class SettingsImporter {
             while (!(eventType == XmlPullParser.END_TAG &&
                      SettingsExporter.ACCOUNT_ELEMENT.equals(xpp.getName()))) {
 
-                if(eventType == XmlPullParser.START_TAG) {
+                if (eventType == XmlPullParser.START_TAG) {
                     String element = xpp.getName();
                     if (SettingsExporter.NAME_ELEMENT.equals(element)) {
                         account.name = getText(xpp);
@@ -960,7 +959,7 @@ public class SettingsImporter {
 
         int eventType = xpp.next();
         while (!(eventType == XmlPullParser.END_TAG && endTag.equals(xpp.getName()))) {
-            if(eventType == XmlPullParser.START_TAG) {
+            if (eventType == XmlPullParser.START_TAG) {
                 String element = xpp.getName();
                 if (SettingsExporter.HOST_ELEMENT.equals(element)) {
                     server.host = getText(xpp);
@@ -994,7 +993,7 @@ public class SettingsImporter {
         while (!(eventType == XmlPullParser.END_TAG &&
                  SettingsExporter.IDENTITIES_ELEMENT.equals(xpp.getName()))) {
 
-            if(eventType == XmlPullParser.START_TAG) {
+            if (eventType == XmlPullParser.START_TAG) {
                 String element = xpp.getName();
                 if (SettingsExporter.IDENTITY_ELEMENT.equals(element)) {
                     if (identities == null) {
@@ -1021,7 +1020,7 @@ public class SettingsImporter {
         while (!(eventType == XmlPullParser.END_TAG &&
                  SettingsExporter.IDENTITY_ELEMENT.equals(xpp.getName()))) {
 
-            if(eventType == XmlPullParser.START_TAG) {
+            if (eventType == XmlPullParser.START_TAG) {
                 String element = xpp.getName();
                 if (SettingsExporter.NAME_ELEMENT.equals(element)) {
                     identity.name = getText(xpp);
@@ -1049,7 +1048,7 @@ public class SettingsImporter {
         while (!(eventType == XmlPullParser.END_TAG &&
                  SettingsExporter.FOLDERS_ELEMENT.equals(xpp.getName()))) {
 
-            if(eventType == XmlPullParser.START_TAG) {
+            if (eventType == XmlPullParser.START_TAG) {
                 String element = xpp.getName();
                 if (SettingsExporter.FOLDER_ELEMENT.equals(element)) {
                     if (folders == null) {
@@ -1085,15 +1084,15 @@ public class SettingsImporter {
 
         public ImportedServerSettings(ImportedServer server) {
             super(server.type, server.host, convertPort(server.port),
-                    convertConnectionSecurity(server.connectionSecurity),
-                    server.authenticationType, server.username, server.password);
+                  convertConnectionSecurity(server.connectionSecurity),
+                  server.authenticationType, server.username, server.password);
             mImportedServer = server;
         }
 
         @Override
         public Map<String, String> getExtra() {
             return (mImportedServer.extras != null) ?
-                    Collections.unmodifiableMap(mImportedServer.extras.settings) : null;
+                   Collections.unmodifiableMap(mImportedServer.extras.settings) : null;
         }
 
         private static int convertPort(String port) {

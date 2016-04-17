@@ -355,7 +355,9 @@ public class GlobalSettings {
                 } else if (theme == K9.THEME_DARK || theme == android.R.style.Theme) {
                     return K9.THEME_DARK;
                 }
-            } catch (NumberFormatException e) { /* do nothing */ }
+            } catch (NumberFormatException e) {
+                /* do nothing */
+            }
 
             throw new InvalidSettingValueException();
         }
@@ -434,7 +436,9 @@ public class GlobalSettings {
                 if (new File(value).isDirectory()) {
                     return value;
                 }
-            } catch (Exception e) { /* do nothing */ }
+            } catch (Exception e) {
+                /* do nothing */
+            }
 
             throw new InvalidSettingValueException();
         }

@@ -397,7 +397,7 @@ public class AccountSettings extends K9PreferenceActivity {
 
         if (!mAccount.isSearchByDateCapable()) {
             ((PreferenceScreen) findPreference(PREFERENCE_SCREEN_INCOMING)).removePreference(mMessageAge);
-       } else {
+        } else {
             mMessageAge.setValue(String.valueOf(mAccount.getMaximumPolledMessageAge()));
             mMessageAge.setSummary(mMessageAge.getEntry());
             mMessageAge.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
@@ -516,8 +516,8 @@ public class AccountSettings extends K9PreferenceActivity {
             });
         } else {
             PreferenceScreen incomingPrefs = (PreferenceScreen) findPreference(PREFERENCE_SCREEN_INCOMING);
-            incomingPrefs.removePreference( (PreferenceScreen) findPreference(PREFERENCE_SCREEN_PUSH_ADVANCED));
-            incomingPrefs.removePreference( (ListPreference) findPreference(PREFERENCE_PUSH_MODE));
+            incomingPrefs.removePreference((PreferenceScreen) findPreference(PREFERENCE_SCREEN_PUSH_ADVANCED));
+            incomingPrefs.removePreference((ListPreference) findPreference(PREFERENCE_PUSH_MODE));
         }
 
         mAccountNotify = (CheckBoxPreference) findPreference(PREFERENCE_NOTIFY);
@@ -941,7 +941,7 @@ public class AccountSettings extends K9PreferenceActivity {
             Iterator <? extends Folder > iter = folders.iterator();
             while (iter.hasNext()) {
                 Folder folder = iter.next();
-                if (mAccount.getOutboxFolderName().equals(folder.getName())) {
+                if (mAccount.getOutboxFolderName().equals(folder.getRemoteName())) {
                     iter.remove();
                 }
             }

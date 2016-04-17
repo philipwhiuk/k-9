@@ -277,7 +277,7 @@ public class Apg extends CryptoProvider {
         try {
             Uri contentUri = Uri.withAppendedPath(Apg.CONTENT_URI_SECRET_KEY_RING_BY_EMAILS, email);
             Cursor c = context.getContentResolver().query(contentUri,
-                    new String[] { "master_key_id" }, null, null, null);
+                       new String[] { "master_key_id" }, null, null, null);
             if (c != null && c.getCount() > 0) {
                 c.close();
                 return true;
@@ -287,8 +287,8 @@ public class Apg extends CryptoProvider {
             }
         } catch (SecurityException e) {
             Toast.makeText(context,
-                    context.getResources().getString(R.string.insufficient_apg_permissions),
-                    Toast.LENGTH_LONG).show();
+                           context.getResources().getString(R.string.insufficient_apg_permissions),
+                           Toast.LENGTH_LONG).show();
         }
         return false;
     }
@@ -305,7 +305,7 @@ public class Apg extends CryptoProvider {
         try {
             Uri contentUri = Uri.withAppendedPath(Apg.CONTENT_URI_PUBLIC_KEY_RING_BY_EMAILS, email);
             Cursor c = context.getContentResolver().query(contentUri,
-                    new String[] { "master_key_id" }, null, null, null);
+                       new String[] { "master_key_id" }, null, null, null);
             if (c != null && c.getCount() > 0) {
                 c.close();
                 return true;
@@ -315,8 +315,8 @@ public class Apg extends CryptoProvider {
             }
         } catch (SecurityException e) {
             Toast.makeText(context,
-                    context.getResources().getString(R.string.insufficient_apg_permissions),
-                    Toast.LENGTH_LONG).show();
+                           context.getResources().getString(R.string.insufficient_apg_permissions),
+                           Toast.LENGTH_LONG).show();
         }
         return false;
     }

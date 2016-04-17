@@ -302,7 +302,7 @@ public class ChooseFolder extends K9ListActivity {
             List<String> topFolders = new ArrayList<String>();
 
             for (Folder folder : folders) {
-                String name = folder.getName();
+                String name = folder.getRemoteName();
 
                 // Inbox needs to be compared case-insensitively
                 if (mHideCurrentFolder && (name.equals(mFolder) || (

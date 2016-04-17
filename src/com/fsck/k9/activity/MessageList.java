@@ -1360,7 +1360,7 @@ public class MessageList extends K9ListActivity implements OnItemClickListener,
         LocalMessage message = messageInfo.message;
         Folder folder = message.getFolder();
         Account account = folder.getAccount();
-        String folderName = folder.getName();
+        String folderName = folder.getRemoteName();
 
         mController.setFlag(account, folderName, new Message[] { message }, Flag.FLAGGED,
                 !messageInfo.flagged);
@@ -2027,7 +2027,7 @@ public class MessageList extends K9ListActivity implements OnItemClickListener,
                 uid = message.getUid();
                 if (uid != null && (holder.uid == uid || uid.equals(holder.uid))) {
                     folder = message.getFolder();
-                     if (holder.folder.name.equals(folder.getName()) &&
+                     if (holder.folder.name.equals(folder.getRemoteName()) &&
                              holder.account.equals(folder.getAccount().getUuid())) {
                          return holder;
                      }
@@ -2745,14 +2745,14 @@ public class MessageList extends K9ListActivity implements OnItemClickListener,
             final Message message = holder.message;
             if (first) {
                 first = false;
-                folderName = message.getFolder().getName();
+                folderName = message.getFolder().getRemoteName();
                 account = message.getFolder().getAccount();
                 if ((operation == FolderOperation.MOVE && !mController.isMoveCapable(account)) || (operation == FolderOperation.COPY && !mController.isCopyCapable(account))) {
                     // account is not copy/move capable
                     return;
                 }
             } else if (!account.equals(message.getFolder().getAccount())
-                       || !folderName.equals(message.getFolder().getName())) {
+                       || !folderName.equals(message.getFolder().getRemoteName())) {
                 // make sure all messages come from the same account/folder?
                 return;
             }

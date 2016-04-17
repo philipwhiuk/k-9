@@ -123,7 +123,9 @@ public class MessageView extends K9Activity implements OnClickListener {
         }
 
         @Override
-        public void onMount(String providerId) { /* no-op */ }
+        public void onMount(String providerId) {
+            /* no-op */
+        }
     }
 
     @Override
@@ -573,7 +575,7 @@ public class MessageView extends K9Activity implements OnClickListener {
     private void onFlag() {
         if (mMessage != null) {
             boolean newState = !mMessage.isSet(Flag.FLAGGED);
-            mController.setFlag(mAccount, mMessage.getFolder().getName(),
+            mController.setFlag(mAccount, mMessage.getFolder().getRemoteName(),
                     new Message[] { mMessage }, Flag.FLAGGED, newState);
             mMessageView.setHeaders(mMessage, mAccount);
         }

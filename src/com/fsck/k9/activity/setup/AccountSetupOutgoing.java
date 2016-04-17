@@ -89,15 +89,14 @@ public class AccountSetupOutgoing extends K9Activity implements OnClickListener,
         mAccount = Preferences.getPreferences(this).getAccount(accountUuid);
 
         try {
-            if (new URI(mAccount.getStoreUri()).getScheme().startsWith("webdav")) {
+            String scheme = new URI(mAccount.getStoreUri()).getScheme();
+            if (scheme.startsWith("webdav") || scheme.startsWith("eas")) {
                 mAccount.setTransportUri(mAccount.getStoreUri());
                 AccountSetupCheckSettings.actionCheckSettings(this, mAccount, false, true);
             }
         } catch (URISyntaxException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
-
 
         mUsernameView = (EditText)findViewById(R.id.account_username);
         mPasswordView = (EditText)findViewById(R.id.account_password);
@@ -223,7 +222,6 @@ public class AccountSetupOutgoing extends K9Activity implements OnClickListener,
                 }
             }
 
-
             for (int i = 0; i < smtpSchemes.length; i++) {
                 if (smtpSchemes[i].equals(uri.getScheme())) {
                     SpinnerOption.setSpinnerOptionValue(mSecurityTypeView, i);
@@ -247,7 +245,6 @@ public class AccountSetupOutgoing extends K9Activity implements OnClickListener,
              */
             failure(e);
         }
-
     }
 
     @Override

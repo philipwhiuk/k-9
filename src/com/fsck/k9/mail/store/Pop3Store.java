@@ -119,7 +119,7 @@ public class Pop3Store extends Store {
                 int userIndex = 0, passwordIndex = 1;
                 String userinfo = pop3Uri.getUserInfo();
                 String[] userInfoParts = userinfo.split(":");
-                if (userInfoParts.length > 2 || userinfo.endsWith(":") ) {
+                if (userInfoParts.length > 2 || userinfo.endsWith(":")) {
                     // If 'userinfo' ends with ":" the password is empty. This can only happen
                     // after an account was imported (so authType and username are present).
                     userIndex++;
@@ -137,7 +137,7 @@ public class Pop3Store extends Store {
         }
 
         return new ServerSettings(STORE_TYPE, host, port, connectionSecurity, authType, username,
-                password);
+                                  password);
     }
 
     /**
@@ -157,43 +157,42 @@ public class Pop3Store extends Store {
         try {
             userEnc = URLEncoder.encode(server.username, "UTF-8");
             passwordEnc = (server.password != null) ?
-                    URLEncoder.encode(server.password, "UTF-8") : "";
-        }
-        catch (UnsupportedEncodingException e) {
+                          URLEncoder.encode(server.password, "UTF-8") : "";
+        } catch (UnsupportedEncodingException e) {
             throw new IllegalArgumentException("Could not encode username or password", e);
         }
 
         String scheme;
         switch (server.connectionSecurity) {
-            case SSL_TLS_OPTIONAL:
-                scheme = "pop3+ssl";
-                break;
-            case SSL_TLS_REQUIRED:
-                scheme = "pop3+ssl+";
-                break;
-            case STARTTLS_OPTIONAL:
-                scheme = "pop3+tls";
-                break;
-            case STARTTLS_REQUIRED:
-                scheme = "pop3+tls+";
-                break;
-            default:
-            case NONE:
-                scheme = "pop3";
-                break;
+        case SSL_TLS_OPTIONAL:
+            scheme = "pop3+ssl";
+            break;
+        case SSL_TLS_REQUIRED:
+            scheme = "pop3+ssl+";
+            break;
+        case STARTTLS_OPTIONAL:
+            scheme = "pop3+tls";
+            break;
+        case STARTTLS_REQUIRED:
+            scheme = "pop3+tls+";
+            break;
+        default:
+        case NONE:
+            scheme = "pop3";
+            break;
         }
 
         try {
             AuthType.valueOf(server.authenticationType);
         } catch (Exception e) {
             throw new IllegalArgumentException("Invalid authentication type (" +
-                    server.authenticationType + ")");
+                                               server.authenticationType + ")");
         }
 
         String userInfo = server.authenticationType + ":" + userEnc + ":" + passwordEnc;
         try {
             return new URI(scheme, userInfo, server.host, server.port, null, null,
-                    null).toString();
+                           null).toString();
         } catch (URISyntaxException e) {
             throw new IllegalArgumentException("Can't create Pop3Store URI", e);
         }
@@ -258,7 +257,7 @@ public class Pop3Store extends Store {
         Folder folder = mFolders.get(name);
         if (folder == null) {
             folder = new Pop3Folder(name);
-            mFolders.put(folder.getName(), folder);
+            mFolders.put(folder.getRemoteName(), folder);
         }
         return folder;
     }
@@ -460,6 +459,11 @@ public class Pop3Store extends Store {
             mIn = null;
             mOut = null;
             mSocket = null;
+        }
+
+        @Override
+        public String getRemoteName() {
+            return mName;
         }
 
         @Override
@@ -862,7 +866,7 @@ public class Pop3Store extends Store {
 
             if (response == null) {
                 executeSimpleCommand(String.format(RETR_COMMAND + " %d",
-                                     mUidToMsgNumMap.get(message.getUid())));
+                                                   mUidToMsgNumMap.get(message.getUid())));
             }
 
             try {

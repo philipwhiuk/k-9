@@ -74,6 +74,7 @@ import com.fsck.k9.controller.MessagingController;
 import com.fsck.k9.controller.MessagingListener;
 import com.fsck.k9.helper.SizeFormatter;
 import com.fsck.k9.mail.Flag;
+import com.fsck.k9.mail.MessagingException;
 import com.fsck.k9.mail.ServerSettings;
 import com.fsck.k9.mail.Store;
 import com.fsck.k9.mail.Transport;
@@ -621,10 +622,16 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
                 Log.i(K9.LOG_TAG, "refusing to open account that is not available");
                 return false;
             }
-            if (K9.FOLDER_NONE.equals(realAccount.getAutoExpandFolderName())) {
-                FolderList.actionHandleAccount(this, realAccount);
-            } else {
-                MessageList.actionHandleFolder(this, realAccount, realAccount.getAutoExpandFolderName());
+            try {
+                if (K9.FOLDER_NONE.equals(realAccount.getAutoExpandFolderName()) ||
+                        realAccount.getLocalStore().getFolderCount() == 0) {
+                    FolderList.actionHandleAccount(this, realAccount);
+                } else {
+                    MessageList.actionHandleFolder(this, realAccount, realAccount.getAutoExpandFolderName());
+                }
+            }
+            catch (MessagingException e) {
+                Log.e(K9.LOG_TAG, "Exception while getting local folder count", e);
             }
         }
         return true;
@@ -1286,19 +1293,16 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
                 android.view.MenuItem item = menu.getItem(i);
                     item.setVisible(false);
             }
-        }
-        else {
+        } else {
             EnumSet<ACCOUNT_LOCATION> accountLocation = accountLocation(account);
             if (accountLocation.contains(ACCOUNT_LOCATION.TOP)) {
                 menu.findItem(R.id.move_up).setEnabled(false);
-            }
-            else {
+            } else {
                 menu.findItem(R.id.move_up).setEnabled(true);
             }
             if (accountLocation.contains(ACCOUNT_LOCATION.BOTTOM)) {
                 menu.findItem(R.id.move_down).setEnabled(false);
-            }
-            else {
+            } else {
                 menu.findItem(R.id.move_down).setEnabled(true);
             }
         }

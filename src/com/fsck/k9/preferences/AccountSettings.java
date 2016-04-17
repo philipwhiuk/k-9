@@ -386,7 +386,9 @@ public class AccountSettings {
                 if (mMapping.containsKey(deletePolicy)) {
                     return deletePolicy;
                 }
-            } catch (NumberFormatException e) { /* do nothing */ }
+            } catch (NumberFormatException e) {
+                /* do nothing */
+            }
 
             throw new InvalidSettingValueException();
         }

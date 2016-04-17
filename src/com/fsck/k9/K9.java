@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.SynchronousQueue;
 
@@ -15,6 +16,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -22,6 +24,7 @@ import android.net.Uri;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.TextUtils;
 import android.text.format.Time;
 import android.util.Log;
 
@@ -60,7 +63,7 @@ public class K9 extends Application {
         void initializeComponent(K9 application);
     }
 
-    public static Application app = null;
+    public static K9 app = null;
     public static File tempDirectory;
     public static final String LOG_TAG = "k9";
 
@@ -83,6 +86,7 @@ public class K9 extends Application {
     private static final FontSizes fontSizes = new FontSizes();
 
     private static BACKGROUND_OPS backgroundOps = BACKGROUND_OPS.WHEN_CHECKED;
+    
     /**
      * Some log messages can be sent to a file, so that the logs
      * can be read using unprivileged access (eg. Terminal Emulator)
@@ -98,7 +102,6 @@ public class K9 extends Application {
      **/
     public static boolean DEVELOPER_MODE = true;
 
-
     /**
      * If this is enabled there will be additional logging information sent to
      * Log.d, including protocol dumps.
@@ -110,32 +113,25 @@ public class K9 extends Application {
      * Should K-9 log the conversation it has over the wire with
      * SMTP servers?
      */
-
     public static boolean DEBUG_PROTOCOL_SMTP = true;
 
     /**
      * Should K-9 log the conversation it has over the wire with
      * IMAP servers?
      */
-
     public static boolean DEBUG_PROTOCOL_IMAP = true;
-
 
     /**
      * Should K-9 log the conversation it has over the wire with
      * POP3 servers?
      */
-
     public static boolean DEBUG_PROTOCOL_POP3 = true;
 
     /**
      * Should K-9 log the conversation it has over the wire with
      * WebDAV servers?
      */
-
     public static boolean DEBUG_PROTOCOL_WEBDAV = true;
-
-
 
     /**
      * If this is enabled than logging that normally hides sensitive information
@@ -151,7 +147,6 @@ public class K9 extends Application {
     public static String ERROR_FOLDER_NAME = "K9mail-errors";
 
     private static boolean mAnimations = true;
-
     private static boolean mConfirmDelete = false;
     private static boolean mConfirmDeleteStarred = false;
     private static boolean mConfirmSpam = false;
@@ -168,7 +163,6 @@ public class K9 extends Application {
     }
 
     private static int mMessageListPreviewLines = 2;
-
     private static boolean mShowCorrespondentNames = true;
     private static boolean mMessageListSenderAboveSubject = false;
     private static boolean mShowContactName = false;
@@ -177,7 +171,6 @@ public class K9 extends Application {
     private static boolean mMessageViewFixedWidthFont = false;
     private static boolean mMessageViewReturnToList = false;
     private static boolean mMessageViewShowNext = false;
-
     private static boolean mGesturesEnabled = true;
     private static boolean mUseVolumeKeysForNavigation = false;
     private static boolean mUseVolumeKeysForListNavigation = false;
@@ -200,6 +193,7 @@ public class K9 extends Application {
 
     private static boolean useGalleryBugWorkaround = false;
     private static boolean galleryBuggy;
+    private static String mDeviceId = null;
 
     private static SortType mSortType;
     private static HashMap<SortType, Boolean> mSortAscending = new HashMap<SortType, Boolean>();
@@ -257,10 +251,10 @@ public class K9 extends Application {
     public static final int MAX_ATTACHMENT_DOWNLOAD_SIZE = (128 * 1024 * 1024);
 
 
-    /* How many times should K-9 try to deliver a message before giving up
+    /**
+     * How many times should K-9 try to deliver a message before giving up
      * until the app is killed and restarted
      */
-
     public static int MAX_SEND_ATTEMPTS = 5;
 
     /**
@@ -281,24 +275,17 @@ public class K9 extends Application {
      */
     public static final int NOTIFICATION_LED_ON_TIME = 500;
     public static final int NOTIFICATION_LED_OFF_TIME = 2000;
-
     public static final boolean NOTIFICATION_LED_WHILE_SYNCING = false;
     public static final int NOTIFICATION_LED_FAST_ON_TIME = 100;
     public static final int NOTIFICATION_LED_FAST_OFF_TIME = 100;
-
-
     public static final int NOTIFICATION_LED_BLINK_SLOW = 0;
     public static final int NOTIFICATION_LED_BLINK_FAST = 1;
-
-
-
     public static final int NOTIFICATION_LED_SENDING_FAILURE_COLOR = 0xffff0000;
 
     // Must not conflict with an account number
-    public static final int FETCHING_EMAIL_NOTIFICATION      = -5000;
-    public static final int SEND_FAILED_NOTIFICATION      = -1500;
+    public static final int FETCHING_EMAIL_NOTIFICATION = -5000;
+    public static final int SEND_FAILED_NOTIFICATION = -1500;
     public static final int CONNECTIVITY_ID = -3;
-
 
     public static class Intents {
 
@@ -336,7 +323,6 @@ public class K9 extends Application {
         int acctLength = Preferences.getPreferences(context).getAvailableAccounts().size();
 
         setServicesEnabled(context, acctLength > 0, null);
-
     }
 
     private static void setServicesEnabled(Context context, boolean enabled, Integer wakeLockId) {
@@ -375,7 +361,6 @@ public class K9 extends Application {
              */
             MailService.actionReset(context, wakeLockId);
         }
-
     }
 
     /**
@@ -431,14 +416,12 @@ public class K9 extends Application {
         editor.putBoolean("quietTimeEnabled", mQuietTimeEnabled);
         editor.putString("quietTimeStarts", mQuietTimeStarts);
         editor.putString("quietTimeEnds", mQuietTimeEnds);
-
         editor.putBoolean("startIntegratedInbox", mStartIntegratedInbox);
         editor.putBoolean("measureAccounts", mMeasureAccounts);
         editor.putBoolean("countSearchMessages", mCountSearchMessages);
         editor.putBoolean("messageListSenderAboveSubject", mMessageListSenderAboveSubject);
         editor.putBoolean("hideSpecialAccounts", mHideSpecialAccounts);
         editor.putInt("messageListPreviewLines", mMessageListPreviewLines);
-
         editor.putBoolean("showCorrespondentNames", mShowCorrespondentNames);
         editor.putBoolean("showContactName", mShowContactName);
         editor.putBoolean("changeRegisteredNameColor", mChangeContactNameColor);
@@ -458,7 +441,6 @@ public class K9 extends Application {
         editor.putInt("theme", theme);
         editor.putInt("messageViewTheme", messageViewTheme);
         editor.putBoolean("useGalleryBugWorkaround", useGalleryBugWorkaround);
-
         editor.putBoolean("confirmDelete", mConfirmDelete);
         editor.putBoolean("confirmDeleteStarred", mConfirmDeleteStarred);
         editor.putBoolean("confirmSpam", mConfirmSpam);
@@ -469,6 +451,7 @@ public class K9 extends Application {
         editor.putString("notificationHideSubject", sNotificationHideSubject.toString());
 
         editor.putString("attachmentdefaultpath", mAttachmentDefaultPath);
+        editor.putString("deviceId", mDeviceId);
         fontSizes.save(editor);
     }
 
@@ -492,7 +475,6 @@ public class K9 extends Application {
         /*
          * Enable background sync of messages
          */
-
         setServicesEnabled(this);
         registerReceivers();
 
@@ -568,7 +550,6 @@ public class K9 extends Application {
                 K9.this.sendBroadcast(intent);
 
             }
-
         });
 
         notifyObservers();
@@ -588,13 +569,10 @@ public class K9 extends Application {
         mHideSpecialAccounts = sprefs.getBoolean("hideSpecialAccounts", false);
         mMessageListSenderAboveSubject = sprefs.getBoolean("messageListSenderAboveSubject", false);
         mMessageListPreviewLines = sprefs.getInt("messageListPreviewLines", 2);
-
         mMobileOptimizedLayout = sprefs.getBoolean("mobileOptimizedLayout", false);
-
         mQuietTimeEnabled = sprefs.getBoolean("quietTimeEnabled", false);
         mQuietTimeStarts = sprefs.getString("quietTimeStarts", "21:00");
         mQuietTimeEnds = sprefs.getString("quietTimeEnds", "7:00");
-
         mShowCorrespondentNames = sprefs.getBoolean("showCorrespondentNames", true);
         mShowContactName = sprefs.getBoolean("showContactName", false);
         mChangeContactNameColor = sprefs.getBoolean("changeRegisteredNameColor", false);
@@ -611,7 +589,6 @@ public class K9 extends Application {
         mBatchButtonsUnselect = sprefs.getBoolean("batchButtonsUnselect", true);
 
         useGalleryBugWorkaround = sprefs.getBoolean("useGalleryBugWorkaround", K9.isGalleryBuggy());
-
         mConfirmDelete = sprefs.getBoolean("confirmDelete", false);
         mConfirmDeleteStarred = sprefs.getBoolean("confirmDeleteStarred", false);
         mConfirmSpam = sprefs.getBoolean("confirmSpam", false);
@@ -637,6 +614,7 @@ public class K9 extends Application {
         }
 
         mAttachmentDefaultPath = sprefs.getString("attachmentdefaultpath",  Environment.getExternalStorageDirectory().toString());
+        mDeviceId = sprefs.getString("deviceId", null);
         fontSizes.load(sprefs);
 
         try {
@@ -675,9 +653,7 @@ public class K9 extends Application {
             // Discard , as it means we're not running on a device with strict mode
             Log.v(K9.LOG_TAG, "Failed to turn on strict mode", e);
         }
-
     }
-
 
     /**
      * since Android invokes Application.onCreate() only after invoking all
@@ -811,7 +787,6 @@ public class K9 extends Application {
         mQuietTimeEnds = quietTimeEnds;
     }
 
-
     public static boolean isQuietTime() {
         if (!mQuietTimeEnabled) {
             return false;
@@ -833,7 +808,6 @@ public class K9 extends Application {
             return false;
         }
 
-
         // 21:00 - 05:00 means we want to be quiet if it's after 9 or before 5
         if (quietStarts > quietEnds) {
             // if it's 22:00 or 03:00 but not 8:00
@@ -853,8 +827,6 @@ public class K9 extends Application {
 
         return false;
     }
-
-
 
     public static boolean startIntegratedInbox() {
         return mStartIntegratedInbox;
@@ -1115,5 +1087,26 @@ public class K9 extends Application {
     public static synchronized void setSortAscending(SortType sortType, boolean sortAscending) {
         mSortAscending.put(sortType, sortAscending);
     }
+    
+    /**
+     * Generates a uuid that is to identify this application on this device.
+     * The uuid is only generated once, and then persisted.
+     * @return the device Id
+     */
+    public String getDeviceId() {
+        if (TextUtils.isEmpty(mDeviceId)) {
+            // Remove the dashes from the UUID, so that we have alphanumeric characters only.
+            // This increases the likelyhood of compatability with external systems that may
+            // use the ID.
+            mDeviceId = UUID.randomUUID().toString().replace("-", "");
 
+            // This particular setting is not editted through the settings view, but instead only
+            // set in this method. We need to commit it now to ensure it is persisted correctly.
+            final Preferences preferences = Preferences.getPreferences(this);
+            Editor editor = preferences.getPreferences().edit();
+            editor.putString("deviceId", mDeviceId);
+            editor.commit();
+        }
+        return mDeviceId;
+    }
 }

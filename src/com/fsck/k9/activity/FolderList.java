@@ -80,6 +80,7 @@ public class FolderList extends K9ListActivity implements OnNavigationListener {
      * Constants for showDialog() etc.
      */
     private static final int DIALOG_FIND_FOLDER = 2;
+    private static final int DIALOG_EMPTY_TRASH = 3;
 
     private static final String EXTRA_ACCOUNT = "account";
 
@@ -162,7 +163,6 @@ public class FolderList extends K9ListActivity implements OnNavigationListener {
             runOnUiThread(new Runnable() {
                 public void run() {
                     String toastText = getString(R.string.account_size_changed, mAccount.getDescription(), SizeFormatter.formatSize(getApplication(), oldSize), SizeFormatter.formatSize(getApplication(), newSize));
-
                     Toast toast = Toast.makeText(getApplication(), toastText, Toast.LENGTH_LONG);
                     toast.show();
                 }
@@ -173,12 +173,9 @@ public class FolderList extends K9ListActivity implements OnNavigationListener {
             runOnUiThread(new Runnable() {
                 public void run() {
                     FolderInfoHolder folderHolder = mAdapter.getFolder(folder);
-
-
                     if (folderHolder != null) {
                         folderHolder.loading = loading;
                     }
-
                 }
             });
         }
@@ -299,7 +296,10 @@ public class FolderList extends K9ListActivity implements OnNavigationListener {
             }
         });
         registerForContextMenu(mListView);
-
+        
+        TextView progressMsg = (TextView)findViewById(R.id.message);
+        progressMsg.setText(getString(R.string.folder_list_loading_folders));
+        
         mListView.setSaveEnabled(true);
 
         mInflater = getLayoutInflater();
@@ -478,11 +478,8 @@ public class FolderList extends K9ListActivity implements OnNavigationListener {
         onRefresh(false);
     }
 
-
     private void onRefresh(final boolean forceRemote) {
-
         MessagingController.getInstance(getApplication()).listFolders(mAccount, forceRemote, mAdapter.mListener);
-
     }
 
     /**
@@ -504,17 +501,19 @@ public class FolderList extends K9ListActivity implements OnNavigationListener {
         Accounts.listAccounts(this);
         finish();
     }
+    
+    private void onEmptyTrash() {
+        showDialog(DIALOG_EMPTY_TRASH);
+    }
 
-    private void onEmptyTrash(final Account account) {
+    private void emptyTrash() {
         mHandler.dataChanged();
-
-        MessagingController.getInstance(getApplication()).emptyTrash(account, null);
+        MessagingController.getInstance(getApplication()).emptyTrash(mAccount, null);
     }
 
     private void onExpunge(final Account account, String folderName) {
         MessagingController.getInstance(getApplication()).expunge(account, folderName, null);
     }
-
 
     private void onClearFolder(Account account, String folderName) {
         // There has to be a cheaper way to get at the localFolder object than this
@@ -538,10 +537,6 @@ public class FolderList extends K9ListActivity implements OnNavigationListener {
         onRefresh(!REFRESH_REMOTE);
     }
 
-
-
-
-
     private void sendMail(Account account) {
         MessagingController.getInstance(getApplication()).sendPendingMessages(account, mAdapter.mListener);
     }
@@ -550,52 +545,42 @@ public class FolderList extends K9ListActivity implements OnNavigationListener {
         switch (item.getItemId()) {
         case android.R.id.home:
             onAccounts();
-
             return true;
 
         case R.id.compose:
             MessageCompose.actionCompose(this, mAccount);
-
             return true;
 
         case R.id.check_mail:
             MessagingController.getInstance(getApplication()).checkMail(this, mAccount, true, true, mAdapter.mListener);
-
             return true;
 
         case R.id.send_messages:
             MessagingController.getInstance(getApplication()).sendPendingMessages(mAccount, null);
-
             return true;
 
         case R.id.list_folders:
             onRefresh(REFRESH_REMOTE);
-
             return true;
 
         case R.id.filter_folders:
             onEnterFilter();
-
             return true;
 
         case R.id.account_settings:
             onEditAccount();
-
             return true;
 
         case R.id.app_settings:
             onEditPrefs();
-
             return true;
 
         case R.id.empty_trash:
-            onEmptyTrash(mAccount);
-
+            onEmptyTrash();
             return true;
 
         case R.id.compact:
             onCompact(mAccount);
-
             return true;
 
         case R.id.display_1st_class: {
@@ -699,6 +684,21 @@ public class FolderList extends K9ListActivity implements OnNavigationListener {
 
             return builder.create();
         }
+        
+        case DIALOG_EMPTY_TRASH: {
+            return ConfirmationDialog.create(this,
+                    id,
+                    R.string.empty_trash_dlg_title,
+                    R.string.empty_trash_dlg_instructions,
+                    R.string.okay_action,
+                    R.string.cancel_action,
+                    new Runnable() {
+                        @Override
+                        public void run() {
+                            emptyTrash();
+                        }
+                    });
+        }
         }
 
         return super.onCreateDialog(id);
@@ -719,9 +719,12 @@ public class FolderList extends K9ListActivity implements OnNavigationListener {
             input.setSelection(input.getText().length());
             break;
         }
-        default: {
+        case DIALOG_EMPTY_TRASH:
+            ((AlertDialog)dialog).setMessage(getString(R.string.empty_trash_dlg_instructions));
+            break;
+        default:
             super.onPrepareDialog(id, dialog);
-        }
+            break;
         }
     }
 
@@ -748,9 +751,8 @@ public class FolderList extends K9ListActivity implements OnNavigationListener {
             return mFilteredFolders.get(position);
         }
 
-
         public long getItemId(int position) {
-            return mFilteredFolders.get(position).folder.getName().hashCode() ;
+            return mFilteredFolders.get(position).folder.getRemoteName().hashCode();
         }
 
         public int getCount() {
@@ -842,7 +844,7 @@ public class FolderList extends K9ListActivity implements OnNavigationListener {
 
                         FolderInfoHolder holder = null;
 
-                        int folderIndex = getFolderIndex(folder.getName());
+                        int folderIndex = getFolderIndex(folder.getRemoteName());
                         if (folderIndex >= 0) {
                             holder = (FolderInfoHolder) getItem(folderIndex);
                         }
@@ -1024,7 +1026,7 @@ public class FolderList extends K9ListActivity implements OnNavigationListener {
         public int getFolderIndex(String folder) {
             FolderInfoHolder searchHolder = new FolderInfoHolder();
             searchHolder.name = folder;
-            return   mFilteredFolders.indexOf(searchHolder);
+            return mFilteredFolders.indexOf(searchHolder);
         }
 
         public FolderInfoHolder getFolder(String folder) {

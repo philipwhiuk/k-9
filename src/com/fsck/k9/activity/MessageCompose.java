@@ -582,7 +582,7 @@ public class MessageCompose extends K9Activity implements OnClickListener, OnFoc
                 if (mAutoEncrypt && crypto.isAvailable(getApplicationContext())) {
                     for (Address address : getRecipientAddresses()) {
                         if (crypto.hasPublicKeyForEmail(getApplicationContext(),
-                                address.getAddress())) {
+                        address.getAddress())) {
                             mEncryptCheckbox.setChecked(true);
                             mContinueWithoutPublicKey = false;
                             break;
@@ -1157,7 +1157,7 @@ public class MessageCompose extends K9Activity implements OnClickListener, OnFoc
      */
     private Address[] getRecipientAddresses() {
         String addresses = mToView.getText().toString() + mCcView.getText().toString()
-                + mBccView.getText().toString();
+                           + mBccView.getText().toString();
         return Address.parseUnencoded(addresses.trim());
     }
 
@@ -1534,7 +1534,7 @@ public class MessageCompose extends K9Activity implements OnClickListener, OnFoc
         }
         if (mQuotedHtmlContent != null) {
             uri.appendQueryParameter(IdentityField.FOOTER_OFFSET.value(),
-                    Integer.toString(mQuotedHtmlContent.getFooterInsertionPoint()));
+                                     Integer.toString(mQuotedHtmlContent.getFooterInsertionPoint()));
         }
         if (bodyPlain != null) {
             if (bodyPlain.getComposedMessageLength() != null && bodyPlain.getComposedMessageOffset() != null) {
@@ -1678,7 +1678,7 @@ public class MessageCompose extends K9Activity implements OnClickListener, OnFoc
         String signature = "";
         if (mIdentity.getSignatureUse()) {
             signature = mSignatureView.getText().toString();
-            if(!StringUtils.isNullOrEmpty(signature)) {
+            if (!StringUtils.isNullOrEmpty(signature)) {
                 signature = HtmlConverter.textToHtmlFragment("\n" + signature);
             }
         }
@@ -2793,7 +2793,7 @@ public class MessageCompose extends K9Activity implements OnClickListener, OnFoc
      * @throws MessagingException
      */
     private void processSourceMessageText(Message message, Integer bodyOffset, Integer bodyLength,
-            boolean viewMessageContent) throws MessagingException {
+                                          boolean viewMessageContent) throws MessagingException {
         Part textPart = MimeUtility.findFirstPartByMimeType(message, "text/plain");
         if (textPart != null) {
             String text = MimeUtility.getTextFromPart(textPart);
@@ -2812,7 +2812,7 @@ public class MessageCompose extends K9Activity implements OnClickListener, OnFoc
                     // top-posting: ignore two newlines at start of quote
                     quotedText.append(text.substring(bodyLength + 2));
                 } else if (bodyOffset + bodyLength == text.length() &&
-                        text.substring(bodyOffset - 1, bodyOffset).equals("\n")) {
+                           text.substring(bodyOffset - 1, bodyOffset).equals("\n")) {
                     // bottom-posting: ignore newline at end of quote
                     quotedText.append(text.substring(0, bodyOffset - 1));
                 } else {
@@ -2877,10 +2877,10 @@ public class MessageCompose extends K9Activity implements OnClickListener, OnFoc
                     List<Integer> start = new ArrayList<Integer>();
                     List<Integer> end = new ArrayList<Integer>();
 
-                    while(blockquoteStart.find()) {
+                    while (blockquoteStart.find()) {
                         start.add(blockquoteStart.start());
                     }
-                    while(blockquoteEnd.find()) {
+                    while (blockquoteEnd.find()) {
                         end.add(blockquoteEnd.start());
                     }
                     if (start.size() != end.size()) {
@@ -2895,8 +2895,8 @@ public class MessageCompose extends K9Activity implements OnClickListener, OnFoc
                         } else {
                             for (int i = 0; i < start.size() - 1; i++) {
                                 // within blockquotes.
-                                if (end.get(i) < start.get(i+1)) {
-                                    dashSignatureHtml.region(end.get(i), start.get(i+1));
+                                if (end.get(i) < start.get(i + 1)) {
+                                    dashSignatureHtml.region(end.get(i), start.get(i + 1));
                                     if (dashSignatureHtml.find()) {
                                         content = content.substring(0, dashSignatureHtml.start());
                                         break;

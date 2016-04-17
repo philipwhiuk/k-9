@@ -78,7 +78,6 @@ public class FolderSettings extends K9PreferenceActivity {
         Preference category = findPreference(PREFERENCE_TOP_CATERGORY);
         category.setTitle(displayName);
 
-
         mInTopGroup = (CheckBoxPreference)findPreference(PREFERENCE_IN_TOP_GROUP);
         mInTopGroup.setChecked(mFolder.isInTopGroup());
         mIntegrate = (CheckBoxPreference)findPreference(PREFERENCE_INTEGRATE);

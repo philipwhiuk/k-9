@@ -19,6 +19,7 @@ import com.fsck.k9.helper.Utility;
 import com.fsck.k9.mail.ConnectionSecurity;
 import com.fsck.k9.mail.ServerSettings;
 import com.fsck.k9.mail.Store;
+import com.fsck.k9.mail.store.EasStore;
 import com.fsck.k9.mail.store.ImapStore;
 import com.fsck.k9.mail.store.Pop3Store;
 import com.fsck.k9.mail.store.WebDavStore;
@@ -48,6 +49,10 @@ public class AccountSetupIncoming extends K9Activity implements OnClickListener 
         80, 443, 443, 443, 443
     };
 
+    private static final int[] EAS_PORTS = {
+        80, 443, 443, 443, 443
+    };
+
     private static final ConnectionSecurity[] CONNECTION_SECURITY_TYPES = {
         ConnectionSecurity.NONE,
         ConnectionSecurity.SSL_TLS_OPTIONAL,
@@ -59,7 +64,6 @@ public class AccountSetupIncoming extends K9Activity implements OnClickListener 
     private static final String[] AUTH_TYPES = {
         "PLAIN", "CRAM_MD5"
     };
-
 
     private int[] mAccountPorts;
     private String mStoreType;
@@ -289,6 +293,17 @@ public class AccountSetupIncoming extends K9Activity implements OnClickListener 
                 if (webDavSettings.mailboxPath != null) {
                     mWebdavMailboxPathView.setText(webDavSettings.mailboxPath);
                 }
+                mAccount.setDeletePolicy(Account.DELETE_POLICY_ON_DELETE);
+            } else if (EasStore.STORE_TYPE.equals(settings.type)) {
+                serverLabelView.setText(R.string.account_setup_incoming_eas_server_label);
+                mAccountPorts = EAS_PORTS;
+                findViewById(R.id.imap_path_prefix_section).setVisibility(View.GONE);
+                findViewById(R.id.webdav_advanced_header).setVisibility(View.GONE);
+                findViewById(R.id.webdav_mailbox_alias_section).setVisibility(View.GONE);
+                findViewById(R.id.webdav_owa_path_section).setVisibility(View.GONE);
+                findViewById(R.id.webdav_auth_path_section).setVisibility(View.GONE);
+                findViewById(R.id.compression_section).setVisibility(View.GONE);
+                findViewById(R.id.compression_label).setVisibility(View.GONE);
                 mAccount.setDeletePolicy(Account.DELETE_POLICY_ON_DELETE);
             } else {
                 throw new Exception("Unknown account type: " + mAccount.getStoreUri());

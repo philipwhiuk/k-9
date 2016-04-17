@@ -1,14 +1,20 @@
 
 package com.fsck.k9.mail.store;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -17,7 +23,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
-import com.fsck.k9.helper.HtmlConverter;
 import org.apache.commons.io.IOUtils;
 
 import android.app.Application;
@@ -31,13 +36,14 @@ import android.net.Uri;
 import android.util.Log;
 
 import com.fsck.k9.Account;
+import com.fsck.k9.Account.MessageFormat;
 import com.fsck.k9.AccountStats;
 import com.fsck.k9.K9;
 import com.fsck.k9.Preferences;
 import com.fsck.k9.R;
-import com.fsck.k9.Account.MessageFormat;
 import com.fsck.k9.controller.MessageRemovalListener;
 import com.fsck.k9.controller.MessageRetrievalListener;
+import com.fsck.k9.helper.HtmlConverter;
 import com.fsck.k9.helper.Utility;
 import com.fsck.k9.mail.Address;
 import com.fsck.k9.mail.Body;
@@ -79,8 +85,6 @@ public class LocalStore extends Store implements Serializable {
      */
     private static final String[] EMPTY_STRING_ARRAY = new String[0];
 
-    private static final Flag[] PERMANENT_FLAGS = { Flag.DELETED, Flag.X_DESTROYED, Flag.SEEN, Flag.FLAGGED };
-
     /*
      * a String containing the columns getMessages expects to work with
      * in the correct order.
@@ -89,11 +93,11 @@ public class LocalStore extends Store implements Serializable {
         "subject, sender_list, date, uid, flags, id, to_list, cc_list, "
         + "bcc_list, reply_to_list, attachment_count, internal_date, message_id, folder_id, preview ";
 
+    static private String GET_FOLDER_COLS = "id, name, unread_count, visible_limit, last_updated, status, "
+                                            + "push_state, last_pushed, flagged_count, integrate, top_group, poll_class, push_class, "
+                                            + "display_class, remote_name";
 
-    static private String GET_FOLDER_COLS = "id, name, unread_count, visible_limit, last_updated, status, push_state, last_pushed, flagged_count, integrate, top_group, poll_class, push_class, display_class";
-
-
-    protected static final int DB_VERSION = 43;
+    protected static final int DB_VERSION = 44;
 
     protected String uUid = null;
 
@@ -138,7 +142,6 @@ public class LocalStore extends Store implements Serializable {
             Log.i(K9.LOG_TAG, String.format("Upgrading database from version %d to version %d",
                                             db.getVersion(), DB_VERSION));
 
-
             AttachmentProvider.clear(mApplication);
 
             db.beginTransaction();
@@ -147,25 +150,25 @@ public class LocalStore extends Store implements Serializable {
                     // schema version 29 was when we moved to incremental updates
                     // in the case of a new db or a < v29 db, we blow away and start from scratch
                     if (db.getVersion() < 29) {
-
+    
                         db.execSQL("DROP TABLE IF EXISTS folders");
                         db.execSQL("CREATE TABLE folders (id INTEGER PRIMARY KEY, name TEXT, "
                                    + "last_updated INTEGER, unread_count INTEGER, visible_limit INTEGER, status TEXT, "
                                    + "push_state TEXT, last_pushed INTEGER, flagged_count INTEGER default 0, "
-                                   + "integrate INTEGER, top_group INTEGER, poll_class TEXT, push_class TEXT, display_class TEXT"
-                                   + ")");
-
+                                   + "integrate INTEGER, top_group INTEGER, poll_class TEXT, push_class TEXT, display_class TEXT,"
+                                   + "remote_name TEXT)");
+    
                         db.execSQL("CREATE INDEX IF NOT EXISTS folder_name ON folders (name)");
                         db.execSQL("DROP TABLE IF EXISTS messages");
                         db.execSQL("CREATE TABLE messages (id INTEGER PRIMARY KEY, deleted INTEGER default 0, folder_id INTEGER, uid TEXT, subject TEXT, "
                                    + "date INTEGER, flags TEXT, sender_list TEXT, to_list TEXT, cc_list TEXT, bcc_list TEXT, reply_to_list TEXT, "
                                    + "html_content TEXT, text_content TEXT, attachment_count INTEGER, internal_date INTEGER, message_id TEXT, preview TEXT, "
                                    + "mime_type TEXT)");
-
+    
                         db.execSQL("DROP TABLE IF EXISTS headers");
                         db.execSQL("CREATE TABLE headers (id INTEGER PRIMARY KEY, message_id INTEGER, name TEXT, value TEXT)");
                         db.execSQL("CREATE INDEX IF NOT EXISTS header_folder ON headers (message_id)");
-
+    
                         db.execSQL("CREATE INDEX IF NOT EXISTS msg_uid ON messages (uid, folder_id)");
                         db.execSQL("DROP INDEX IF EXISTS msg_folder_id");
                         db.execSQL("DROP INDEX IF EXISTS msg_folder_id_date");
@@ -174,20 +177,20 @@ public class LocalStore extends Store implements Serializable {
                         db.execSQL("CREATE TABLE attachments (id INTEGER PRIMARY KEY, message_id INTEGER,"
                                    + "store_data TEXT, content_uri TEXT, size INTEGER, name TEXT,"
                                    + "mime_type TEXT, content_id TEXT, content_disposition TEXT)");
-
+    
                         db.execSQL("DROP TABLE IF EXISTS pending_commands");
                         db.execSQL("CREATE TABLE pending_commands " +
                                    "(id INTEGER PRIMARY KEY, command TEXT, arguments TEXT)");
-
+    
                         db.execSQL("DROP TRIGGER IF EXISTS delete_folder");
                         db.execSQL("CREATE TRIGGER delete_folder BEFORE DELETE ON folders BEGIN DELETE FROM messages WHERE old.id = folder_id; END;");
-
+    
                         db.execSQL("DROP TRIGGER IF EXISTS delete_message");
                         db.execSQL("CREATE TRIGGER delete_message BEFORE DELETE ON messages BEGIN DELETE FROM attachments WHERE old.id = message_id; "
                                    + "DELETE FROM headers where old.id = message_id; END;");
                     } else {
                         // in the case that we're starting out at 29 or newer, run all the needed updates
-
+    
                         if (db.getVersion() < 30) {
                             try {
                                 db.execSQL("ALTER TABLE messages ADD deleted INTEGER default 0");
@@ -205,7 +208,7 @@ public class LocalStore extends Store implements Serializable {
                             db.execSQL("UPDATE messages SET deleted = 1 WHERE flags LIKE '%DELETED%'");
                         }
                         if (db.getVersion() < 33) {
-
+    
                             try {
                                 db.execSQL("ALTER TABLE messages ADD preview TEXT");
                             } catch (SQLiteException e) {
@@ -213,7 +216,7 @@ public class LocalStore extends Store implements Serializable {
                                     throw e;
                                 }
                             }
-
+    
                         }
                         if (db.getVersion() < 34) {
                             try {
@@ -245,7 +248,7 @@ public class LocalStore extends Store implements Serializable {
                                 Log.e(K9.LOG_TAG, "Unable to add content_disposition column to attachments");
                             }
                         }
-
+    
                         // Database version 38 is solely to prune cached attachments now that we clear them better
                         if (db.getVersion() < 39) {
                             try {
@@ -254,7 +257,7 @@ public class LocalStore extends Store implements Serializable {
                                 Log.e(K9.LOG_TAG, "Unable to remove extra header data from the database");
                             }
                         }
-
+    
                         // V40: Store the MIME type for a message.
                         if (db.getVersion() < 40) {
                             try {
@@ -263,7 +266,7 @@ public class LocalStore extends Store implements Serializable {
                                 Log.e(K9.LOG_TAG, "Unable to add mime_type column to messages");
                             }
                         }
-
+    
                         if (db.getVersion() < 41) {
                             try {
                                 db.execSQL("ALTER TABLE folders ADD integrate INTEGER");
@@ -277,9 +280,8 @@ public class LocalStore extends Store implements Serializable {
                                 }
                             }
                             Cursor cursor = null;
-
+    
                             try {
-
                                 SharedPreferences prefs = getPreferences();
                                 cursor = db.rawQuery("SELECT id, name FROM folders", null);
                                 while (cursor.moveToNext()) {
@@ -291,12 +293,8 @@ public class LocalStore extends Store implements Serializable {
                                         Log.e(K9.LOG_TAG, " error trying to ugpgrade a folder class", e);
                                     }
                                 }
-                            }
-
-
-                            catch (SQLiteException e) {
+                            } catch (SQLiteException e) {
                                 Log.e(K9.LOG_TAG, "Exception while upgrading database to v41. folder classes may have vanished", e);
-
                             } finally {
                                 Utility.closeQuietly(cursor);
                             }
@@ -305,7 +303,7 @@ public class LocalStore extends Store implements Serializable {
                             try {
                                 long startTime = System.currentTimeMillis();
                                 SharedPreferences.Editor editor = getPreferences().edit();
-
+    
                                 List <? extends Folder >  folders = getPersonalNamespaces(true);
                                 for (Folder folder : folders) {
                                     if (folder instanceof LocalFolder) {
@@ -313,7 +311,7 @@ public class LocalStore extends Store implements Serializable {
                                         lFolder.save(editor);
                                     }
                                 }
-
+    
                                 editor.commit();
                                 long endTime = System.currentTimeMillis();
                                 Log.i(K9.LOG_TAG, "Putting folder preferences for " + folders.size() + " folders back into Preferences took " + (endTime - startTime) + " ms");
@@ -332,21 +330,21 @@ public class LocalStore extends Store implements Serializable {
                                     db.update("folders", cv, "name = ?", new String[] { "OUTBOX" });
                                     Log.i(K9.LOG_TAG, "Renamed folder OUTBOX to " + Account.OUTBOX);
                                 }
-
+    
                                 // Check if old (pre v3.800) localized outbox folder exists
                                 String localizedOutbox = K9.app.getString(R.string.special_mailbox_name_outbox);
                                 LocalFolder obsoleteOutbox = new LocalFolder(localizedOutbox);
                                 if (obsoleteOutbox.exists()) {
                                     // Get all messages from the localized outbox ...
                                     Message[] messages = obsoleteOutbox.getMessages(null, false);
-
+    
                                     if (messages.length > 0) {
                                         // ... and move them to the drafts folder (we don't want to
                                         // surprise the user by sending potentially very old messages)
                                         LocalFolder drafts = new LocalFolder(mAccount.getDraftsFolderName());
                                         obsoleteOutbox.moveMessages(messages, drafts);
                                     }
-
+    
                                     // Now get rid of the localized outbox
                                     obsoleteOutbox.delete();
                                     obsoleteOutbox.delete(true);
@@ -355,15 +353,24 @@ public class LocalStore extends Store implements Serializable {
                                 Log.e(K9.LOG_TAG, "Error trying to fix the outbox folders", e);
                             }
                         }
+                        if (db.getVersion() < 44) {
+                            try {
+                                db.execSQL("ALTER TABLE folders ADD remote_name TEXT");
+                                // Mirror the name to the remote_name column for existing folders.
+                                db.execSQL("UPDATE folders SET remote_name = name");
+                            } catch (SQLiteException e) {
+                                Log.e(K9.LOG_TAG, "Unable to add remote_name column to folders");
+                            }
+                        }
                     }
                 } catch (SQLiteException e) {
                     Log.e(K9.LOG_TAG, "Exception while upgrading database. Resetting the DB to v0");
                     db.setVersion(0);
                     throw new Error("Database upgrade failed! Resetting your DB version to 0 to force a full schema recreation.");
                 }
-
+    
                 db.setVersion(DB_VERSION);
-
+                
                 db.setTransactionSuccessful();
             } finally {
                 db.endTransaction();
@@ -386,7 +393,6 @@ public class LocalStore extends Store implements Serializable {
         }
 
         private void update41Metadata(final SQLiteDatabase  db, SharedPreferences prefs, int id, String name) {
-
 
             Folder.FolderClass displayClass = Folder.FolderClass.NO_CLASS;
             Folder.FolderClass syncClass = Folder.FolderClass.INHERITED;
@@ -614,6 +620,10 @@ public class LocalStore extends Store implements Serializable {
         return new LocalFolder(name);
     }
 
+    public LocalFolder getFolder(String remoteName, String name) {
+        return new LocalFolder(remoteName, name);
+    }
+
     // TODO this takes about 260-300ms, seems slow.
     @Override
     public List <? extends Folder > getPersonalNamespaces(boolean forceListAll) throws MessagingException {
@@ -628,8 +638,10 @@ public class LocalStore extends Store implements Serializable {
                         cursor = db.rawQuery("SELECT " + GET_FOLDER_COLS + " FROM folders ORDER BY name ASC", null);
                         while (cursor.moveToNext()) {
                             LocalFolder folder = new LocalFolder(cursor.getString(1));
-                            folder.open(cursor.getInt(0), cursor.getString(1), cursor.getInt(2), cursor.getInt(3), cursor.getLong(4), cursor.getString(5), cursor.getString(6), cursor.getLong(7), cursor.getInt(8), cursor.getInt(9), cursor.getInt(10), cursor.getString(11), cursor.getString(12), cursor.getString(13));
-
+                            folder.open(cursor.getInt(0), cursor.getString(14), cursor.getString(1), cursor.getInt(2),
+                                        cursor.getInt(3), cursor.getLong(4), cursor.getString(5), cursor.getString(6),
+                                        cursor.getLong(7), cursor.getInt(8), cursor.getInt(9), cursor.getInt(10), cursor.getString(11),
+                                        cursor.getString(12), cursor.getString(13));
                             folders.add(folder);
                         }
                         return folders;
@@ -1040,41 +1052,42 @@ public class LocalStore extends Store implements Serializable {
             @Override
             public Void doDbWork(final SQLiteDatabase db) throws WrappedException {
                 for (LocalFolder folder : foldersToCreate) {
-                    String name = folder.getName();
-                    final  LocalFolder.PreferencesHolder prefHolder = folder.new PreferencesHolder();
+                    String remoteName = folder.getRemoteName();
+                    final LocalFolder.PreferencesHolder prefHolder = folder.new PreferencesHolder();
 
                     // When created, special folders should always be displayed
                     // inbox should be integrated
                     // and the inbox and drafts folders should be syncced by default
-                    if (mAccount.isSpecialFolder(name)) {
+                    if (mAccount.isSpecialFolder(remoteName)) {
                         prefHolder.inTopGroup = true;
                         prefHolder.displayClass = LocalFolder.FolderClass.FIRST_CLASS;
-                        if (name.equalsIgnoreCase(mAccount.getInboxFolderName())) {
+                        if (remoteName.equalsIgnoreCase(mAccount.getInboxFolderName())) {
                             prefHolder.integrate = true;
                             prefHolder.pushClass = LocalFolder.FolderClass.FIRST_CLASS;
                         } else {
                             prefHolder.pushClass = LocalFolder.FolderClass.INHERITED;
 
                         }
-                        if (name.equalsIgnoreCase(mAccount.getInboxFolderName()) ||
-                                name.equalsIgnoreCase(mAccount.getDraftsFolderName())) {
+                        if (remoteName.equalsIgnoreCase(mAccount.getInboxFolderName()) ||
+                                remoteName.equalsIgnoreCase(mAccount.getDraftsFolderName())) {
                             prefHolder.syncClass = LocalFolder.FolderClass.FIRST_CLASS;
                         } else {
                             prefHolder.syncClass = LocalFolder.FolderClass.NO_CLASS;
                         }
                     }
-                    folder.refresh(name, prefHolder);   // Recover settings from Preferences
+                    folder.refresh(remoteName, prefHolder);   // Recover settings from Preferences
 
-                    db.execSQL("INSERT INTO folders (name, visible_limit, top_group, display_class, poll_class, push_class, integrate) VALUES (?, ?, ?, ?, ?, ?, ?)", new Object[] {
-                                   name,
+                    db.execSQL("INSERT INTO folders (name, visible_limit, top_group, display_class, poll_class, push_class, integrate, remote_name)"
+                               + " VALUES (?, ?, ?, ?, ?, ?, ?, ?)", new Object[] {
+                                   folder.getName(),
                                    visibleLimit,
                                    prefHolder.inTopGroup ? 1 : 0,
                                    prefHolder.displayClass.name(),
                                    prefHolder.syncClass.name(),
                                    prefHolder.pushClass.name(),
                                    prefHolder.integrate ? 1 : 0,
+                                   remoteName
                                });
-
                 }
                 return null;
             }
@@ -1082,10 +1095,10 @@ public class LocalStore extends Store implements Serializable {
     }
 
     public class LocalFolder extends Folder implements Serializable {
-        /**
-         *
-         */
+
         private static final long serialVersionUID = -1973296520918624767L;
+        // mRemoteName uniquely identifies the folder in both the local and remote store.
+        private String mRemoteName;
         private String mName = null;
         private long mFolderId = -1;
         private int mUnreadMessageCount = -1;
@@ -1102,23 +1115,35 @@ public class LocalStore extends Store implements Serializable {
         // know whether or not an unread message added to the local folder is actually "new" or not.
         private Integer mLastUid = null;
 
-        public LocalFolder(String name) {
+        public LocalFolder(String remoteName) {
             super(LocalStore.this.mAccount);
-            this.mName = name;
 
-            if (LocalStore.this.mAccount.getInboxFolderName().equals(getName())) {
+            mRemoteName = remoteName;
+            mName = remoteName;
 
+            if (LocalStore.this.mAccount.getInboxFolderName().equals(remoteName)) {
                 mSyncClass =  FolderClass.FIRST_CLASS;
                 mPushClass =  FolderClass.FIRST_CLASS;
                 mInTopGroup = true;
             }
+        }
 
+        public LocalFolder(String remoteName, String name) {
+            super(LocalStore.this.mAccount);
 
+            mRemoteName = remoteName;
+            mName = name;
+
+            if (LocalStore.this.mAccount.getInboxFolderName().equals(remoteName)) {
+                mSyncClass =  FolderClass.FIRST_CLASS;
+                mPushClass =  FolderClass.FIRST_CLASS;
+                mInTopGroup = true;
+            }
         }
 
         public LocalFolder(long id) {
             super(LocalStore.this.mAccount);
-            this.mFolderId = id;
+            mFolderId = id;
         }
 
         public long getId() {
@@ -1138,8 +1163,8 @@ public class LocalStore extends Store implements Serializable {
                         try {
                             String baseQuery = "SELECT " + GET_FOLDER_COLS + " FROM folders ";
 
-                            if (mName != null) {
-                                cursor = db.rawQuery(baseQuery + "where folders.name = ?", new String[] { mName });
+                            if (mRemoteName != null) {
+                                cursor = db.rawQuery(baseQuery + "where folders.remote_name = ?", new String[] { mRemoteName });
                             } else {
                                 cursor = db.rawQuery(baseQuery + "where folders.id = ?", new String[] { Long.toString(mFolderId) });
                             }
@@ -1147,7 +1172,9 @@ public class LocalStore extends Store implements Serializable {
                             if (cursor.moveToFirst()) {
                                 int folderId = cursor.getInt(0);
                                 if (folderId > 0) {
-                                    open(folderId, cursor.getString(1), cursor.getInt(2), cursor.getInt(3), cursor.getLong(4), cursor.getString(5), cursor.getString(6), cursor.getLong(7), cursor.getInt(8), cursor.getInt(9), cursor.getInt(10), cursor.getString(11), cursor.getString(12), cursor.getString(13));
+                                    open(folderId, cursor.getString(14), cursor.getString(1), cursor.getInt(2), cursor.getInt(3),
+                                         cursor.getLong(4), cursor.getString(5), cursor.getString(6), cursor.getLong(7), cursor.getInt(8),
+                                         cursor.getInt(9), cursor.getInt(10), cursor.getString(11), cursor.getString(12), cursor.getString(13));
                                 }
                             } else {
                                 Log.w(K9.LOG_TAG, "Creating folder " + getName() + " with existing id " + getId());
@@ -1167,8 +1194,11 @@ public class LocalStore extends Store implements Serializable {
             }
         }
 
-        private void open(int id, String name, int unreadCount, int visibleLimit, long lastChecked, String status, String pushState, long lastPushed, int flaggedCount, int integrate, int topGroup, String syncClass, String pushClass, String displayClass) throws MessagingException {
+        private void open(int id, String remoteName, String name, int unreadCount, int visibleLimit, long lastChecked, String status,
+                          String pushState, long lastPushed, int flaggedCount, int integrate, int topGroup, String syncClass,
+                          String pushClass, String displayClass) throws MessagingException {
             mFolderId = id;
+            mRemoteName = remoteName;
             mName = name;
             mUnreadMessageCount = unreadCount;
             mVisibleLimit = visibleLimit;
@@ -1185,7 +1215,6 @@ public class LocalStore extends Store implements Serializable {
             mDisplayClass = Folder.FolderClass.valueOf((displayClass == null) ? noClass : displayClass);
             mPushClass = Folder.FolderClass.valueOf((pushClass == null) ? noClass : pushClass);
             mSyncClass = Folder.FolderClass.valueOf((syncClass == null) ? noClass : syncClass);
-
         }
 
         @Override
@@ -1199,8 +1228,18 @@ public class LocalStore extends Store implements Serializable {
         }
 
         @Override
+        public String getRemoteName() {
+            return mRemoteName;
+        }
+
+        @Override
         public String getName() {
             return mName;
+        }
+        
+        public void setName(String name) throws MessagingException {
+            mName = name;
+            updateFolderColumn("name", mName);
         }
 
         @Override
@@ -1210,10 +1249,8 @@ public class LocalStore extends Store implements Serializable {
                 public Boolean doDbWork(final SQLiteDatabase db) throws WrappedException {
                     Cursor cursor = null;
                     try {
-                        cursor = db.rawQuery("SELECT id FROM folders "
-                                             + "where folders.name = ?", new String[] { LocalFolder.this
-                                                     .getName()
-                                                                                      });
+                        cursor = db.rawQuery("SELECT id FROM folders where folders.remote_name = ?",
+                                             new String[] { LocalFolder.this.getRemoteName() });
                         if (cursor.moveToFirst()) {
                             int folderId = cursor.getInt(0);
                             return (folderId > 0);
@@ -1346,10 +1383,8 @@ public class LocalStore extends Store implements Serializable {
                     listener.messageRemoved(messages[i]);
                 }
                 messages[i].destroy();
-
             }
         }
-
 
         public void setVisibleLimit(final int visibleLimit) throws MessagingException {
             mVisibleLimit = visibleLimit;
@@ -1360,6 +1395,8 @@ public class LocalStore extends Store implements Serializable {
         public void setStatus(final String status) throws MessagingException {
             updateFolderColumn("status", status);
         }
+
+        @Override
         public void setPushState(final String pushState) throws MessagingException {
             mPushState = pushState;
             updateFolderColumn("push_state", pushState);
@@ -1384,9 +1421,11 @@ public class LocalStore extends Store implements Serializable {
             }
         }
 
+        @Override
         public String getPushState() {
             return mPushState;
         }
+        
         @Override
         public FolderClass getDisplayClass() {
             return mDisplayClass;
@@ -1403,7 +1442,6 @@ public class LocalStore extends Store implements Serializable {
 
         public FolderClass getRawSyncClass() {
             return mSyncClass;
-
         }
 
         @Override
@@ -1417,19 +1455,18 @@ public class LocalStore extends Store implements Serializable {
 
         public FolderClass getRawPushClass() {
             return mPushClass;
-
         }
 
         public void setDisplayClass(FolderClass displayClass) throws MessagingException {
             mDisplayClass = displayClass;
             updateFolderColumn("display_class", mDisplayClass.name());
-
         }
 
         public void setSyncClass(FolderClass syncClass) throws MessagingException {
             mSyncClass = syncClass;
             updateFolderColumn("poll_class", mSyncClass.name());
         }
+
         public void setPushClass(FolderClass pushClass) throws MessagingException {
             mPushClass = pushClass;
             updateFolderColumn("push_class", mPushClass.name());
@@ -1438,6 +1475,7 @@ public class LocalStore extends Store implements Serializable {
         public boolean isIntegrate() {
             return mIntegrate;
         }
+
         public void setIntegrate(boolean integrate) throws MessagingException {
             mIntegrate = integrate;
             updateFolderColumn("integrate", mIntegrate ? 1 : 0);
@@ -1454,7 +1492,6 @@ public class LocalStore extends Store implements Serializable {
         private String getPrefId() throws MessagingException {
             open(OpenMode.READ_WRITE);
             return getPrefId(mName);
-
         }
 
         public void delete() throws MessagingException {
@@ -1481,19 +1518,19 @@ public class LocalStore extends Store implements Serializable {
             String id = getPrefId();
 
             // there can be a lot of folders.  For the defaults, let's not save prefs, saving space, except for INBOX
-            if (mDisplayClass == FolderClass.NO_CLASS && !mAccount.getInboxFolderName().equals(getName())) {
+            if (mDisplayClass == FolderClass.NO_CLASS && !mAccount.getInboxFolderName().equals(getRemoteName())) {
                 editor.remove(id + ".displayMode");
             } else {
                 editor.putString(id + ".displayMode", mDisplayClass.name());
             }
 
-            if (mSyncClass == FolderClass.INHERITED && !mAccount.getInboxFolderName().equals(getName())) {
+            if (mSyncClass == FolderClass.INHERITED && !mAccount.getInboxFolderName().equals(getRemoteName())) {
                 editor.remove(id + ".syncMode");
             } else {
                 editor.putString(id + ".syncMode", mSyncClass.name());
             }
 
-            if (mPushClass == FolderClass.SECOND_CLASS && !mAccount.getInboxFolderName().equals(getName())) {
+            if (mPushClass == FolderClass.SECOND_CLASS && !mAccount.getInboxFolderName().equals(getRemoteName())) {
                 editor.remove(id + ".pushMode");
             } else {
                 editor.putString(id + ".pushMode", mPushClass.name());
@@ -1501,7 +1538,6 @@ public class LocalStore extends Store implements Serializable {
             editor.putBoolean(id + ".inTopGroup", mInTopGroup);
 
             editor.putBoolean(id + ".integrate", mIntegrate);
-
         }
 
         public void refresh(String name, PreferencesHolder prefHolder) {
@@ -1541,7 +1577,6 @@ public class LocalStore extends Store implements Serializable {
             }
             prefHolder.inTopGroup = preferences.getBoolean(id + ".inTopGroup", prefHolder.inTopGroup);
             prefHolder.integrate = preferences.getBoolean(id + ".integrate", prefHolder.integrate);
-
         }
 
         @Override
@@ -2408,7 +2443,9 @@ public class LocalStore extends Store implements Serializable {
                                     if (s != null) {
                                         try {
                                             size = Integer.parseInt(s);
-                                        } catch (NumberFormatException e) { /* Ignore */ }
+                                        } catch (NumberFormatException e) {
+                                            /* Ignore */
+                                        }
                                     }
                                 }
                             }
@@ -2589,14 +2626,11 @@ public class LocalStore extends Store implements Serializable {
             clearMessagesWhere(where, params);
         }
 
-
-
         public void clearAllMessages() throws MessagingException {
             final String where = "folder_id = ?";
             final String[] params = new String[] {
                 Long.toString(mFolderId)
             };
-
 
             clearMessagesWhere(where, params);
             setPushState(null);
@@ -2624,7 +2658,6 @@ public class LocalStore extends Store implements Serializable {
                 Log.e(K9.LOG_TAG, "Unable to fetch all messages from LocalStore", e);
             }
         }
-
 
         @Override
         public void delete(final boolean recurse) throws MessagingException {
@@ -2655,14 +2688,14 @@ public class LocalStore extends Store implements Serializable {
         @Override
         public boolean equals(Object o) {
             if (o instanceof LocalFolder) {
-                return ((LocalFolder)o).mName.equals(mName);
+                return ((LocalFolder)o).mRemoteName.equals(mRemoteName);
             }
             return super.equals(o);
         }
 
         @Override
         public int hashCode() {
-            return mName.hashCode();
+            return mRemoteName.hashCode();
         }
 
         private void deleteAttachments(final long messageId) throws MessagingException {
@@ -2788,7 +2821,7 @@ public class LocalStore extends Store implements Serializable {
             }
 
         }
-
+        
         @Override
         public boolean isInTopGroup() {
             return mInTopGroup;
@@ -3058,7 +3091,6 @@ public class LocalStore extends Store implements Serializable {
             mMessageDirty = true;
         }
 
-
         @Override
         public void setReplyTo(Address[] replyTo) throws MessagingException {
             if (replyTo == null || replyTo.length == 0) {
@@ -3068,7 +3100,6 @@ public class LocalStore extends Store implements Serializable {
             }
             mMessageDirty = true;
         }
-
 
         /*
          * For performance reasons, we add headers instead of setting them (see super implementation)
@@ -3100,8 +3131,6 @@ public class LocalStore extends Store implements Serializable {
             mMessageDirty = true;
         }
 
-
-
         public boolean toMe() {
             try {
                 if (!mToMeCalculated) {
@@ -3119,13 +3148,8 @@ public class LocalStore extends Store implements Serializable {
             return mToMe;
         }
 
-
-
-
-
         public boolean ccMe() {
             try {
-
                 if (!mCcMeCalculated) {
                     for (Address address : getRecipients(RecipientType.CC)) {
                         if (mAccount.isAnIdentity(address)) {
@@ -3133,7 +3157,6 @@ public class LocalStore extends Store implements Serializable {
                             mCcMeCalculated = true;
                         }
                     }
-
                 }
             } catch (MessagingException e) {
                 // do something better than ignore this
@@ -3142,11 +3165,6 @@ public class LocalStore extends Store implements Serializable {
 
             return mCcMe;
         }
-
-
-
-
-
 
         public void setFlagInternal(Flag flag, boolean set) throws MessagingException {
             super.setFlag(flag, set);
@@ -3186,8 +3204,6 @@ public class LocalStore extends Store implements Serializable {
             } catch (WrappedException e) {
                 throw(MessagingException) e.getCause();
             }
-
-
         }
 
         /*
@@ -3195,9 +3211,7 @@ public class LocalStore extends Store implements Serializable {
          * and attachments as well. Delete will not actually remove the row since we need
          * to retain the uid for synchronization purposes.
          */
-        private void delete() throws MessagingException
-
-        {
+        private void delete() throws MessagingException {
             /*
              * Delete all of the message's content to save space.
              */
@@ -3230,8 +3244,6 @@ public class LocalStore extends Store implements Serializable {
                 throw(MessagingException) e.getCause();
             }
             ((LocalFolder)mFolder).deleteHeaders(mId);
-
-
         }
 
         /*

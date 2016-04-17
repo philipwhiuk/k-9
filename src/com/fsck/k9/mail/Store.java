@@ -1,18 +1,20 @@
 
 package com.fsck.k9.mail;
 
+import java.util.HashMap;
+import java.util.List;
+
 import android.app.Application;
 import android.content.Context;
 
 import com.fsck.k9.Account;
+import com.fsck.k9.mail.store.EasStore;
 import com.fsck.k9.mail.store.ImapStore;
 import com.fsck.k9.mail.store.LocalStore;
 import com.fsck.k9.mail.store.Pop3Store;
+import com.fsck.k9.mail.store.UnavailableStorageException;
 import com.fsck.k9.mail.store.WebDavStore;
 import com.fsck.k9.mail.store.StorageManager.StorageProvider;
-
-import java.util.HashMap;
-import java.util.List;
 
 /**
  * Store is the access point for an email message store. It's location can be
@@ -55,6 +57,8 @@ public abstract class Store {
                 store = new Pop3Store(account);
             } else if (uri.startsWith("webdav")) {
                 store = new WebDavStore(account);
+            } else if (uri.startsWith("eas")) {
+                store = new EasStore(account);
             }
 
             if (store != null) {
@@ -95,6 +99,7 @@ public abstract class Store {
      * @see ImapStore#decodeUri(String)
      * @see Pop3Store#decodeUri(String)
      * @see WebDavStore#decodeUri(String)
+     * @see EasStore#decodeUri(String)
      */
     public static ServerSettings decodeStoreUri(String uri) {
         if (uri.startsWith("imap")) {
@@ -103,6 +108,8 @@ public abstract class Store {
             return Pop3Store.decodeUri(uri);
         } else if (uri.startsWith("webdav")) {
             return WebDavStore.decodeUri(uri);
+        } else if (uri.startsWith("eas")) {
+            return EasStore.decodeUri(uri);
         } else {
             throw new IllegalArgumentException("Not a valid store URI");
         }
@@ -119,6 +126,7 @@ public abstract class Store {
      * @see ImapStore#createUri(ServerSettings)
      * @see Pop3Store#createUri(ServerSettings)
      * @see WebDavStore#createUri(ServerSettings)
+     * @see EasStore#createUri(ServerSettings)
      */
     public static String createStoreUri(ServerSettings server) {
         if (ImapStore.STORE_TYPE.equals(server.type)) {
@@ -127,6 +135,8 @@ public abstract class Store {
             return Pop3Store.createUri(server);
         } else if (WebDavStore.STORE_TYPE.equals(server.type)) {
             return WebDavStore.createUri(server);
+        } else if (EasStore.STORE_TYPE.equals(server.type)) {
+            return EasStore.createUri(server);
         } else {
             throw new IllegalArgumentException("Not a valid store URI");
         }
@@ -163,6 +173,10 @@ public abstract class Store {
     }
 
     public boolean isExpungeCapable() {
+        return false;
+    }
+    
+    public boolean syncByDeltas() {
         return false;
     }
 
