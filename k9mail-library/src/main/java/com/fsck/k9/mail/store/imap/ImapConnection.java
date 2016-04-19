@@ -387,7 +387,7 @@ class ImapConnection {
                 //Invalidate the token anyway but assume it's permanent.
                 Log.v(LOG_TAG, "Authentication exception for new token, permanent error assumed", e);
                 oauthTokenProvider.invalidateToken(settings.getUsername());
-                throw new AuthenticationFailedException(e.getMessage(), e);
+                throw new AuthenticationFailedException(e2.getMessage(), e);
             }
         }
     }
@@ -398,7 +398,6 @@ class ImapConnection {
                 Authentication.computeXoauth(settings.getUsername(),
                         oauthTokenProvider.getToken(settings.getUsername(),
                                 OAuth2TokenProvider.OAUTH2_TIMEOUT)), true);
-
         extractCapabilities(
                 responseParser.readStatusResponse(tag, command, getLogId(), new UntaggedHandler() {
                     @Override

@@ -6,12 +6,8 @@ class NegativeImapResponseException extends MessagingException {
     private static final long serialVersionUID = 3725007182205882394L;
 
 
-    private final String alertText;
-
-
-    public NegativeImapResponseException(String message, String alertText) {
+    public NegativeImapResponseException(String message) {
         super(message, true);
-        this.alertText = alertText;
     }
 
     public String getAlertText() {
