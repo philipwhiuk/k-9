@@ -80,7 +80,6 @@ public class AccountSetupIncoming extends K9Activity implements OnClickListener 
     private CheckBox mSubscribedFoldersOnly;
     private AuthTypeAdapter mAuthTypeAdapter;
     private ConnectionSecurity[] mConnectionSecurityChoices = ConnectionSecurity.values();
-    private AndroidAccountOAuth2TokenStore androidAccountOAuth2TokenStore;
 
     public static void actionIncomingSettings(Activity context, Account account, boolean makeDefault) {
         Intent i = new Intent(context, AccountSetupIncoming.class);
@@ -164,6 +163,7 @@ public class AccountSetupIncoming extends K9Activity implements OnClickListener 
         boolean editSettings = Intent.ACTION_EDIT.equals(getIntent().getAction());
 
         try {
+            Log.i(K9.LOG_TAG, "Setting up based on settings: " + mAccount.getStoreUri());
             ServerSettings settings = RemoteStore.decodeStoreUri(mAccount.getStoreUri());
 
             if (savedInstanceState == null) {
@@ -556,7 +556,7 @@ public class AccountSetupIncoming extends K9Activity implements OnClickListener 
     protected void onNext() {
         AuthType authType = getSelectedAuthType();
         if (authType == AuthType.XOAUTH2) {
-            androidAccountOAuth2TokenStore.authorizeAPI(mAccount.getEmail(), this,
+            K9.oAuth2TokenStore.authorizeAPI(mAccount.getEmail(), this,
                     new OAuth2TokenProvider.OAuth2TokenProviderAuthCallback() {
                 @Override
                 public void success() {

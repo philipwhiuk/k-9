@@ -408,6 +408,7 @@ public class AccountSetupBasics extends K9Activity
             onManualSetup();
             return;
         }
+        Log.i(K9.LOG_TAG, "Provider found, using automatic set-up");
 
         if (mProvider.note != null) {
             showDialog(DIALOG_NOTE);
@@ -435,7 +436,12 @@ public class AccountSetupBasics extends K9Activity
     }
 
     private void onManualSetup() {
-        String email = mEmailView.getText().toString();
+        String email;
+        if(mOAuth2CheckBox.isChecked()) {
+            email = mAccountSpinner.getSelectedItem().toString();
+        } else {
+            email = mEmailView.getText().toString();
+        }
         String[] emailParts = splitEmail(email);
         String user = email;
         String domain = emailParts[1];
