@@ -1288,8 +1288,7 @@ public class Account implements BaseAccount, StoreConfig {
     }
 
     public Store getRemoteStore() throws MessagingException {
-        return RemoteStore.getInstance(K9.app, this,
-                new AndroidAccountOAuth2TokenStore(K9.app.getApplicationContext()));
+        return RemoteStore.getInstance(K9.app, this, K9.oAuth2TokenStore);
     }
 
     // It'd be great if this actually went into the store implementation

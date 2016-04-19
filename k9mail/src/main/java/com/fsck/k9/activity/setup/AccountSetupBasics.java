@@ -94,7 +94,7 @@ public class AccountSetupBasics extends K9Activity
         mClientCertificateSpinner = (ClientCertificateSpinner)findViewById(R.id.account_client_certificate_spinner);
         mOAuth2CheckBox = (CheckBox)findViewById(R.id.account_oauth2);
         mAccountSpinner = (Spinner)findViewById(R.id.account_spinner);
-        accountTokenStore = new AndroidAccountOAuth2TokenStore(this);
+        accountTokenStore = K9.oAuth2TokenStore;
         ArrayAdapter<String>  adapter = new ArrayAdapter<String>(
                 this, android.R.layout.simple_spinner_item, accountTokenStore.getAccounts());
         mAccountSpinner.setAdapter(adapter);

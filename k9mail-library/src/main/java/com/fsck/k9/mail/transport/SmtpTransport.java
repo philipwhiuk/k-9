@@ -22,6 +22,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.*;
 import java.security.GeneralSecurityException;
 import java.util.*;
@@ -770,19 +771,42 @@ public class SmtpTransport extends Transport {
     }
 
     private void saslXoauth2(String username) throws MessagingException, IOException {
-
         try {
-            executeSimpleCommand("AUTH XOAUTH2 " +
-                    Authentication.computeXoauth(username, oauthTokenProvider.getToken(username)),
-                    true);
+            attemptXoauth2(username);
         } catch (NegativeSmtpReplyException exception) {
             if (exception.getReplyCode() == 535) {
                 // Authentication credentials invalid
-                throw new AuthenticationFailedException(exception.getMessage(), exception);
+
+                //We could avoid this double check if we had a reasonable chance of knowing
+                //if a token was invalid before use (e.g. due to expiry). But we don't
+                //This is the intended behaviour per AccountManager
+                Log.v(LOG_TAG, "Authentication exception, invalidating token and re-trying", exception);
+                oauthTokenProvider.invalidateToken(username);
+                try {
+                    attemptXoauth2(username);
+                } catch (NegativeSmtpReplyException exception2) {
+                    if (exception2.getReplyCode() == 535) {
+                        // Authentication credentials invalid
+                        //Okay, we failed on a new token.
+                        //Invalidate the token anyway but assume it's permanent.
+                        Log.v(LOG_TAG, "Authentication exception for new token, permanent error assumed", exception2);
+                        oauthTokenProvider.invalidateToken(username);
+                        throw new AuthenticationFailedException(exception2.getMessage(), exception2);
+                    } else {
+                        throw exception2;
+                    }
+                }
             } else {
                 throw exception;
             }
         }
+    }
+
+    private void attemptXoauth2(String username) throws MessagingException, IOException {
+        executeSimpleCommand("AUTH XOAUTH2 " +
+                Authentication.computeXoauth(username,
+                        oauthTokenProvider.getToken(username, OAuth2TokenProvider.OAUTH2_TIMEOUT)),
+                true);
     }
 
     private void saslAuthExternal(String username) throws MessagingException, IOException {

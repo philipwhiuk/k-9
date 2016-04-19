@@ -6,6 +6,7 @@ import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -372,30 +373,43 @@ class ImapConnection {
 
     private void authXoauth2withSASLIR() throws IOException, MessagingException {
         try {
-            String command = Commands.AUTHENTICATE_XOAUTH2;
-            String tag = sendSaslIrCommand(command,
-                Authentication.computeXoauth(settings.getUsername(),
-                        oauthTokenProvider.getToken(settings.getUsername())), true);
-
-
-            extractCapabilities(
-                    responseParser.readStatusResponse(tag, command, getLogId(), new UntaggedHandler() {
-                        @Override
-                        public void handleAsyncUntaggedResponse(ImapResponse response) throws IOException {
-                            if(response.isContinuationRequested()) {
-                                outputStream.write("\r\n".getBytes());
-                                outputStream.flush();
-                            }
-                        }
-                    })
-            );
+            attemptXOAuth2();
         } catch (NegativeImapResponseException e) {
+            //We could avoid this if we had a reasonable chance of knowing
+            //if a token was invalid before use (e.g. due to expiry). But we don't
+            //This is the intended behaviour per AccountManager
+            Log.v(LOG_TAG, "Authentication exception, invalidating token and re-trying", e);
             oauthTokenProvider.invalidateToken(settings.getUsername());
-            throw new AuthenticationFailedException(e.getMessage());
-        } catch (Exception e) {
-            oauthTokenProvider.invalidateToken(settings.getUsername());
-            throw e;
+            try {
+                attemptXOAuth2();
+            } catch (NegativeImapResponseException e2) {
+                //Okay, we failed on a new token.
+                //Invalidate the token anyway but assume it's permanent.
+                Log.v(LOG_TAG, "Authentication exception for new token, permanent error assumed", e);
+                oauthTokenProvider.invalidateToken(settings.getUsername());
+                throw new AuthenticationFailedException(e.getMessage(), e);
+            }
         }
+    }
+
+    private void attemptXOAuth2() throws MessagingException, IOException {
+        String command = Commands.AUTHENTICATE_XOAUTH2;
+        String tag = sendSaslIrCommand(command,
+                Authentication.computeXoauth(settings.getUsername(),
+                        oauthTokenProvider.getToken(settings.getUsername(),
+                                OAuth2TokenProvider.OAUTH2_TIMEOUT)), true);
+
+        extractCapabilities(
+                responseParser.readStatusResponse(tag, command, getLogId(), new UntaggedHandler() {
+                    @Override
+                    public void handleAsyncUntaggedResponse(ImapResponse response) throws IOException {
+                        if(response.isContinuationRequested()) {
+                            outputStream.write("\r\n".getBytes());
+                            outputStream.flush();
+                        }
+                    }
+                })
+        );
     }
 
     private void authCramMD5() throws MessagingException, IOException {

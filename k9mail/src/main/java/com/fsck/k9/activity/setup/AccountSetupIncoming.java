@@ -21,6 +21,7 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
 
 import com.fsck.k9.*;
 import com.fsck.k9.Account.FolderMode;
+import com.fsck.k9.account.AndroidAccountOAuth2TokenStore;
 import com.fsck.k9.mail.NetworkType;
 import com.fsck.k9.activity.K9Activity;
 import com.fsck.k9.activity.setup.AccountSetupCheckSettings.CheckDirection;
@@ -31,6 +32,7 @@ import com.fsck.k9.mail.ServerSettings;
 import com.fsck.k9.mail.ServerSettings.Type;
 import com.fsck.k9.mail.Store;
 import com.fsck.k9.mail.Transport;
+import com.fsck.k9.mail.oauth.OAuth2TokenProvider;
 import com.fsck.k9.mail.store.RemoteStore;
 import com.fsck.k9.mail.store.imap.ImapStoreSettings;
 import com.fsck.k9.mail.store.webdav.WebDavStoreSettings;
@@ -78,6 +80,7 @@ public class AccountSetupIncoming extends K9Activity implements OnClickListener 
     private CheckBox mSubscribedFoldersOnly;
     private AuthTypeAdapter mAuthTypeAdapter;
     private ConnectionSecurity[] mConnectionSecurityChoices = ConnectionSecurity.values();
+    private AndroidAccountOAuth2TokenStore androidAccountOAuth2TokenStore;
 
     public static void actionIncomingSettings(Activity context, Account account, boolean makeDefault) {
         Intent i = new Intent(context, AccountSetupIncoming.class);
@@ -551,17 +554,26 @@ public class AccountSetupIncoming extends K9Activity implements OnClickListener 
     }
 
     protected void onNext() {
-        try {
-            AuthType authType = getSelectedAuthType();
-            if (authType == AuthType.XOAUTH2) {
-                fetchAuthTokenForAccount(mAccount.getEmail());
-                return;
-            }
-            updateAccountSettings(mPasswordView.getText().toString());
-            AccountSetupCheckSettings.actionCheckSettings(this, mAccount, CheckDirection.INCOMING);
-        } catch (Exception e) {
-            failure(e);
+        AuthType authType = getSelectedAuthType();
+        if (authType == AuthType.XOAUTH2) {
+            androidAccountOAuth2TokenStore.authorizeAPI(mAccount.getEmail(), this,
+                    new OAuth2TokenProvider.OAuth2TokenProviderAuthCallback() {
+                @Override
+                public void success() {
+                    updateAccountSettings("");
+                    AccountSetupCheckSettings.actionCheckSettings(
+                            AccountSetupIncoming.this, mAccount, CheckDirection.INCOMING);
+                }
+
+                @Override
+                public void failure(Exception e) {
+                    AccountSetupIncoming.this.failure(e);
+                }
+            });
+            return;
         }
+        updateAccountSettings(mPasswordView.getText().toString());
+        AccountSetupCheckSettings.actionCheckSettings(this, mAccount, CheckDirection.INCOMING);
     }
 
     private void fetchAuthTokenForAccount(final String emailAddress) {
@@ -578,9 +590,6 @@ public class AccountSetupIncoming extends K9Activity implements OnClickListener 
                                 try {
                                     Bundle bundle = future.getResult();
                                     if(bundle.get(AccountManager.KEY_ACCOUNT_NAME).equals(emailAddress)) {
-                                        updateAccountSettings(AccountManager.KEY_AUTHTOKEN);
-                                        AccountSetupCheckSettings.actionCheckSettings(
-                                                AccountSetupIncoming.this, mAccount, CheckDirection.INCOMING);
                                     }
                                 } catch (Exception e) {
                                     failure(e);
