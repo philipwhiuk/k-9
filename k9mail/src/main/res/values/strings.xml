@@ -1224,4 +1224,6 @@ Please submit bug reports, contribute new features and ask questions at
     <string name="xoauth2_unable_to_contact_auth_server">Unable to contact authentication server</string>
     <string name="xoauth2_error_contacting_auth_server">Error contacting authentication server</string>
     <string name="xoauth2_account_doesnt_exist">Account doesn\'t exist</string>
+    <string name="xoauth2_incorrect_auth_info_provided">Incorrect auth info provided</string>
+    <string name="xoauth2_no_account">No account provided</string>
 </resources>

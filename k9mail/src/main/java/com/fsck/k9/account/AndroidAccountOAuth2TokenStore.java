@@ -9,14 +9,10 @@ import android.accounts.OperationCanceledException;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
 
-import com.fsck.k9.K9;
 import com.fsck.k9.R;
-import com.fsck.k9.activity.setup.AccountSetupCheckSettings;
-import com.fsck.k9.activity.setup.AccountSetupIncoming;
 import com.fsck.k9.mail.AuthenticationFailedException;
-import com.fsck.k9.mail.K9MailLib;
+import com.fsck.k9.mail.oauth.AuthorizationException;
 import com.fsck.k9.mail.oauth.OAuth2TokenProvider;
 
 import java.io.IOException;
@@ -46,6 +42,7 @@ public class AndroidAccountOAuth2TokenStore implements OAuth2TokenProvider {
         Account account = getAccountFromManager(emailAddress);
         if (account == null) {
             callback.failure(new AuthorizationException(activity.getString(R.string.xoauth2_account_doesnt_exist)));
+            return;
         }
         if(account.name.equals(emailAddress)) {
             accountManager.getAuthToken(account, GMAIL_AUTH_TOKEN_TYPE, null, activity,
@@ -54,8 +51,17 @@ public class AndroidAccountOAuth2TokenStore implements OAuth2TokenProvider {
                     public void run(AccountManagerFuture<Bundle> future) {
                         try {
                             Bundle bundle = future.getResult();
-                            if (bundle.get(AccountManager.KEY_ACCOUNT_NAME).equals(emailAddress)) {
+                            Object keyAccountName = bundle.get(AccountManager.KEY_ACCOUNT_NAME);
+                            if (keyAccountName == null) {
+                                callback.failure(new AuthorizationException(activity.getString(
+                                        R.string.xoauth2_no_account)));
+                                return;
+                            }
+                            if (keyAccountName.equals(emailAddress)) {
                                 callback.success();
+                            } else {
+                                callback.failure(new AuthorizationException(activity.getString(
+                                        R.string.xoauth2_incorrect_auth_info_provided)));
                             }
                         } catch (OperationCanceledException e) {
                             callback.failure(new AuthorizationException(activity.getString(
