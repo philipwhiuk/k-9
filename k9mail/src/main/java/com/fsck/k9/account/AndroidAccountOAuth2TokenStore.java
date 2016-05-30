@@ -45,7 +45,7 @@ public class AndroidAccountOAuth2TokenStore implements OAuth2TokenProvider {
                              final OAuth2TokenProviderAuthCallback callback) {
         Account account = getAccountFromManager(emailAddress);
         if (account == null) {
-            callback.failure(new Exception(activity.getString(R.string.xoauth2_account_doesnt_exist)));
+            callback.failure(new AuthorizationException(activity.getString(R.string.xoauth2_account_doesnt_exist)));
         }
         if(account.name.equals(emailAddress)) {
             accountManager.getAuthToken(account, GMAIL_AUTH_TOKEN_TYPE, null, activity,
@@ -58,13 +58,13 @@ public class AndroidAccountOAuth2TokenStore implements OAuth2TokenProvider {
                                 callback.success();
                             }
                         } catch (OperationCanceledException e) {
-                            callback.failure(new Exception(activity.getString(
+                            callback.failure(new AuthorizationException(activity.getString(
                                     R.string.xoauth2_auth_cancelled_by_user), e));
                         } catch (IOException e) {
-                            callback.failure(new Exception(activity.getString(
+                            callback.failure(new AuthorizationException(activity.getString(
                                     R.string.xoauth2_unable_to_contact_auth_server), e));
                         } catch (AuthenticatorException e) {
-                            callback.failure(new Exception(activity.getString(
+                            callback.failure(new AuthorizationException(activity.getString(
                                     R.string.xoauth2_error_contacting_auth_server), e));
                         }
                     }
@@ -102,9 +102,12 @@ public class AndroidAccountOAuth2TokenStore implements OAuth2TokenProvider {
             Bundle bundle = future.getResult(timeoutMillis, TimeUnit.MILLISECONDS);
             if (bundle == null)
                 throw new AuthenticationFailedException("No token provided");
-            if (bundle.get(AccountManager.KEY_ACCOUNT_NAME).equals(username)) {
+            if (bundle.get(AccountManager.KEY_ACCOUNT_NAME) == null)
+                throw new AuthenticationFailedException("No account information provided");
+            if (bundle.get(AccountManager.KEY_ACCOUNT_NAME).equals(username))
                 authTokens.put(username, bundle.get(AccountManager.KEY_AUTHTOKEN).toString());
-            }
+            else
+                throw new AuthenticationFailedException("Unexpected account information provided");
         } catch (Exception e) {
             throw new AuthenticationFailedException(e.getMessage());
         }

@@ -393,13 +393,13 @@ class ImapConnection {
     }
 
     private void attemptXOAuth2() throws MessagingException, IOException {
-        String command = Commands.AUTHENTICATE_XOAUTH2;
-        String tag = sendSaslIrCommand(command,
-                Authentication.computeXoauth(settings.getUsername(),
-                        oauthTokenProvider.getToken(settings.getUsername(),
-                                OAuth2TokenProvider.OAUTH2_TIMEOUT)), true);
+        String token = oauthTokenProvider.getToken(settings.getUsername(),
+                OAuth2TokenProvider.OAUTH2_TIMEOUT);
+        String tag = sendSaslIrCommand(Commands.AUTHENTICATE_XOAUTH2,
+                Authentication.computeXoauth(settings.getUsername(), token), true);
         extractCapabilities(
-                responseParser.readStatusResponse(tag, command, getLogId(), new UntaggedHandler() {
+                responseParser.readStatusResponse(tag, Commands.AUTHENTICATE_XOAUTH2, getLogId(),
+                        new UntaggedHandler() {
                     @Override
                     public void handleAsyncUntaggedResponse(ImapResponse response) throws IOException {
                         if(response.isContinuationRequested()) {
@@ -704,7 +704,7 @@ class ImapConnection {
                 if (sensitive && !K9MailLib.isDebugSensitive()) {
                     Log.v(LOG_TAG, getLogId() + ">>> [Command Hidden, Enable Sensitive Debug Logging To Show]");
                 } else {
-            Log.v(LOG_TAG,  getLogId() + ">>> " + tag + " " + command+ " " + initialClientResponse);
+                    Log.v(LOG_TAG,  getLogId() + ">>> " + tag + " " + command+ " " + initialClientResponse);
                 }
             }
 

@@ -19,7 +19,7 @@ public interface OAuth2TokenProvider {
 
         void success();
 
-        void failure(Exception e);
+        void failure(AuthorizationException e);
     }
 
     /**

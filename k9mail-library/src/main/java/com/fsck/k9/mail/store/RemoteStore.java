@@ -52,17 +52,19 @@ public abstract class RemoteStore extends Store {
         Store store = sStores.get(uri);
         if (store == null) {
             if (uri.startsWith("imap")) {
-                store = new ImapStore(storeConfig,
-                        new DefaultTrustedSocketFactory(context),
-                        (ConnectivityManager) context.getSystemService(
-                                Context.CONNECTIVITY_SERVICE),
-                        oAuth2TokenProvider
+                store = new ImapStore(
+                            storeConfig,
+                            new DefaultTrustedSocketFactory(context),
+                            (ConnectivityManager) context
+                                    .getSystemService(Context.CONNECTIVITY_SERVICE),
+                            oAuth2TokenProvider
                         );
             } else if (uri.startsWith("pop3")) {
                 store = new Pop3Store(storeConfig,
-                        new DefaultTrustedSocketFactory(context));
+                            new DefaultTrustedSocketFactory(context));
             } else if (uri.startsWith("webdav")) {
-                store = new WebDavStore(storeConfig, new WebDavHttpClient.WebDavHttpClientFactory());
+                store = new WebDavStore(storeConfig,
+                            new WebDavHttpClient.WebDavHttpClientFactory());
             }
 
             if (store != null) {

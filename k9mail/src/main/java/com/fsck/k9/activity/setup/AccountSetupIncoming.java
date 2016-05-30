@@ -4,7 +4,6 @@ package com.fsck.k9.activity.setup;
 import android.accounts.AccountManager;
 import android.accounts.AccountManagerCallback;
 import android.accounts.AccountManagerFuture;
-import android.accounts.AuthenticatorException;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -21,7 +20,6 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
 
 import com.fsck.k9.*;
 import com.fsck.k9.Account.FolderMode;
-import com.fsck.k9.account.AndroidAccountOAuth2TokenStore;
 import com.fsck.k9.mail.NetworkType;
 import com.fsck.k9.activity.K9Activity;
 import com.fsck.k9.activity.setup.AccountSetupCheckSettings.CheckDirection;
@@ -32,6 +30,7 @@ import com.fsck.k9.mail.ServerSettings;
 import com.fsck.k9.mail.ServerSettings.Type;
 import com.fsck.k9.mail.Store;
 import com.fsck.k9.mail.Transport;
+import com.fsck.k9.mail.oauth.AuthorizationException;
 import com.fsck.k9.mail.oauth.OAuth2TokenProvider;
 import com.fsck.k9.mail.store.RemoteStore;
 import com.fsck.k9.mail.store.imap.ImapStoreSettings;
@@ -566,7 +565,7 @@ public class AccountSetupIncoming extends K9Activity implements OnClickListener 
                 }
 
                 @Override
-                public void failure(Exception e) {
+                public void failure(AuthorizationException e) {
                     AccountSetupIncoming.this.failure(e);
                 }
             });
@@ -574,33 +573,6 @@ public class AccountSetupIncoming extends K9Activity implements OnClickListener 
         }
         updateAccountSettings(mPasswordView.getText().toString());
         AccountSetupCheckSettings.actionCheckSettings(this, mAccount, CheckDirection.INCOMING);
-    }
-
-    private void fetchAuthTokenForAccount(final String emailAddress) {
-        new Exception().printStackTrace();
-        AccountManager accountManager = AccountManager.get(this);
-        android.accounts.Account[] accounts = accountManager.getAccountsByType("com.google");
-        for (android.accounts.Account account : accounts) {
-            Log.w(K9.LOG_TAG, "Account: " + account.name);
-            if(account.name.equals(emailAddress)) {
-                accountManager.getAuthToken(account, GMAIL_AUTH_TOKEN_TYPE, null, this,
-                        new AccountManagerCallback<Bundle>() {
-                            @Override
-                            public void run(AccountManagerFuture<Bundle> future) {
-                                try {
-                                    Bundle bundle = future.getResult();
-                                    if(bundle.get(AccountManager.KEY_ACCOUNT_NAME).equals(emailAddress)) {
-                                    }
-                                } catch (Exception e) {
-                                    failure(e);
-                                }
-                            }
-                        }, null);
-                return;
-            }
-        }
-        failure(new Exception("Account doesn't exist"));
-
     }
 
     private void updateAccountSettings(String password) {

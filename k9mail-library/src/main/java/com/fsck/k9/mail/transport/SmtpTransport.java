@@ -1,6 +1,7 @@
 
 package com.fsck.k9.mail.transport;
 
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.fsck.k9.mail.*;
@@ -32,6 +33,8 @@ import static com.fsck.k9.mail.K9MailLib.LOG_TAG;
 import static com.fsck.k9.mail.CertificateValidationException.Reason.MissingCapability;
 
 public class SmtpTransport extends Transport {
+    public static final int SMTP_AUTHENTICATION_FAILURE_ERROR_CODE = 535;
+
     private TrustedSocketFactory mTrustedSocketFactory;
     private OAuth2TokenProvider oauthTokenProvider;
 
@@ -316,9 +319,8 @@ public class SmtpTransport extends Transport {
             }
             parseOptionalSizeValue(extensions);
 
-            if (mUsername != null
-                    && mUsername.length() > 0
-                    && ((mPassword != null && mPassword.length() > 0) ||
+            if (TextUtils.isEmpty(mUsername)
+                    && (TextUtils.isEmpty(mPassword) ||
                         AuthType.EXTERNAL == mAuthType ||
                         AuthType.XOAUTH2 == mAuthType)) {
 
@@ -721,7 +723,7 @@ public class SmtpTransport extends Transport {
             executeSimpleCommand(Base64.encode(username), true);
             executeSimpleCommand(Base64.encode(password), true);
         } catch (NegativeSmtpReplyException exception) {
-            if (exception.getReplyCode() == 535) {
+            if (exception.getReplyCode() == SMTP_AUTHENTICATION_FAILURE_ERROR_CODE) {
                 // Authentication credentials invalid
                 throw new AuthenticationFailedException("AUTH LOGIN failed ("
                         + exception.getMessage() + ")");
@@ -737,7 +739,7 @@ public class SmtpTransport extends Transport {
         try {
             executeSimpleCommand("AUTH PLAIN " + data, true);
         } catch (NegativeSmtpReplyException exception) {
-            if (exception.getReplyCode() == 535) {
+            if (exception.getReplyCode() == SMTP_AUTHENTICATION_FAILURE_ERROR_CODE) {
                 // Authentication credentials invalid
                 throw new AuthenticationFailedException("AUTH PLAIN failed ("
                         + exception.getMessage() + ")");
@@ -761,7 +763,7 @@ public class SmtpTransport extends Transport {
         try {
             executeSimpleCommand(b64CRAMString, true);
         } catch (NegativeSmtpReplyException exception) {
-            if (exception.getReplyCode() == 535) {
+            if (exception.getReplyCode() == SMTP_AUTHENTICATION_FAILURE_ERROR_CODE) {
                 // Authentication credentials invalid
                 throw new AuthenticationFailedException(exception.getMessage(), exception);
             } else {
@@ -773,31 +775,33 @@ public class SmtpTransport extends Transport {
     private void saslXoauth2(String username) throws MessagingException, IOException {
         try {
             attemptXoauth2(username);
-        } catch (NegativeSmtpReplyException exception) {
-            if (exception.getReplyCode() == 535) {
-                // Authentication credentials invalid
+        } catch (NegativeSmtpReplyException negativeResponseFromOldToken) {
+            if (negativeResponseFromOldToken.getReplyCode() != SMTP_AUTHENTICATION_FAILURE_ERROR_CODE) {
+                throw negativeResponseFromOldToken;
+            }
 
-                //We could avoid this double check if we had a reasonable chance of knowing
-                //if a token was invalid before use (e.g. due to expiry). But we don't
-                //This is the intended behaviour per AccountManager
-                Log.v(LOG_TAG, "Authentication exception, invalidating token and re-trying", exception);
-                oauthTokenProvider.invalidateToken(username);
-                try {
-                    attemptXoauth2(username);
-                } catch (NegativeSmtpReplyException exception2) {
-                    if (exception2.getReplyCode() == 535) {
-                        // Authentication credentials invalid
-                        //Okay, we failed on a new token.
-                        //Invalidate the token anyway but assume it's permanent.
-                        Log.v(LOG_TAG, "Authentication exception for new token, permanent error assumed", exception2);
-                        oauthTokenProvider.invalidateToken(username);
-                        throw new AuthenticationFailedException(exception2.getMessage(), exception2);
-                    } else {
-                        throw exception2;
-                    }
+            // Authentication credentials invalid
+
+            //We could avoid this double check if we had a reasonable chance of knowing
+            //if a token was invalid before use (e.g. due to expiry). But we don't
+            //This is the intended behaviour per AccountManager
+            Log.v(LOG_TAG, "Authentication exception, invalidating token and re-trying", negativeResponseFromOldToken);
+            oauthTokenProvider.invalidateToken(username);
+            try {
+                attemptXoauth2(username);
+            } catch (NegativeSmtpReplyException negativeResponseFromNewToken) {
+                if (negativeResponseFromNewToken.getReplyCode() != SMTP_AUTHENTICATION_FAILURE_ERROR_CODE) {
+                    throw negativeResponseFromNewToken;
                 }
-            } else {
-                throw exception;
+
+                // Authentication credentials invalid
+                //Okay, we failed on a new token.
+                //Invalidate the token anyway but assume it's permanent.
+                Log.v(LOG_TAG, "Authentication exception for new token, permanent error assumed",
+                        negativeResponseFromNewToken);
+                oauthTokenProvider.invalidateToken(username);
+                throw new AuthenticationFailedException(negativeResponseFromNewToken.getMessage(),
+                        negativeResponseFromNewToken);
             }
         }
     }
