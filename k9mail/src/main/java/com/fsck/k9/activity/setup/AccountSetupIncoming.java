@@ -555,7 +555,7 @@ public class AccountSetupIncoming extends K9Activity implements OnClickListener 
     protected void onNext() {
         AuthType authType = getSelectedAuthType();
         if (authType == AuthType.XOAUTH2) {
-            K9.oAuth2TokenStore.authorizeAPI(mAccount.getEmail(), this,
+            Globals.getOAuth2TokenProvider().authorizeAPI(mAccount.getEmail(), this,
                     new OAuth2TokenProvider.OAuth2TokenProviderAuthCallback() {
                 @Override
                 public void success() {

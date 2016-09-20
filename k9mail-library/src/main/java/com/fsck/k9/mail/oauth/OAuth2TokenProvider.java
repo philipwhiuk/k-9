@@ -4,12 +4,19 @@ import android.app.Activity;
 
 import com.fsck.k9.mail.AuthenticationFailedException;
 
+import java.util.List;
+
 public interface OAuth2TokenProvider {
 
     /**
      * A default timeout value to use when fetching tokens.
      */
     public static final int OAUTH2_TIMEOUT = 30000;
+
+    /**
+     * @return Accounts suitable for OAuth 2.0 token provision.
+     */
+    List<String> getAccounts();
 
     /**
      * Provides an asynchronous response to an
@@ -27,10 +34,9 @@ public interface OAuth2TokenProvider {
      * @param username Username
      * @param activity The responsible activity
      * @param callback A callback to process the asynchronous response
-     * @throws AuthenticationFailedException
      */
     void authorizeAPI(String username, Activity activity,
-                        OAuth2TokenProviderAuthCallback callback) throws AuthenticationFailedException;
+                        OAuth2TokenProviderAuthCallback callback);
 
     /**
      * Fetch a token. No guarantees are provided for validity.

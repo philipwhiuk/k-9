@@ -24,12 +24,12 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
-import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.Spinner;
 
 import com.fsck.k9.Account;
 import com.fsck.k9.EmailAddressValidator;
+import com.fsck.k9.Globals;
 import com.fsck.k9.K9;
 import com.fsck.k9.Preferences;
 import com.fsck.k9.R;
@@ -42,6 +42,7 @@ import com.fsck.k9.mail.AuthType;
 import com.fsck.k9.mail.ConnectionSecurity;
 import com.fsck.k9.mail.ServerSettings;
 import com.fsck.k9.mail.Transport;
+import com.fsck.k9.mail.oauth.OAuth2TokenProvider;
 import com.fsck.k9.mail.store.RemoteStore;
 import com.fsck.k9.account.AccountCreator;
 import com.fsck.k9.view.ClientCertificateSpinner;
@@ -55,7 +56,7 @@ import com.fsck.k9.view.ClientCertificateSpinner.OnClientCertificateChangedListe
  * AccountSetupAccountType activity.
  */
 public class AccountSetupBasics extends K9Activity
-    implements OnClickListener, TextWatcher, OnCheckedChangeListener, OnClientCertificateChangedListener {
+    implements OnClickListener, TextWatcher, OnClientCertificateChangedListener {
     private final static String EXTRA_ACCOUNT = "com.fsck.k9.AccountSetupBasics.account";
     private final static int DIALOG_NOTE = 1;
     private final static String STATE_KEY_PROVIDER =
@@ -73,7 +74,6 @@ public class AccountSetupBasics extends K9Activity
     private Button mManualSetupButton;
     private Account mAccount;
     private Provider mProvider;
-    private AndroidAccountOAuth2TokenStore accountTokenStore;
 
     private EmailAddressValidator mEmailValidator = new EmailAddressValidator();
     private boolean mCheckedIncoming = false;
@@ -94,9 +94,9 @@ public class AccountSetupBasics extends K9Activity
         mClientCertificateSpinner = (ClientCertificateSpinner)findViewById(R.id.account_client_certificate_spinner);
         mOAuth2CheckBox = (CheckBox)findViewById(R.id.account_oauth2);
         mAccountSpinner = (Spinner)findViewById(R.id.account_spinner);
-        accountTokenStore = K9.oAuth2TokenStore;
-        ArrayAdapter<String>  adapter = new ArrayAdapter<String>(
-                this, android.R.layout.simple_spinner_item, accountTokenStore.getAccounts());
+        OAuth2TokenProvider oAuth2TokenProvider = Globals.getOAuth2TokenProvider();
+        ArrayAdapter<String>  adapter = new ArrayAdapter<>(
+                this, android.R.layout.simple_spinner_item, oAuth2TokenProvider.getAccounts());
         mAccountSpinner.setAdapter(adapter);
         mNextButton = (Button)findViewById(R.id.next);
         mManualSetupButton = (Button)findViewById(R.id.manual_setup);
@@ -108,12 +108,29 @@ public class AccountSetupBasics extends K9Activity
     private void initializeViewListeners() {
         mEmailView.addTextChangedListener(this);
         mPasswordView.addTextChangedListener(this);
-        mClientCertificateCheckBox.setOnCheckedChangeListener(this);
+        mClientCertificateCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
+                updateViewVisibility(mClientCertificateCheckBox.isChecked(), mOAuth2CheckBox.isChecked());
+                validateFields();
+
+                if (isChecked) {
+                    // Have the user select (or confirm) the client certificate
+                    mClientCertificateSpinner.chooseCertificate();
+                }
+            }
+        });
         mClientCertificateSpinner.setOnClientCertificateChangedListener(this);
 
-        mOAuth2CheckBox.setOnCheckedChangeListener(this);
+        mOAuth2CheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
+                updateViewVisibility(mClientCertificateCheckBox.isChecked(), mOAuth2CheckBox.isChecked());
+                validateFields();
+            }
+        });
 
-        mShowPasswordCheckBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+        mShowPasswordCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 showPassword(isChecked);
@@ -182,20 +199,6 @@ public class AccountSetupBasics extends K9Activity
     @Override
     public void onClientCertificateChanged(String alias) {
         validateFields();
-    }
-
-    /**
-     * Called when checking the client certificate CheckBox
-     */
-    @Override
-    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        updateViewVisibility(mClientCertificateCheckBox.isChecked(), mOAuth2CheckBox.isChecked());
-        validateFields();
-
-        // Have the user select (or confirm) the client certificate
-        if (buttonView.equals(mClientCertificateCheckBox) && isChecked) {
-            mClientCertificateSpinner.chooseCertificate();
-        }
     }
 
     private void updateViewVisibility(boolean usingCertificates, boolean usingXoauth) {
@@ -308,10 +311,11 @@ public class AccountSetupBasics extends K9Activity
         boolean usingXOAuth2 = mOAuth2CheckBox.isChecked();
 
         String email;
-        if (usingXOAuth2)
+        if (usingXOAuth2) {
             email = mAccountSpinner.getSelectedItem().toString();
-        else
+        } else {
             email = mEmailView.getText().toString();
+        }
         String password = mPasswordView.getText().toString();
         String[] emailParts = splitEmail(email);
         String user = emailParts[0];
@@ -437,7 +441,7 @@ public class AccountSetupBasics extends K9Activity
 
     private void onManualSetup() {
         String email;
-        if(mOAuth2CheckBox.isChecked()) {
+        if (mOAuth2CheckBox.isChecked()) {
             email = mAccountSpinner.getSelectedItem().toString();
         } else {
             email = mEmailView.getText().toString();
@@ -510,11 +514,10 @@ public class AccountSetupBasics extends K9Activity
     }
 
     /**
-     * Attempts to get the given attribute as a String resource first, and if it fails
-     * returns the attribute as a simple String value.
-     * @param xml
-     * @param name
-     * @return
+     * @param xml XML Parser
+     * @param name Attribute name
+     * @return the given attribute as a String resource first, or if it fails,
+     * the attribute as a simple String value.
      */
     private String getXmlAttribute(XmlResourceParser xml, String name) {
         int resId = xml.getAttributeResourceValue(null, name, 0);

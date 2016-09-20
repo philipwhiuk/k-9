@@ -49,6 +49,7 @@ import com.fsck.k9.Account.DeletePolicy;
 import com.fsck.k9.Account.Expunge;
 import com.fsck.k9.AccountStats;
 import com.fsck.k9.BuildConfig;
+import com.fsck.k9.Globals;
 import com.fsck.k9.K9;
 import com.fsck.k9.K9.Intents;
 import com.fsck.k9.Preferences;
@@ -2975,7 +2976,7 @@ public class MessagingController {
                 Log.i(K9.LOG_TAG, "Scanning folder '" + account.getOutboxFolderName() + "' (" + localFolder.getId() + ") for messages to send");
 
             Transport transport = Transport.getInstance(K9.app, account,
-                    K9.oAuth2TokenStore);
+                    Globals.getOAuth2TokenProvider());
             for (LocalMessage message : localMessages) {
                 if (message.isSet(Flag.DELETED)) {
                     message.destroy();

@@ -1,6 +1,8 @@
 package com.fsck.k9.mail.store.imap;
 
 
+import android.text.TextUtils;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -82,7 +84,7 @@ class ImapStoreUriDecoder {
             String userinfo = imapUri.getUserInfo();
             String[] userInfoParts = userinfo.split(":");
 
-            if (userinfo.endsWith(":")) {
+            if (userInfoParts.length < 2 || (userInfoParts[1] == null || userInfoParts[1].length() == 0)) {
                 // Password is empty. This happens either for XOAUTH or for imports
                 authenticationType = AuthType.valueOf(userInfoParts[0]);
                 username = decodeUtf8(userInfoParts[1]);

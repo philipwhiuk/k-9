@@ -294,7 +294,9 @@ public class ImapConnectionTest {
         server.output("2 OK Success");
         simplePostAuthenticationDialog(server);
         ImapConnection imapConnection = startServerAndCreateImapConnection(server);
+
         imapConnection.open();
+
         server.verifyConnectionStillOpen();
         server.verifyInteractionCompleted();
     }
@@ -316,9 +318,9 @@ public class ImapConnectionTest {
                 "user=user\001auth=Bearer token2\001\001"
         ).base64());
         server.output("3 OK Success");
-
         simplePostAuthenticationDialog(server, "4");
         ImapConnection imapConnection = startServerAndCreateImapConnection(server);
+
         imapConnection.open();
 
         server.verifyConnectionStillOpen();
@@ -348,9 +350,9 @@ public class ImapConnectionTest {
         server.output("+ 433ba3a3a");
         server.expect("");
         server.output("3 NO SASL authentication failed");
-
         simplePostAuthenticationDialog(server);
         ImapConnection imapConnection = startServerAndCreateImapConnection(server);
+
         try {
             imapConnection.open();
             fail();

@@ -44,7 +44,7 @@ public class AndroidAccountOAuth2TokenStore implements OAuth2TokenProvider {
             callback.failure(new AuthorizationException(activity.getString(R.string.xoauth2_account_doesnt_exist)));
             return;
         }
-        if(account.name.equals(emailAddress)) {
+        if (account.name.equals(emailAddress)) {
             accountManager.getAuthToken(account, GMAIL_AUTH_TOKEN_TYPE, null, activity,
                 new AccountManagerCallback<Bundle>() {
                     @Override
@@ -125,6 +125,7 @@ public class AndroidAccountOAuth2TokenStore implements OAuth2TokenProvider {
         authTokens.remove(username);
     }
 
+    @Override
     public List<String> getAccounts() {
         Account[] accounts = accountManager.getAccountsByType(GOOGLE_ACCOUNT_TYPE);
         ArrayList<String> accountNames = new ArrayList<>();

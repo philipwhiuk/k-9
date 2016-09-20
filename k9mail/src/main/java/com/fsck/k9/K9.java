@@ -65,7 +65,6 @@ public class K9 extends Application {
     }
 
     public static Application app = null;
-    public static AndroidAccountOAuth2TokenStore oAuth2TokenStore = null;
     public static File tempDirectory;
     public static final String LOG_TAG = "k9";
 
@@ -508,7 +507,7 @@ public class K9 extends Application {
         super.onCreate();
         app = this;
         Globals.setContext(this);
-        oAuth2TokenStore = new AndroidAccountOAuth2TokenStore(this);
+        Globals.setOAuth2TokenProvider(new AndroidAccountOAuth2TokenStore(this));
 
         K9MailLib.setDebugStatus(new K9MailLib.DebugStatus() {
             @Override public boolean enabled() {

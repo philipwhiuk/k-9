@@ -333,20 +333,16 @@ public class AccountSetupOutgoing extends K9Activity implements OnClickListener,
         boolean isAuthTypeXOAuth2 = (AuthType.XOAUTH2 == authType);
 
         if (isAuthTypeExternal) {
-
-            // hide password fields, show client certificate fields
             mPasswordView.setVisibility(View.GONE);
             mPasswordLabelView.setVisibility(View.GONE);
             mClientCertificateLabelView.setVisibility(View.VISIBLE);
             mClientCertificateSpinner.setVisibility(View.VISIBLE);
         } else if (isAuthTypeXOAuth2) {
-            // hide password fields, hide client certificate fields
             mPasswordView.setVisibility(View.GONE);
             mPasswordLabelView.setVisibility(View.GONE);
             mClientCertificateLabelView.setVisibility(View.GONE);
             mClientCertificateSpinner.setVisibility(View.GONE);
         } else {
-            // show password fields, hide client certificate fields
             mPasswordView.setVisibility(View.VISIBLE);
             mPasswordLabelView.setVisibility(View.VISIBLE);
             mClientCertificateLabelView.setVisibility(View.GONE);

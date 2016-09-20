@@ -8,6 +8,7 @@ import com.fsck.k9.mail.filter.Hex;
 
 public class Authentication {
     private static final String US_ASCII = "US-ASCII";
+    private static final String XOAUTH_FORMAT = "user=%1s\001auth=Bearer %2s\001\001";
 
     /**
      * Computes the response for CRAM-MD5 authentication mechanism given the user credentials and
@@ -85,8 +86,8 @@ public class Authentication {
     }
 
     public static String computeXoauth(String username, String authToken) throws UnsupportedEncodingException {
-        return new String(Base64.encodeBase64(
-                ("user="+username+"\001auth=Bearer "+authToken+"\001\001").getBytes()
-        ),US_ASCII);
+        return new String(
+                Base64.encodeBase64(String.format(XOAUTH_FORMAT, username, authToken).getBytes()),
+                US_ASCII);
     }
 }

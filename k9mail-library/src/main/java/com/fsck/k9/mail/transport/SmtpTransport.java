@@ -319,7 +319,7 @@ public class SmtpTransport extends Transport {
             }
             parseOptionalSizeValue(extensions);
 
-            if (TextUtils.isEmpty(mUsername)
+            if (!TextUtils.isEmpty(mUsername)
                     && (TextUtils.isEmpty(mPassword) ||
                         AuthType.EXTERNAL == mAuthType ||
                         AuthType.XOAUTH2 == mAuthType)) {
