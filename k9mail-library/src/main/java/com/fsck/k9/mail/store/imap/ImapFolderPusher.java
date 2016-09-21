@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 
 import android.content.Context;
 import android.os.PowerManager;
@@ -19,8 +20,10 @@ import com.fsck.k9.mail.K9MailLib;
 import com.fsck.k9.mail.Message;
 import com.fsck.k9.mail.MessagingException;
 import com.fsck.k9.mail.PushReceiver;
+import com.fsck.k9.mail.SingleThreadedExecutorServiceFactory;
 import com.fsck.k9.mail.power.TracingPowerManager;
 import com.fsck.k9.mail.power.TracingPowerManager.TracingWakeLock;
+import com.fsck.k9.mail.power.TracingPowerManagerFactory;
 import com.fsck.k9.mail.store.RemoteStore;
 
 import static com.fsck.k9.mail.K9MailLib.LOG_TAG;
@@ -40,17 +43,21 @@ class ImapFolderPusher extends ImapFolder {
     private final IdleStopper idleStopper = new IdleStopper();
     private final TracingWakeLock wakeLock;
     private final List<ImapResponse> storedUntaggedResponses = new ArrayList<ImapResponse>();
-    private Thread listeningThread;
+    private final SingleThreadedExecutorServiceFactory singleThreadedExecutorServiceFactory;
+    private ExecutorService executorService;
     private volatile boolean stop = false;
     private volatile boolean idling = false;
 
 
-    public ImapFolderPusher(ImapStore store, String name, PushReceiver pushReceiver) {
+    public ImapFolderPusher(ImapStore store, String name, PushReceiver pushReceiver,
+                            TracingPowerManagerFactory tracingPowerManagerFactory,
+                            SingleThreadedExecutorServiceFactory singleThreadedExecutorServiceFactory) {
         super(store, name);
         this.pushReceiver = pushReceiver;
+        this.singleThreadedExecutorServiceFactory = singleThreadedExecutorServiceFactory;
 
         Context context = pushReceiver.getContext();
-        TracingPowerManager powerManager = TracingPowerManager.getPowerManager(context);
+        TracingPowerManager powerManager = tracingPowerManagerFactory.getPowerManager(context);
         String tag = "ImapFolderPusher " + store.getStoreConfig().toString() + ":" + getName();
         wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, tag);
         wakeLock.setReferenceCounted(false);
@@ -58,12 +65,12 @@ class ImapFolderPusher extends ImapFolder {
 
     public void start() {
         synchronized (threadLock) {
-            if (listeningThread != null) {
+            if (executorService != null && !executorService.isShutdown()) {
                 throw new IllegalStateException("start() called twice");
             }
 
-            listeningThread = new Thread(new PushRunnable());
-            listeningThread.start();
+            executorService = singleThreadedExecutorServiceFactory.createService();
+            executorService.submit(new PushRunnable());
         }
     }
 
@@ -76,14 +83,11 @@ class ImapFolderPusher extends ImapFolder {
 
     public void stop() {
         synchronized (threadLock) {
-            if (listeningThread == null) {
+            if (executorService == null || executorService.isShutdown()) {
                 throw new IllegalStateException("stop() called twice");
             }
-
             stop = true;
-
-            listeningThread.interrupt();
-            listeningThread = null;
+            executorService.shutdownNow();
         }
 
         ImapConnection conn = connection;
@@ -199,6 +203,7 @@ class ImapFolderPusher extends ImapFolder {
                     pushReceiver.authenticationFailed();
                     stop = true;
                 } catch (Exception e) {
+                    e.printStackTrace();
                     reacquireWakeLockAndCleanUp();
 
                     if (stop) {

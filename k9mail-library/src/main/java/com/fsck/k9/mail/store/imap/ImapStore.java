@@ -28,6 +28,7 @@ import com.fsck.k9.mail.PushReceiver;
 import com.fsck.k9.mail.Pusher;
 import com.fsck.k9.mail.ServerSettings;
 import com.fsck.k9.mail.oauth.OAuth2TokenProvider;
+import com.fsck.k9.mail.power.TracingPowerManagerFactory;
 import com.fsck.k9.mail.ssl.TrustedSocketFactory;
 import com.fsck.k9.mail.store.RemoteStore;
 import com.fsck.k9.mail.store.StoreConfig;
@@ -58,6 +59,7 @@ public class ImapStore extends RemoteStore {
     private String pathDelimiter = null;
     private final Deque<ImapConnection> connections = new LinkedList<ImapConnection>();
     private FolderNameCodec folderNameCodec;
+    private TracingPowerManagerFactory tracingPowerManagerFactory = new TracingPowerManagerFactory();
 
     /**
      * Cache of ImapFolder objects. ImapFolders are attached to a given folder on the server
@@ -398,7 +400,7 @@ public class ImapStore extends RemoteStore {
 
     @Override
     public Pusher getPusher(PushReceiver receiver) {
-        return new ImapPusher(this, receiver);
+        return new ImapPusher(this, receiver, tracingPowerManagerFactory);
     }
 
 

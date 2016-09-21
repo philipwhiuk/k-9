@@ -12,6 +12,8 @@ import static org.junit.Assert.assertEquals;
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, sdk = 21)
 public class AddressTest {
+
+
     /**
      * test the possibility to parse "From:" fields with no email.
      * for example: From: News for Vector Limited - Google Finance
@@ -43,15 +45,12 @@ public class AddressTest {
                 "very.common@example.com",
                 "disposable.style.email.with+symbol@example.com",
                 "other.email-with-dash@example.com",
-                //TODO: Handle addresses with quotes
-                /*
                 "\"much.more unusual\"@example.com",
                 "\"very.unusual.@.unusual.com\"@example.com",
-                //"very.(),:;<>[]\".VERY.\"very@\\ \"very\".unusual"@strange.example.com
+                "\"very.(),:;<>[]\".VERY.\"very@\\ \"very\".unusual\"@strange.example.com",
                 "\"very.(),:;<>[]\\\".VERY.\\\"very@\\\\ \\\"very\\\".unusual\"@strange.example.com",
                 "\"()<>[]:,;@\\\\\\\"!#$%&'*+-/=?^_`{}| ~.a\"@example.org",
                 "\" \"@example.org",
-                */
                 "admin@mailserver1",
                 "#!$%&'*+-/=?^_`{}|~@example.org",
                 "example@localhost",
@@ -88,5 +87,16 @@ public class AddressTest {
         assertEquals("\"sa\"mp\"le\"", Address.quoteString("sa\"mp\"le"));
         assertEquals("\"sa\"mp\"le\"", Address.quoteString("\"sa\"mp\"le\""));
         assertEquals("\"\"\"", Address.quoteString("\""));
+    }
+
+    /**
+     * Can copy address.
+     */
+    @Test
+    public void canCopyAddress() {
+        Address[] addresses = Address.parse("Max Mustermann <maxmuster@mann.com>");
+        Address copiedAddress = new Address(addresses[0]);
+        assertEquals("maxmuster@mann.com", copiedAddress.getAddress());
+        assertEquals("Max Mustermann", copiedAddress.getPersonal());
     }
 }

@@ -9,6 +9,8 @@ import android.util.Log;
 import com.fsck.k9.mail.K9MailLib;
 import com.fsck.k9.mail.PushReceiver;
 import com.fsck.k9.mail.Pusher;
+import com.fsck.k9.mail.SingleThreadedExecutorServiceFactory;
+import com.fsck.k9.mail.power.TracingPowerManagerFactory;
 
 import static com.fsck.k9.mail.K9MailLib.LOG_TAG;
 
@@ -16,15 +18,17 @@ import static com.fsck.k9.mail.K9MailLib.LOG_TAG;
 class ImapPusher implements Pusher {
     private final ImapStore store;
     private final PushReceiver pushReceiver;
+    private final TracingPowerManagerFactory tracingPowerManagerFactory;
 
     private final List<ImapFolderPusher> folderPushers = new ArrayList<>();
 
     private long lastRefresh = -1;
 
 
-    public ImapPusher(ImapStore store, PushReceiver pushReceiver) {
+    public ImapPusher(ImapStore store, PushReceiver pushReceiver, TracingPowerManagerFactory tracingPowerManagerFactory) {
         this.store = store;
         this.pushReceiver = pushReceiver;
+        this.tracingPowerManagerFactory = tracingPowerManagerFactory;
     }
 
     @Override
@@ -95,7 +99,8 @@ class ImapPusher implements Pusher {
     }
 
     ImapFolderPusher createImapFolderPusher(String folderName) {
-        return new ImapFolderPusher(store, folderName, pushReceiver);
+        return new ImapFolderPusher(store, folderName, pushReceiver, tracingPowerManagerFactory,
+                    new SingleThreadedExecutorServiceFactory());
     }
 
     long currentTimeMillis() {

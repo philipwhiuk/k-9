@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.List;
 
 import com.fsck.k9.mail.PushReceiver;
+import com.fsck.k9.mail.power.TracingPowerManagerFactory;
 import com.fsck.k9.mail.store.StoreConfig;
 import org.junit.Before;
 import org.junit.Test;
@@ -162,7 +163,7 @@ public class ImapPusherTest {
 
 
         public TestImapPusher(ImapStore store, PushReceiver receiver) {
-            super(store, receiver);
+            super(store, receiver, mock(TracingPowerManagerFactory.class));
         }
 
         @Override
