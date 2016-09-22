@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -106,7 +107,8 @@ class ImapFolder extends Folder<ImapMessage> {
     }
 
     private List<ImapResponse> executeSimpleCommand(String command) throws MessagingException, IOException {
-        return handleUntaggedResponses(connection.executeSimpleCommand(command));
+        List<ImapResponse> responses = connection.executeSimpleCommand(command);
+        return handleUntaggedResponses(responses);
     }
 
     @Override
@@ -153,7 +155,6 @@ class ImapFolder extends Folder<ImapMessage> {
             for (ImapResponse response : responses) {
                 handlePermanentFlags(response);
             }
-
             handleSelectOrExamineOkResponse(getLastResponse(responses));
 
             exists = true;
