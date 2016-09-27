@@ -203,7 +203,6 @@ class ImapFolderPusher extends ImapFolder {
                     pushReceiver.authenticationFailed();
                     stop = true;
                 } catch (Exception e) {
-                    e.printStackTrace();
                     reacquireWakeLockAndCleanUp();
 
                     if (stop) {
@@ -254,7 +253,8 @@ class ImapFolderPusher extends ImapFolder {
             pushReceiver.setPushActive(getName(), false);
 
             try {
-                connection.close();
+                if(connection != null)
+                    connection.close();
             } catch (Exception me) {
                 Log.e(LOG_TAG, "Got exception while closing for exception for " + getLogId(), me);
             }
