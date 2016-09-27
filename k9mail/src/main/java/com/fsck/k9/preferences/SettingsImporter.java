@@ -16,6 +16,7 @@ import org.xmlpull.v1.XmlPullParserFactory;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.support.annotation.VisibleForTesting;
 import android.util.Log;
 
 import com.fsck.k9.Account;
@@ -260,12 +261,14 @@ public class SettingsImporter {
                                     errorneousAccounts.add(importResult.original);
                                 }
                             } catch (InvalidSettingValueException e) {
+                                e.printStackTrace();
                                 if (K9.DEBUG) {
                                     Log.e(K9.LOG_TAG, "Encountered invalid setting while " +
                                             "importing account \"" + account.name + "\"", e);
                                 }
                                 errorneousAccounts.add(new AccountDescription(account.name, account.uuid));
                             } catch (Exception e) {
+                                e.printStackTrace();
                                 Log.e(K9.LOG_TAG, "Exception while importing account \"" +
                                         account.name + "\"", e);
                                 errorneousAccounts.add(new AccountDescription(account.name, account.uuid));
@@ -665,7 +668,8 @@ public class SettingsImporter {
         editor.putString(key, value);
     }
 
-    private static Imported parseSettings(InputStream inputStream, boolean globalSettings,
+    @VisibleForTesting
+    protected static Imported parseSettings(InputStream inputStream, boolean globalSettings,
             List<String> accountUuids, boolean overview)
     throws SettingsImportExportException {
 
@@ -1142,7 +1146,8 @@ public class SettingsImporter {
         }
     }
 
-    private static class Imported {
+    @VisibleForTesting
+    protected static class Imported {
         public int contentVersion;
         public ImportedSettings globalSettings;
         public Map<String, ImportedAccount> accounts;
@@ -1152,7 +1157,8 @@ public class SettingsImporter {
         public Map<String, String> settings = new HashMap<String, String>();
     }
 
-    private static class ImportedAccount {
+    @VisibleForTesting
+    protected static class ImportedAccount {
         public String uuid;
         public String name;
         public ImportedServer incoming;
@@ -1162,7 +1168,8 @@ public class SettingsImporter {
         public List<ImportedFolder> folders;
     }
 
-    private static class ImportedServer {
+    @VisibleForTesting
+    protected static class ImportedServer {
         public String type;
         public String host;
         public String port;
