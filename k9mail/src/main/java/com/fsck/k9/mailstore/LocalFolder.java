@@ -1360,11 +1360,12 @@ public class LocalFolder extends Folder<LocalMessage> implements Serializable {
         return updateOrInsertMessagePart(db, cv, part, INVALID_MESSAGE_PART_ID);
     }
 
-    private void renameTemporaryFile(File file, String messagePartId) {
+    private void renameTemporaryFile(File file, String messagePartId) throws IOException {
         File destination = localStore.getAttachmentFile(messagePartId);
         if (!file.renameTo(destination)) {
             Log.w(K9.LOG_TAG, "Couldn't rename temporary file " + file.getAbsolutePath() +
                     " to " + destination.getAbsolutePath());
+            throw new IOException("Couldn't rename temporary file");
         }
     }
 
