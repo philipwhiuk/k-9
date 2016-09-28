@@ -123,7 +123,7 @@ public class SettingsImporter {
 
         try {
             // Parse the import stream but don't save individual settings (overview=true)
-            Imported imported = parseSettings(inputStream, false, null, true);
+            Imported imported = SettingsParser.parseSettings(inputStream, false, null, true);
 
             // If the stream contains global settings the "globalSettings" member will not be null
             boolean globalSettings = (imported.globalSettings != null);
@@ -182,7 +182,7 @@ public class SettingsImporter {
             List<AccountDescriptionPair> importedAccounts = new ArrayList<AccountDescriptionPair>();
             List<AccountDescription> errorneousAccounts = new ArrayList<AccountDescription>();
 
-            Imported imported = parseSettings(inputStream, globalSettings, accountUuids, false);
+            Imported imported = SettingsParser.parseSettings(inputStream, globalSettings, accountUuids, false);
 
             Preferences preferences = Preferences.getPreferences(context);
             Storage storage = preferences.getStorage();
@@ -261,14 +261,12 @@ public class SettingsImporter {
                                     errorneousAccounts.add(importResult.original);
                                 }
                             } catch (InvalidSettingValueException e) {
-                                e.printStackTrace();
                                 if (K9.DEBUG) {
                                     Log.e(K9.LOG_TAG, "Encountered invalid setting while " +
                                             "importing account \"" + account.name + "\"", e);
                                 }
                                 errorneousAccounts.add(new AccountDescription(account.name, account.uuid));
                             } catch (Exception e) {
-                                e.printStackTrace();
                                 Log.e(K9.LOG_TAG, "Exception while importing account \"" +
                                         account.name + "\"", e);
                                 errorneousAccounts.add(new AccountDescription(account.name, account.uuid));
@@ -667,441 +665,7 @@ public class SettingsImporter {
         }
         editor.putString(key, value);
     }
-
-    @VisibleForTesting
-    protected static Imported parseSettings(InputStream inputStream, boolean globalSettings,
-            List<String> accountUuids, boolean overview)
-    throws SettingsImportExportException {
-
-        if (!overview && accountUuids == null) {
-            throw new IllegalArgumentException("Argument 'accountUuids' must not be null.");
-        }
-
-        try {
-            XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
-            //factory.setNamespaceAware(true);
-            XmlPullParser xpp = factory.newPullParser();
-
-            InputStreamReader reader = new InputStreamReader(inputStream);
-            xpp.setInput(reader);
-
-            Imported imported = null;
-            int eventType = xpp.getEventType();
-            while (eventType != XmlPullParser.END_DOCUMENT) {
-                if(eventType == XmlPullParser.START_TAG) {
-                    if (SettingsExporter.ROOT_ELEMENT.equals(xpp.getName())) {
-                        imported = parseRoot(xpp, globalSettings, accountUuids, overview);
-                    } else {
-                        Log.w(K9.LOG_TAG, "Unexpected start tag: " + xpp.getName());
-                    }
-                }
-                eventType = xpp.next();
-            }
-
-            if (imported == null || (overview && imported.globalSettings == null &&
-                    imported.accounts == null)) {
-                throw new SettingsImportExportException("Invalid import data");
-            }
-
-            return imported;
-        } catch (Exception e) {
-            throw new SettingsImportExportException(e);
-        }
-    }
-
-    private static void skipToEndTag(XmlPullParser xpp, String endTag)
-    throws XmlPullParserException, IOException {
-
-        int eventType = xpp.next();
-        while (!(eventType == XmlPullParser.END_TAG && endTag.equals(xpp.getName()))) {
-            eventType = xpp.next();
-        }
-    }
-
-    private static String getText(XmlPullParser xpp)
-    throws XmlPullParserException, IOException {
-
-        int eventType = xpp.next();
-        if (eventType != XmlPullParser.TEXT) {
-            return "";
-        }
-        return xpp.getText();
-    }
-
-    private static Imported parseRoot(XmlPullParser xpp, boolean globalSettings,
-            List<String> accountUuids, boolean overview)
-    throws XmlPullParserException, IOException, SettingsImportExportException {
-
-        Imported result = new Imported();
-
-        String fileFormatVersionString = xpp.getAttributeValue(null,
-                SettingsExporter.FILE_FORMAT_ATTRIBUTE);
-        validateFileFormatVersion(fileFormatVersionString);
-
-        String contentVersionString = xpp.getAttributeValue(null,
-                SettingsExporter.VERSION_ATTRIBUTE);
-        result.contentVersion = validateContentVersion(contentVersionString);
-
-        int eventType = xpp.next();
-        while (!(eventType == XmlPullParser.END_TAG &&
-                 SettingsExporter.ROOT_ELEMENT.equals(xpp.getName()))) {
-
-            if(eventType == XmlPullParser.START_TAG) {
-                String element = xpp.getName();
-                if (SettingsExporter.GLOBAL_ELEMENT.equals(element)) {
-                    if (overview || globalSettings) {
-                        if (result.globalSettings == null) {
-                            if (overview) {
-                                result.globalSettings = new ImportedSettings();
-                                skipToEndTag(xpp, SettingsExporter.GLOBAL_ELEMENT);
-                            } else {
-                                result.globalSettings = parseSettings(xpp, SettingsExporter.GLOBAL_ELEMENT);
-                            }
-                        } else {
-                            skipToEndTag(xpp, SettingsExporter.GLOBAL_ELEMENT);
-                            Log.w(K9.LOG_TAG, "More than one global settings element. Only using the first one!");
-                        }
-                    } else {
-                        skipToEndTag(xpp, SettingsExporter.GLOBAL_ELEMENT);
-                        Log.i(K9.LOG_TAG, "Skipping global settings");
-                    }
-                } else if (SettingsExporter.ACCOUNTS_ELEMENT.equals(element)) {
-                    if (result.accounts == null) {
-                        result.accounts = parseAccounts(xpp, accountUuids, overview);
-                    } else {
-                        Log.w(K9.LOG_TAG, "More than one accounts element. Only using the first one!");
-                    }
-                } else {
-                    Log.w(K9.LOG_TAG, "Unexpected start tag: " + xpp.getName());
-                }
-            }
-            eventType = xpp.next();
-        }
-
-        return result;
-    }
-
-    private static int validateFileFormatVersion(String versionString)
-            throws SettingsImportExportException {
-
-        if (versionString == null) {
-            throw new SettingsImportExportException("Missing file format version");
-        }
-
-        int version;
-        try {
-            version = Integer.parseInt(versionString);
-        } catch (NumberFormatException e) {
-            throw new SettingsImportExportException("Invalid file format version: " +
-                    versionString);
-        }
-
-        if (version != SettingsExporter.FILE_FORMAT_VERSION) {
-            throw new SettingsImportExportException("Unsupported file format version: " +
-                    versionString);
-        }
-
-        return version;
-    }
-
-    private static int validateContentVersion(String versionString)
-            throws SettingsImportExportException {
-
-        if (versionString == null) {
-            throw new SettingsImportExportException("Missing content version");
-        }
-
-        int version;
-        try {
-            version = Integer.parseInt(versionString);
-        } catch (NumberFormatException e) {
-            throw new SettingsImportExportException("Invalid content version: " +
-                    versionString);
-        }
-
-        if (version < 1) {
-            throw new SettingsImportExportException("Unsupported content version: " + versionString);
-        }
-
-        return version;
-    }
-
-    private static ImportedSettings parseSettings(XmlPullParser xpp, String endTag)
-    throws XmlPullParserException, IOException {
-
-        ImportedSettings result = null;
-
-        int eventType = xpp.next();
-        while (!(eventType == XmlPullParser.END_TAG && endTag.equals(xpp.getName()))) {
-
-            if(eventType == XmlPullParser.START_TAG) {
-                String element = xpp.getName();
-                if (SettingsExporter.VALUE_ELEMENT.equals(element)) {
-                    String key = xpp.getAttributeValue(null, SettingsExporter.KEY_ATTRIBUTE);
-                    String value = getText(xpp);
-
-                    if (result == null) {
-                        result = new ImportedSettings();
-                    }
-
-                    if (result.settings.containsKey(key)) {
-                        Log.w(K9.LOG_TAG, "Already read key \"" + key + "\". Ignoring value \"" + value + "\"");
-                    } else {
-                        result.settings.put(key, value);
-                    }
-                } else {
-                    Log.w(K9.LOG_TAG, "Unexpected start tag: " + xpp.getName());
-                }
-            }
-            eventType = xpp.next();
-        }
-
-        return result;
-    }
-
-    private static Map<String, ImportedAccount> parseAccounts(XmlPullParser xpp,
-            List<String> accountUuids, boolean overview)
-    throws XmlPullParserException, IOException {
-
-        Map<String, ImportedAccount> accounts = null;
-
-        int eventType = xpp.next();
-        while (!(eventType == XmlPullParser.END_TAG &&
-                 SettingsExporter.ACCOUNTS_ELEMENT.equals(xpp.getName()))) {
-
-            if(eventType == XmlPullParser.START_TAG) {
-                String element = xpp.getName();
-                if (SettingsExporter.ACCOUNT_ELEMENT.equals(element)) {
-                    if (accounts == null) {
-                        accounts = new HashMap<String, ImportedAccount>();
-                    }
-
-                    ImportedAccount account = parseAccount(xpp, accountUuids, overview);
-
-                    if (account == null) {
-                        // Do nothing - parseAccount() already logged a message
-                    } else if (!accounts.containsKey(account.uuid)) {
-                        accounts.put(account.uuid, account);
-                    } else {
-                        Log.w(K9.LOG_TAG, "Duplicate account entries with UUID " + account.uuid +
-                                ". Ignoring!");
-                    }
-                } else {
-                    Log.w(K9.LOG_TAG, "Unexpected start tag: " + xpp.getName());
-                }
-            }
-            eventType = xpp.next();
-        }
-
-        return accounts;
-    }
-
-    private static ImportedAccount parseAccount(XmlPullParser xpp, List<String> accountUuids,
-            boolean overview)
-    throws XmlPullParserException, IOException {
-
-        String uuid = xpp.getAttributeValue(null, SettingsExporter.UUID_ATTRIBUTE);
-
-        try {
-            UUID.fromString(uuid);
-        } catch (Exception e) {
-            skipToEndTag(xpp, SettingsExporter.ACCOUNT_ELEMENT);
-            Log.w(K9.LOG_TAG, "Skipping account with invalid UUID " + uuid);
-            return null;
-        }
-
-        ImportedAccount account = new ImportedAccount();
-        account.uuid = uuid;
-
-        if (overview || accountUuids.contains(uuid)) {
-            int eventType = xpp.next();
-            while (!(eventType == XmlPullParser.END_TAG &&
-                     SettingsExporter.ACCOUNT_ELEMENT.equals(xpp.getName()))) {
-
-                if(eventType == XmlPullParser.START_TAG) {
-                    String element = xpp.getName();
-                    if (SettingsExporter.NAME_ELEMENT.equals(element)) {
-                        account.name = getText(xpp);
-                    } else if (SettingsExporter.INCOMING_SERVER_ELEMENT.equals(element)) {
-                        if (overview) {
-                            skipToEndTag(xpp, SettingsExporter.INCOMING_SERVER_ELEMENT);
-                        } else {
-                            account.incoming = parseServerSettings(xpp, SettingsExporter.INCOMING_SERVER_ELEMENT);
-                        }
-                    } else if (SettingsExporter.OUTGOING_SERVER_ELEMENT.equals(element)) {
-                        if (overview) {
-                            skipToEndTag(xpp, SettingsExporter.OUTGOING_SERVER_ELEMENT);
-                        } else {
-                            account.outgoing = parseServerSettings(xpp, SettingsExporter.OUTGOING_SERVER_ELEMENT);
-                        }
-                    } else if (SettingsExporter.SETTINGS_ELEMENT.equals(element)) {
-                        if (overview) {
-                            skipToEndTag(xpp, SettingsExporter.SETTINGS_ELEMENT);
-                        } else {
-                            account.settings = parseSettings(xpp, SettingsExporter.SETTINGS_ELEMENT);
-                        }
-                    } else if (SettingsExporter.IDENTITIES_ELEMENT.equals(element)) {
-                        if (overview) {
-                            skipToEndTag(xpp, SettingsExporter.IDENTITIES_ELEMENT);
-                        } else {
-                            account.identities = parseIdentities(xpp);
-                        }
-                    } else if (SettingsExporter.FOLDERS_ELEMENT.equals(element)) {
-                        if (overview) {
-                            skipToEndTag(xpp, SettingsExporter.FOLDERS_ELEMENT);
-                        } else {
-                            account.folders = parseFolders(xpp);
-                        }
-                    } else {
-                        Log.w(K9.LOG_TAG, "Unexpected start tag: " + xpp.getName());
-                    }
-                }
-                eventType = xpp.next();
-            }
-        } else {
-            skipToEndTag(xpp, SettingsExporter.ACCOUNT_ELEMENT);
-            Log.i(K9.LOG_TAG, "Skipping account with UUID " + uuid);
-        }
-
-        // If we couldn't find an account name use the UUID
-        if (account.name == null) {
-            account.name = uuid;
-        }
-
-        return account;
-    }
-
-    private static ImportedServer parseServerSettings(XmlPullParser xpp, String endTag)
-    throws XmlPullParserException, IOException {
-        ImportedServer server = new ImportedServer();
-
-        server.type = xpp.getAttributeValue(null, SettingsExporter.TYPE_ATTRIBUTE);
-
-        int eventType = xpp.next();
-        while (!(eventType == XmlPullParser.END_TAG && endTag.equals(xpp.getName()))) {
-            if(eventType == XmlPullParser.START_TAG) {
-                String element = xpp.getName();
-                if (SettingsExporter.HOST_ELEMENT.equals(element)) {
-                    server.host = getText(xpp);
-                } else if (SettingsExporter.PORT_ELEMENT.equals(element)) {
-                    server.port = getText(xpp);
-                } else if (SettingsExporter.CONNECTION_SECURITY_ELEMENT.equals(element)) {
-                    server.connectionSecurity = getText(xpp);
-                } else if (SettingsExporter.AUTHENTICATION_TYPE_ELEMENT.equals(element)) {
-                    String text = getText(xpp);
-                    server.authenticationType = AuthType.valueOf(text);
-                } else if (SettingsExporter.USERNAME_ELEMENT.equals(element)) {
-                    server.username = getText(xpp);
-                } else if (SettingsExporter.CLIENT_CERTIFICATE_ALIAS_ELEMENT.equals(element)) {
-                    server.clientCertificateAlias = getText(xpp);
-                } else if (SettingsExporter.PASSWORD_ELEMENT.equals(element)) {
-                    server.password = getText(xpp);
-                } else if (SettingsExporter.EXTRA_ELEMENT.equals(element)) {
-                    server.extras = parseSettings(xpp, SettingsExporter.EXTRA_ELEMENT);
-                } else {
-                    Log.w(K9.LOG_TAG, "Unexpected start tag: " + xpp.getName());
-                }
-            }
-            eventType = xpp.next();
-        }
-
-        return server;
-    }
-
-    private static List<ImportedIdentity> parseIdentities(XmlPullParser xpp)
-    throws XmlPullParserException, IOException {
-        List<ImportedIdentity> identities = null;
-
-        int eventType = xpp.next();
-        while (!(eventType == XmlPullParser.END_TAG &&
-                 SettingsExporter.IDENTITIES_ELEMENT.equals(xpp.getName()))) {
-
-            if(eventType == XmlPullParser.START_TAG) {
-                String element = xpp.getName();
-                if (SettingsExporter.IDENTITY_ELEMENT.equals(element)) {
-                    if (identities == null) {
-                        identities = new ArrayList<ImportedIdentity>();
-                    }
-
-                    ImportedIdentity identity = parseIdentity(xpp);
-                    identities.add(identity);
-                } else {
-                    Log.w(K9.LOG_TAG, "Unexpected start tag: " + xpp.getName());
-                }
-            }
-            eventType = xpp.next();
-        }
-
-        return identities;
-    }
-
-    private static ImportedIdentity parseIdentity(XmlPullParser xpp)
-    throws XmlPullParserException, IOException {
-        ImportedIdentity identity = new ImportedIdentity();
-
-        int eventType = xpp.next();
-        while (!(eventType == XmlPullParser.END_TAG &&
-                 SettingsExporter.IDENTITY_ELEMENT.equals(xpp.getName()))) {
-
-            if(eventType == XmlPullParser.START_TAG) {
-                String element = xpp.getName();
-                if (SettingsExporter.NAME_ELEMENT.equals(element)) {
-                    identity.name = getText(xpp);
-                } else if (SettingsExporter.EMAIL_ELEMENT.equals(element)) {
-                    identity.email = getText(xpp);
-                } else if (SettingsExporter.DESCRIPTION_ELEMENT.equals(element)) {
-                    identity.description = getText(xpp);
-                } else if (SettingsExporter.SETTINGS_ELEMENT.equals(element)) {
-                    identity.settings = parseSettings(xpp, SettingsExporter.SETTINGS_ELEMENT);
-                } else {
-                    Log.w(K9.LOG_TAG, "Unexpected start tag: " + xpp.getName());
-                }
-            }
-            eventType = xpp.next();
-        }
-
-        return identity;
-    }
-
-    private static List<ImportedFolder> parseFolders(XmlPullParser xpp)
-    throws XmlPullParserException, IOException {
-        List<ImportedFolder> folders = null;
-
-        int eventType = xpp.next();
-        while (!(eventType == XmlPullParser.END_TAG &&
-                 SettingsExporter.FOLDERS_ELEMENT.equals(xpp.getName()))) {
-
-            if(eventType == XmlPullParser.START_TAG) {
-                String element = xpp.getName();
-                if (SettingsExporter.FOLDER_ELEMENT.equals(element)) {
-                    if (folders == null) {
-                        folders = new ArrayList<ImportedFolder>();
-                    }
-
-                    ImportedFolder folder = parseFolder(xpp);
-                    folders.add(folder);
-                } else {
-                    Log.w(K9.LOG_TAG, "Unexpected start tag: " + xpp.getName());
-                }
-            }
-            eventType = xpp.next();
-        }
-
-        return folders;
-    }
-
-    private static ImportedFolder parseFolder(XmlPullParser xpp)
-    throws XmlPullParserException, IOException {
-        ImportedFolder folder = new ImportedFolder();
-
-        String name = xpp.getAttributeValue(null, SettingsExporter.NAME_ATTRIBUTE);
-        folder.name = name;
-
-        folder.settings = parseSettings(xpp, SettingsExporter.FOLDER_ELEMENT);
-
-        return folder;
-    }
-
+    
     private static class ImportedServerSettings extends ServerSettings {
         private final ImportedServer mImportedServer;
 
@@ -1147,18 +711,17 @@ public class SettingsImporter {
     }
 
     @VisibleForTesting
-    protected static class Imported {
+    static class Imported {
         public int contentVersion;
         public ImportedSettings globalSettings;
         public Map<String, ImportedAccount> accounts;
     }
 
-    private static class ImportedSettings {
+    static class ImportedSettings {
         public Map<String, String> settings = new HashMap<String, String>();
     }
 
-    @VisibleForTesting
-    protected static class ImportedAccount {
+    static class ImportedAccount {
         public String uuid;
         public String name;
         public ImportedServer incoming;
@@ -1168,8 +731,7 @@ public class SettingsImporter {
         public List<ImportedFolder> folders;
     }
 
-    @VisibleForTesting
-    protected static class ImportedServer {
+    static class ImportedServer {
         public String type;
         public String host;
         public String port;
@@ -1181,14 +743,14 @@ public class SettingsImporter {
         public ImportedSettings extras;
     }
 
-    private static class ImportedIdentity {
+    static class ImportedIdentity {
         public String name;
         public String email;
         public String description;
         public ImportedSettings settings;
     }
 
-    private static class ImportedFolder {
+    static class ImportedFolder {
         public String name;
         public ImportedSettings settings;
     }
