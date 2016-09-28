@@ -1,11 +1,17 @@
 package com.fsck.k9.mail.internet;
 
 
+import com.fsck.k9.mail.BodyPart;
+import com.fsck.k9.mail.MessagingException;
+import com.fsck.k9.mail.Multipart;
+import com.fsck.k9.mail.Part;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
+import static junit.framework.Assert.assertNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -157,6 +163,31 @@ public class MimeUtilityTest {
     }
 
     @Test
+    public void findFirstPartByMimeType_returnsNullWhenPartDoesNotMatch() throws MessagingException {
+        Part part = new MimeBodyPart();
+        part.setHeader(MimeHeader.HEADER_CONTENT_TYPE, "text/plain");
+        assertNull(MimeUtility.findFirstPartByMimeType(part, "text/html"));
+    }
+
+    @Test
+    public void findFirstPartByMimeType_returnsPartWhenPartMatches() throws MessagingException {
+        Part part = new MimeBodyPart();
+        part.setHeader(MimeHeader.HEADER_CONTENT_TYPE, "text/html");
+        assertEquals(part, MimeUtility.findFirstPartByMimeType(part, "text/html"));
+    }
+
+    @Test
+    public void findFirstPartByMimeType_returnsNestedPartWhenNestedPartMatches() throws MessagingException {
+        Part part = new MimeBodyPart();
+        Multipart multipart = new MimeMultipart("abcd");
+        part.setBody(multipart);
+        BodyPart nestedPart = new MimeBodyPart();
+        nestedPart.setHeader(MimeHeader.HEADER_CONTENT_TYPE, "text/html");
+        multipart.addBodyPart(nestedPart);
+        assertEquals(nestedPart, MimeUtility.findFirstPartByMimeType(part, "text/html"));
+    }
+
+    @Test
     public void getMimeTypeByExtension_returnsCorrectType() {
         assertEquals("text/html", MimeUtility.getMimeTypeByExtension("index.html"));
     }
@@ -189,5 +220,15 @@ public class MimeUtilityTest {
     @Test
     public void getEncodingForType_withOther_returnsBase64() {
         assertEquals("base64", MimeUtility.getEncodingforType("unknown"));
+    }
+
+    @Test
+    public void isDefaultMimeType_returnsTrueForOctetStream() {
+        assertTrue(MimeUtility.isDefaultMimeType("application/octet-stream"));
+    }
+
+    @Test
+    public void isDefaultMimeType_returnsFalseForOtherMimeType() {
+        assertFalse(MimeUtility.isDefaultMimeType("text/html"));
     }
 }
