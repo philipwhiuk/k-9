@@ -81,7 +81,6 @@ public class WebDavFolderTest {
     private WebDavFolder folder;
 
     private WebDavFolder destinationFolder;
-    private String moveOrCopyXml = "<xml>MoveOrCopyXml</xml>";
     private HashMap<String, String> moveOrCopyHeaders;
     private List<WebDavMessage> messages;
 
@@ -114,10 +113,8 @@ public class WebDavFolderTest {
     private void setupFolderWithMessages(int count) throws MessagingException {
         HashMap<String, String> headers = new HashMap<>();
         headers.put("Brief", "t");
-        String messageCountXml = "<xml>MessageCountXml</xml>";
-        when(mockStore.getMessageCountXml("True")).thenReturn(messageCountXml);
-        when(mockStore.processRequest("https://localhost/webDavStoreUrl/testFolder",
-                "SEARCH", messageCountXml, headers)).thenReturn(mockDataSet);
+        when(mockStore.processRequest(eq("https://localhost/webDavStoreUrl/testFolder"),
+                eq("SEARCH"), anyString(), eq(headers))).thenReturn(mockDataSet);
         when(mockDataSet.getMessageCount()).thenReturn(count);
         folder.getMessageCount();
     }
@@ -129,12 +126,10 @@ public class WebDavFolderTest {
     }
 
     private void setupGetUrlsRequestResponse(String uid, String url) throws MessagingException {
-        String getUrlsXml = "<xml>GetUrls</xml>";
-        when(mockStore.getMessageUrlsXml(new String[]{uid})).thenReturn(getUrlsXml);
         HashMap<String, String> headers = new HashMap<>();
         headers.put("Brief", "t");
-        when(mockStore.processRequest("https://localhost/webDavStoreUrl/testFolder", "SEARCH", getUrlsXml, headers))
-                .thenReturn(mockDataSet);
+        when(mockStore.processRequest(eq("https://localhost/webDavStoreUrl/testFolder"),
+                eq("SEARCH"), anyString(), eq(headers))).thenReturn(mockDataSet);
         Map<String, String> urlUids = new HashMap<>();
         urlUids.put(uid, url);
         when(mockDataSet.getUidToUrl()).thenReturn(urlUids);
@@ -375,10 +370,8 @@ public class WebDavFolderTest {
         int messageCount = 23;
         HashMap<String, String> headers = new HashMap<>();
         headers.put("Brief", "t");
-        String messageCountXml = "<xml>MessageCountXml</xml>";
-        when(mockStore.getMessageCountXml("True")).thenReturn(messageCountXml);
-        when(mockStore.processRequest("https://localhost/webDavStoreUrl/testFolder",
-                "SEARCH", messageCountXml, headers)).thenReturn(mockDataSet);
+        when(mockStore.processRequest(eq("https://localhost/webDavStoreUrl/testFolder"),
+                eq("SEARCH"), anyString(), eq(headers))).thenReturn(mockDataSet);
         when(mockDataSet.getMessageCount()).thenReturn(messageCount);
 
         int result = folder.getMessageCount();
@@ -391,10 +384,8 @@ public class WebDavFolderTest {
         int unreadMessageCount = 13;
         HashMap<String, String> headers = new HashMap<>();
         headers.put("Brief", "t");
-        String messageCountXml = "<xml>MessageCountXml</xml>";
-        when(mockStore.getMessageCountXml("False")).thenReturn(messageCountXml);
-        when(mockStore.processRequest("https://localhost/webDavStoreUrl/testFolder",
-                "SEARCH", messageCountXml, headers)).thenReturn(mockDataSet);
+        when(mockStore.processRequest(eq("https://localhost/webDavStoreUrl/testFolder"),
+                eq("SEARCH"), anyString(), eq(headers))).thenReturn(mockDataSet);
         when(mockDataSet.getMessageCount()).thenReturn(unreadMessageCount);
 
         int result = folder.getUnreadMessageCount();
@@ -408,11 +399,9 @@ public class WebDavFolderTest {
         int messageStart = 1;
         int messageEnd = 11;
         setupFolderWithMessages(totalMessages);
-        String messagesXml = "<xml>MessagesXml</xml>";
         buildSearchResponse(mockDataSet);
-        when(mockStore.getMessagesXml()).thenReturn(messagesXml);
         when(mockStore.processRequest(eq("https://localhost/webDavStoreUrl/testFolder"), eq("SEARCH"),
-                eq(messagesXml), Matchers.<Map<String, String>>any())).thenReturn(mockDataSet);
+                anyString(), Matchers.<Map<String, String>>any())).thenReturn(mockDataSet);
 
         folder.getMessages(messageStart, messageEnd, new Date(), listener);
 
@@ -426,11 +415,9 @@ public class WebDavFolderTest {
         int messageStart = 1;
         int messageEnd = 11;
         setupFolderWithMessages(totalMessages);
-        String messagesXml = "<xml>MessagesXml</xml>";
         buildSearchResponse(mockDataSet);
-        when(mockStore.getMessagesXml()).thenReturn(messagesXml);
         when(mockStore.processRequest(eq("https://localhost/webDavStoreUrl/testFolder"), eq("SEARCH"),
-                eq(messagesXml), Matchers.<Map<String, String>>any())).thenReturn(mockDataSet);
+                anyString(), Matchers.<Map<String, String>>any())).thenReturn(mockDataSet);
 
         folder.getMessages(messageStart, messageEnd, new Date(), listener);
 
@@ -467,21 +454,10 @@ public class WebDavFolderTest {
         String url = "url1";
         messages = singletonList(createWebDavMessage(uid));
         setupGetUrlsRequestResponse(uid, url);
-        when(mockStore.getMoveOrCopyMessagesReadXml(eq(new String[]{url}), anyBoolean())).thenReturn(moveOrCopyXml);
         moveOrCopyHeaders = new HashMap<>();
         moveOrCopyHeaders.put("Destination", "https://localhost/webDavStoreUrl/destFolder");
         moveOrCopyHeaders.put("Brief", "t");
         moveOrCopyHeaders.put("If-Match", "*");
-    }
-
-    @Test
-    public void moveMessages_should_requestMoveXml() throws Exception {
-        setupMoveOrCopy();
-
-        folder.moveMessages(messages, destinationFolder);
-
-        verify(mockStore).getMoveOrCopyMessagesReadXml(eq(new String[]{"url1"}),
-                eq(true));
     }
 
     @Test
@@ -490,18 +466,8 @@ public class WebDavFolderTest {
 
         folder.moveMessages(messages, destinationFolder);
 
-        verify(mockStore).processRequest("https://localhost/webDavStoreUrl/testFolder", "BMOVE",
-                moveOrCopyXml, moveOrCopyHeaders, false);
-    }
-
-    @Test
-    public void copyMessages_should_requestCopyXml() throws Exception {
-        setupMoveOrCopy();
-
-        folder.copyMessages(messages, destinationFolder);
-
-        verify(mockStore).getMoveOrCopyMessagesReadXml(eq(new String[]{"url1"}),
-                eq(false));
+        verify(mockStore).processRequest(eq("https://localhost/webDavStoreUrl/testFolder"), eq("BMOVE"),
+                anyString(), eq(moveOrCopyHeaders), eq(false));
     }
 
     @Test
@@ -510,8 +476,8 @@ public class WebDavFolderTest {
 
         folder.copyMessages(messages, destinationFolder);
 
-        verify(mockStore).processRequest("https://localhost/webDavStoreUrl/testFolder", "BCOPY",
-                moveOrCopyXml, moveOrCopyHeaders, false);
+        verify(mockStore).processRequest(eq("https://localhost/webDavStoreUrl/testFolder"), eq("BCOPY"),
+                anyString(), eq(moveOrCopyHeaders), eq(false));
     }
 
     @Test

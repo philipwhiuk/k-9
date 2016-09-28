@@ -131,7 +131,7 @@ class WebDavFolder extends Folder<WebDavMessage> {
             }
         }
 
-        messageBody = store.getMoveOrCopyMessagesReadXml(urls, isMove);
+        messageBody = WebDavXmlBuilders.getMoveOrCopyMessagesReadXml(urls, isMove);
         WebDavFolder destFolder = (WebDavFolder) store.getFolder(folderName);
         headers.put("Destination", destFolder.mFolderUrl);
         headers.put("Brief", "t");
@@ -154,7 +154,7 @@ class WebDavFolder extends Folder<WebDavMessage> {
             isRead = "False";
         }
 
-        messageBody = store.getMessageCountXml(isRead);
+        messageBody = WebDavXmlBuilders.getMessageCountXml(isRead);
         headers.put("Brief", "t");
         DataSet dataset = store.processRequest(this.mFolderUrl, "SEARCH", messageBody, headers);
         if (dataset != null) {
@@ -252,7 +252,7 @@ class WebDavFolder extends Folder<WebDavMessage> {
         }
 
         /** Verify authentication */
-        messageBody = store.getMessagesXml();
+        messageBody = WebDavXmlBuilders.getMessagesXml();
 
         headers.put("Brief", "t");
         headers.put("Range", "rows=" + start + "-" + end);
@@ -287,7 +287,7 @@ class WebDavFolder extends Folder<WebDavMessage> {
         String messageBody;
 
         /** Retrieve and parse the XML entity for our messages */
-        messageBody = store.getMessageUrlsXml(uids);
+        messageBody = WebDavXmlBuilders.getMessageUrlsXml(uids);
         headers.put("Brief", "t");
 
         DataSet dataset = store.processRequest(this.mFolderUrl, "SEARCH", messageBody, headers);
@@ -481,7 +481,7 @@ class WebDavFolder extends Folder<WebDavMessage> {
             uids[i] = messages.get(i).getUid();
         }
 
-        messageBody = store.getMessageFlagsXml(uids);
+        messageBody = WebDavXmlBuilders.getMessageFlagsXml(uids);
         headers.put("Brief", "t");
         DataSet dataset = store.processRequest(this.mFolderUrl, "SEARCH", messageBody, headers);
 
@@ -544,7 +544,7 @@ class WebDavFolder extends Folder<WebDavMessage> {
             uids[i] = messages.get(i).getUid();
         }
 
-        messageBody = store.getMessageEnvelopeXml(uids);
+        messageBody = WebDavXmlBuilders.getMessageEnvelopeXml(uids);
         headers.put("Brief", "t");
         DataSet dataset = store.processRequest(this.mFolderUrl, "SEARCH", messageBody, headers);
 
@@ -599,7 +599,7 @@ class WebDavFolder extends Folder<WebDavMessage> {
             urls[i] = uidToUrl.get(uids[i]);
         }
 
-        messageBody = store.getMarkMessagesReadXml(urls, read);
+        messageBody = WebDavXmlBuilders.getMarkMessagesReadXml(urls, read);
         headers.put("Brief", "t");
         headers.put("If-Match", "*");
 
