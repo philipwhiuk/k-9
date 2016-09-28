@@ -44,27 +44,6 @@ import static com.fsck.k9.mail.helper.UrlEncodingHelper.encodeUtf8;
 
 public class Pop3Store extends RemoteStore {
 
-    private static final String STLS_COMMAND = "STLS";
-    private static final String USER_COMMAND = "USER";
-    private static final String PASS_COMMAND = "PASS";
-    private static final String CAPA_COMMAND = "CAPA";
-    private static final String AUTH_COMMAND = "AUTH";
-    private static final String STAT_COMMAND = "STAT";
-    private static final String LIST_COMMAND = "LIST";
-    private static final String UIDL_COMMAND = "UIDL";
-    private static final String TOP_COMMAND = "TOP";
-    private static final String RETR_COMMAND = "RETR";
-    private static final String DELE_COMMAND = "DELE";
-    private static final String QUIT_COMMAND = "QUIT";
-
-    private static final String STLS_CAPABILITY = "STLS";
-    private static final String UIDL_CAPABILITY = "UIDL";
-    private static final String TOP_CAPABILITY = "TOP";
-    private static final String SASL_CAPABILITY = "SASL";
-    private static final String AUTH_PLAIN_CAPABILITY = "PLAIN";
-    private static final String AUTH_CRAM_MD5_CAPABILITY = "CRAM-MD5";
-    private static final String AUTH_EXTERNAL_CAPABILITY = "EXTERNAL";
-
     /**
      * Decodes a Pop3Store URI.
      *
@@ -274,7 +253,7 @@ public class Pop3Store extends RemoteStore {
              * If the server doesn't support UIDL it will return a - response, which causes
              * executeSimpleCommand to throw a MessagingException, exiting this method.
              */
-                folder.executeSimpleCommand(UIDL_COMMAND);
+                folder.executeSimpleCommand(Pop3Constants.UIDL_COMMAND);
 
             }
         }
@@ -341,7 +320,7 @@ public class Pop3Store extends RemoteStore {
                 if (mConnectionSecurity == ConnectionSecurity.STARTTLS_REQUIRED) {
 
                     if (mCapabilities.stls) {
-                        executeSimpleCommand(STLS_COMMAND);
+                        executeSimpleCommand(Pop3Constants.STLS_COMMAND);
 
                         mSocket = mTrustedSocketFactory.createSocket(
                                 mSocket,
@@ -411,7 +390,7 @@ public class Pop3Store extends RemoteStore {
                 throw new MessagingException("Unable to open connection to POP server.", ioe);
             }
 
-            String response = executeSimpleCommand(STAT_COMMAND);
+            String response = executeSimpleCommand(Pop3Constants.STAT_COMMAND);
             String[] parts = response.split(" ");
             mMessageCount = Integer.parseInt(parts[1]);
 
@@ -421,9 +400,9 @@ public class Pop3Store extends RemoteStore {
         }
 
         private void login() throws MessagingException {
-            executeSimpleCommand(USER_COMMAND + " " + mUsername);
+            executeSimpleCommand(Pop3Constants.USER_COMMAND + " " + mUsername);
             try {
-                executeSimpleCommand(PASS_COMMAND + " " + mPassword, true);
+                executeSimpleCommand(Pop3Constants.PASS_COMMAND + " " + mPassword, true);
             } catch (Pop3ErrorResponse e) {
                 throw new AuthenticationFailedException(
                         "POP3 login authentication failed: " + e.getMessage(), e);
@@ -514,7 +493,7 @@ public class Pop3Store extends RemoteStore {
         public void close() {
             try {
                 if (isOpen()) {
-                    executeSimpleCommand(QUIT_COMMAND);
+                    executeSimpleCommand(Pop3Constants.QUIT_COMMAND);
                 }
             } catch (Exception e) {
                 /*
@@ -660,7 +639,7 @@ public class Pop3Store extends RemoteStore {
                 for (int msgNum = start; msgNum <= end; msgNum++) {
                     Pop3Message message = mMsgNumToMsgMap.get(msgNum);
                     if (message == null) {
-                        String response = executeSimpleCommand(UIDL_COMMAND + " " + msgNum);
+                        String response = executeSimpleCommand(Pop3Constants.UIDL_COMMAND + " " + msgNum);
                         // response = "+OK msgNum msgUid"
                         String[] uidParts = response.split(" +");
                         if (uidParts.length < 3 || !"+OK".equals(uidParts[0])) {
@@ -673,7 +652,7 @@ public class Pop3Store extends RemoteStore {
                     }
                 }
             } else {
-                String response = executeSimpleCommand(UIDL_COMMAND);
+                String response = executeSimpleCommand(Pop3Constants.UIDL_COMMAND);
                 while ((response = readLine()) != null) {
                     if (response.equals(".")) {
                         break;
@@ -736,7 +715,7 @@ public class Pop3Store extends RemoteStore {
              * get them is to do a full UIDL list. A possible optimization
              * would be trying UIDL for the latest X messages and praying.
              */
-            String response = executeSimpleCommand(UIDL_COMMAND);
+            String response = executeSimpleCommand(Pop3Constants.UIDL_COMMAND);
             while ((response = readLine()) != null) {
                 if (response.equals(".")) {
                     break;
@@ -862,7 +841,7 @@ public class Pop3Store extends RemoteStore {
                     if (listener != null) {
                         listener.messageStarted(message.getUid(), i, count);
                     }
-                    String response = executeSimpleCommand(String.format(Locale.US, LIST_COMMAND + " %d",
+                    String response = executeSimpleCommand(String.format(Locale.US, Pop3Constants.LIST_COMMAND + " %d",
                                                            mUidToMsgNumMap.get(message.getUid())));
                     String[] listParts = response.split(" ");
                     //int msgNum = Integer.parseInt(listParts[1]);
@@ -878,7 +857,7 @@ public class Pop3Store extends RemoteStore {
                     msgUidIndex.add(message.getUid());
                 }
                 int i = 0, count = messages.size();
-                String response = executeSimpleCommand(LIST_COMMAND);
+                String response = executeSimpleCommand(Pop3Constants.LIST_COMMAND);
                 while ((response = readLine()) != null) {
                     if (response.equals(".")) {
                         break;
@@ -921,7 +900,7 @@ public class Pop3Store extends RemoteStore {
                               "Checking to see if the TOP command is supported nevertheless.");
                     }
 
-                    response = executeSimpleCommand(String.format(Locale.US, TOP_COMMAND + " %d %d",
+                    response = executeSimpleCommand(String.format(Locale.US, Pop3Constants.TOP_COMMAND + " %d %d",
                                                     mUidToMsgNumMap.get(message.getUid()), lines));
 
                     // TOP command is supported. Remember this for the next time.
@@ -943,7 +922,7 @@ public class Pop3Store extends RemoteStore {
             }
 
             if (response == null) {
-                executeSimpleCommand(String.format(Locale.US, RETR_COMMAND + " %d",
+                executeSimpleCommand(String.format(Locale.US, Pop3Constants.RETR_COMMAND + " %d",
                                      mUidToMsgNumMap.get(message.getUid())));
             }
 
@@ -1019,7 +998,7 @@ public class Pop3Store extends RemoteStore {
                     me.setPermanentFailure(true);
                     throw me;
                 }
-                executeSimpleCommand(String.format(DELE_COMMAND + " %s", msgNum));
+                executeSimpleCommand(String.format(Pop3Constants.DELE_COMMAND + " %s", msgNum));
             }
         }
 
@@ -1066,17 +1045,17 @@ public class Pop3Store extends RemoteStore {
                  * While this never became a standard, there are servers that
                  * support it, and Thunderbird includes this check.
                  */
-                String response = executeSimpleCommand(AUTH_COMMAND);
+                String response = executeSimpleCommand(Pop3Constants.AUTH_COMMAND);
                 while ((response = readLine()) != null) {
                     if (response.equals(".")) {
                         break;
                     }
                     response = response.toUpperCase(Locale.US);
-                    if (response.equals(AUTH_PLAIN_CAPABILITY)) {
+                    if (response.equals(Pop3Constants.AUTH_PLAIN_CAPABILITY)) {
                         capabilities.authPlain = true;
-                    } else if (response.equals(AUTH_CRAM_MD5_CAPABILITY)) {
+                    } else if (response.equals(Pop3Constants.AUTH_CRAM_MD5_CAPABILITY)) {
                         capabilities.cramMD5 = true;
-                    } else if (response.equals(AUTH_EXTERNAL_CAPABILITY)) {
+                    } else if (response.equals(Pop3Constants.AUTH_EXTERNAL_CAPABILITY)) {
                         capabilities.external = true;
                     }
                 }
@@ -1084,24 +1063,24 @@ public class Pop3Store extends RemoteStore {
                 // Assume AUTH command with no arguments is not supported.
             }
             try {
-                String response = executeSimpleCommand(CAPA_COMMAND);
+                String response = executeSimpleCommand(Pop3Constants.CAPA_COMMAND);
                 while ((response = readLine()) != null) {
                     if (response.equals(".")) {
                         break;
                     }
                     response = response.toUpperCase(Locale.US);
-                    if (response.equals(STLS_CAPABILITY)) {
+                    if (response.equals(Pop3Constants.STLS_CAPABILITY)) {
                         capabilities.stls = true;
-                    } else if (response.equals(UIDL_CAPABILITY)) {
+                    } else if (response.equals(Pop3Constants.UIDL_CAPABILITY)) {
                         capabilities.uidl = true;
-                    } else if (response.equals(TOP_CAPABILITY)) {
+                    } else if (response.equals(Pop3Constants.TOP_CAPABILITY)) {
                         capabilities.top = true;
-                    } else if (response.startsWith(SASL_CAPABILITY)) {
+                    } else if (response.startsWith(Pop3Constants.SASL_CAPABILITY)) {
                         List<String> saslAuthMechanisms = Arrays.asList(response.split(" "));
-                        if (saslAuthMechanisms.contains(AUTH_PLAIN_CAPABILITY)) {
+                        if (saslAuthMechanisms.contains(Pop3Constants.AUTH_PLAIN_CAPABILITY)) {
                             capabilities.authPlain = true;
                         }
-                        if (saslAuthMechanisms.contains(AUTH_CRAM_MD5_CAPABILITY)) {
+                        if (saslAuthMechanisms.contains(Pop3Constants.AUTH_CRAM_MD5_CAPABILITY)) {
                             capabilities.cramMD5 = true;
                         }
                     }
