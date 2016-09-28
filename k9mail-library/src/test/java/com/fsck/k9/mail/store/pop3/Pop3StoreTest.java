@@ -7,6 +7,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.util.List;
 
+import com.fsck.k9.mail.Authentication;
 import com.fsck.k9.mail.AuthenticationFailedException;
 import com.fsck.k9.mail.Folder;
 import com.fsck.k9.mail.Folder.FolderType;
@@ -44,6 +45,10 @@ public class Pop3StoreTest {
             new String(Base64.encodeBase64(("\000user\000password").getBytes())) + "\r\n";
     private static final String AUTH_PLAIN_AUTHENTICATED_RESPONSE = "+OK\r\n" + "+OK\r\n";
     private static final String AUTH_PLAIN_FAILED_RESPONSE = "+OK\r\n" + "Plain authentication failure";
+    private static final String AUTH_CRAM_MD5_WITH_LOGIN = "AUTH CRAM-MD5\r\n" +
+            "dXNlciAyM2Q0NjY4MzRmNzBhMWQ2NTc1NjFhNWVjMmM1MWVhMA==\r\n";
+    private static final String AUTH_CRAM_MD5_AUTHENTICATED_RESPONSE = "+OK\r\n" + "+OK\r\n";
+    private static final String AUTH_CRAM_MD5_FAILED_RESPONSE = "+OK\r\n" + "CRAM-MD5 authentication failure";
     private static final String STAT = "STAT\r\n";
     private static final String STAT_RESPONSE = "+OK 20 0\r\n";
 
@@ -180,11 +185,47 @@ public class Pop3StoreTest {
     }
 
     @Test(expected = AuthenticationFailedException.class)
-    public void open_withFailedAuth_shouldThrow() throws Exception {
+    public void open_withFailedPlainAuth_shouldThrow() throws Exception {
         String response = INITIAL_RESPONSE +
                 AUTH_HANDLE_RESPONSE +
                 CAPA_RESPONSE +
                 AUTH_PLAIN_FAILED_RESPONSE;
+        when(mockSocket.getInputStream()).thenReturn(new ByteArrayInputStream(response.getBytes("UTF-8")));
+        Folder folder = store.getFolder("Inbox");
+
+        folder.open(Folder.OPEN_MODE_RW);
+    }
+
+    @Test
+    public void open_withAuthResponseUsingAuthCRAM_MD5_shouldRetrieveMessageCountOnAuthenticatedSocket() throws Exception {
+        when(mockStoreConfig.getStoreUri()).thenReturn("pop3+ssl+://CRAM_MD5:user:password@server:12345");
+        store = new Pop3Store(mockStoreConfig, mockTrustedSocketFactory);
+
+        String response = INITIAL_RESPONSE +
+                AUTH_HANDLE_RESPONSE +
+                CAPA_RESPONSE +
+                AUTH_CRAM_MD5_AUTHENTICATED_RESPONSE +
+                STAT_RESPONSE;
+        when(mockSocket.getInputStream()).thenReturn(new ByteArrayInputStream(response.getBytes("UTF-8")));
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        when(mockSocket.getOutputStream()).thenReturn(byteArrayOutputStream);
+        Folder folder = store.getFolder("Inbox");
+
+        folder.open(Folder.OPEN_MODE_RW);
+
+        assertEquals(20, folder.getMessageCount());
+        assertEquals(AUTH + CAPA + AUTH_CRAM_MD5_WITH_LOGIN + STAT, byteArrayOutputStream.toString("UTF-8"));
+    }
+
+    @Test(expected = AuthenticationFailedException.class)
+    public void open_withFailedCramMd5Auth_shouldThrow() throws Exception {
+        when(mockStoreConfig.getStoreUri()).thenReturn("pop3+ssl+://CRAM_MD5:user:password@server:12345");
+        store = new Pop3Store(mockStoreConfig, mockTrustedSocketFactory);
+
+        String response = INITIAL_RESPONSE +
+                AUTH_HANDLE_RESPONSE +
+                CAPA_RESPONSE +
+                AUTH_CRAM_MD5_FAILED_RESPONSE;
         when(mockSocket.getInputStream()).thenReturn(new ByteArrayInputStream(response.getBytes("UTF-8")));
         Folder folder = store.getFolder("Inbox");
 
