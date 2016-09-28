@@ -21,20 +21,24 @@ public class MLFCursorLoaderFactory {
     public static CursorLoader createCursorLoader(
             String threadId, boolean threadedList, String accountUuid,
             MessageReference activeMessage, Account account, LocalSearch search,
-            Activity activity, Account.SortType sortType, boolean sortAscending, boolean sortDateAscending) {
+            Activity activity, Account.SortType sortType, boolean sortAscending,
+            boolean sortDateAscending) {
         Uri uri;
         String[] projection;
         boolean needConditions;
         if (threadId != null) {
-            uri = Uri.withAppendedPath(EmailProvider.CONTENT_URI, "account/" + accountUuid + "/thread/" + threadId);
+            uri = Uri.withAppendedPath(
+                    EmailProvider.CONTENT_URI, "account/" + accountUuid + "/thread/" + threadId);
             projection = MessageListFragment.PROJECTION;
             needConditions = false;
         } else if (threadedList) {
-            uri = Uri.withAppendedPath(EmailProvider.CONTENT_URI, "account/" + accountUuid + "/messages/threaded");
+            uri = Uri.withAppendedPath(
+                    EmailProvider.CONTENT_URI, "account/" + accountUuid + "/messages/threaded");
             projection = MessageListFragment.THREADED_PROJECTION;
             needConditions = true;
         } else {
-            uri = Uri.withAppendedPath(EmailProvider.CONTENT_URI, "account/" + accountUuid + "/messages");
+            uri = Uri.withAppendedPath(
+                    EmailProvider.CONTENT_URI, "account/" + accountUuid + "/messages");
             projection = MessageListFragment.PROJECTION;
             needConditions = true;
         }
@@ -42,10 +46,13 @@ public class MLFCursorLoaderFactory {
         StringBuilder query = new StringBuilder();
         List<String> queryArgs = new ArrayList<>();
         if (needConditions) {
-            boolean selectActive = activeMessage != null && activeMessage.getAccountUuid().equals(accountUuid);
+            boolean selectActive = activeMessage != null
+                    && activeMessage.getAccountUuid().equals(accountUuid);
 
             if (selectActive) {
-                query.append("(" + EmailProvider.MessageColumns.UID + " = ? AND " + EmailProvider.SpecialColumns.FOLDER_NAME + " = ?) OR (");
+                query.append("("
+                        + EmailProvider.MessageColumns.UID + " = ? AND "
+                        + EmailProvider.SpecialColumns.FOLDER_NAME + " = ?) OR (");
                 queryArgs.add(activeMessage.getUid());
                 queryArgs.add(activeMessage.getFolderName());
             }
