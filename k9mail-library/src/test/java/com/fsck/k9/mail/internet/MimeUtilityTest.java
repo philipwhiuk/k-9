@@ -2,12 +2,16 @@ package com.fsck.k9.mail.internet;
 
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-
+@RunWith(RobolectricTestRunner.class)
+@Config(manifest = "src/main/AndroidManifest.xml", sdk = 21)
 public class MimeUtilityTest {
     @Test
     public void testGetHeaderParameter() {
@@ -150,5 +154,40 @@ public class MimeUtilityTest {
     @Test
     public void isSameMimeType_withSecondArgumentBeingNull_shouldReturnFalse() throws Exception {
         assertFalse(MimeUtility.isSameMimeType("text/html", null));
+    }
+
+    @Test
+    public void getMimeTypeByExtension_returnsCorrectType() {
+        assertEquals("text/html", MimeUtility.getMimeTypeByExtension("index.html"));
+    }
+
+    @Test
+    public void getExtensionByMimeType_returnsCorrectExtension() {
+        assertEquals("html", MimeUtility.getExtensionByMimeType("text/html"));
+    }
+
+    @Test
+    public void getEncodingForType_withNull_returnsBase64() {
+        assertEquals("base64", MimeUtility.getEncodingforType(null));
+    }
+
+    @Test
+    public void getEncodingForType_withMessage_returns8Bit() {
+        assertEquals("8bit", MimeUtility.getEncodingforType("message/rfc822"));
+    }
+
+    @Test
+    public void getEncodingForType_withSignedMessage_returns7bit() {
+        assertEquals("7bit", MimeUtility.getEncodingforType("multipart/signed"));
+    }
+
+    @Test
+    public void getEncodingForType_withOtherMultipart_returns8Bit() {
+        assertEquals("8bit", MimeUtility.getEncodingforType("multipart/digest"));
+    }
+
+    @Test
+    public void getEncodingForType_withOther_returnsBase64() {
+        assertEquals("base64", MimeUtility.getEncodingforType("unknown"));
     }
 }
