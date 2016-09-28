@@ -723,6 +723,7 @@ class ImapFolder extends Folder<ImapMessage> {
                     response = connection.readResponse(callback);
 
                     if (response.getTag() == null && ImapResponseParser.equalsIgnoreCase(response.get(1), "FETCH")) {
+
                         ImapList fetchList = (ImapList) response.getKeyedValue("FETCH");
                         String uid = fetchList.getKeyedString("UID");
                         long msgSeq = response.getLong(0);
@@ -787,18 +788,10 @@ class ImapFolder extends Folder<ImapMessage> {
             throws MessagingException {
         checkOpen();
 
-        String partId = part.getServerExtra();
-
-        String fetch;
-        if ("TEXT".equalsIgnoreCase(partId)) {
-            int maximumAutoDownloadMessageSize = store.getStoreConfig().getMaximumAutoDownloadMessageSize();
-            fetch = String.format(Locale.US, "BODY.PEEK[TEXT]<0.%d>", maximumAutoDownloadMessageSize);
-        } else {
-            fetch = String.format("BODY.PEEK[%s]", partId);
-        }
+        String fetchArgument = buildFetchArgument(part.getServerExtra());
 
         try {
-            String command = String.format("UID FETCH %s (UID %s)", message.getUid(), fetch);
+            String command = String.format("UID FETCH %s (UID %s)", message.getUid(), fetchArgument);
             connection.sendCommand(command, false);
 
             ImapResponse response;
@@ -827,27 +820,8 @@ class ImapFolder extends Folder<ImapMessage> {
                     }
 
                     ImapMessage imapMessage = (ImapMessage) message;
-
-                    Object literal = handleFetchResponse(imapMessage, fetchList);
-
-                    if (literal != null) {
-                        if (literal instanceof Body) {
-                            // Most of the work was done in FetchAttchmentCallback.foundLiteral()
-                            MimeMessageHelper.setBody(part, (Body) literal);
-                        } else if (literal instanceof String) {
-                            String bodyString = (String) literal;
-                            InputStream bodyStream = new ByteArrayInputStream(bodyString.getBytes());
-
-                            String contentTransferEncoding =
-                                    part.getHeader(MimeHeader.HEADER_CONTENT_TRANSFER_ENCODING)[0];
-                            String contentType = part.getHeader(MimeHeader.HEADER_CONTENT_TYPE)[0];
-                            MimeMessageHelper.setBody(part, MimeUtility.createBody(bodyStream, contentTransferEncoding,
-                                    contentType));
-                        } else {
-                            // This shouldn't happen
-                            throw new MessagingException("Got FETCH response with bogus parameters");
-                        }
-                    }
+                    Object body = handleFetchResponse(imapMessage, fetchList);
+                    setPartBody(body, part);
 
                     if (listener != null) {
                         listener.messageFinished(message, messageNumber, 1);
@@ -862,41 +836,56 @@ class ImapFolder extends Folder<ImapMessage> {
         }
     }
 
-    // Returns value of body field
-    private Object handleFetchResponse(ImapMessage message, ImapList fetchList) throws MessagingException {
-        Object result = null;
-        if (fetchList.containsKey("FLAGS")) {
-            ImapList flags = fetchList.getKeyedList("FLAGS");
-            if (flags != null) {
-                for (int i = 0, count = flags.size(); i < count; i++) {
-                    String flag = flags.getString(i);
-                    if (flag.equalsIgnoreCase("\\Deleted")) {
-                        message.setFlagInternal(Flag.DELETED, true);
-                    } else if (flag.equalsIgnoreCase("\\Answered")) {
-                        message.setFlagInternal(Flag.ANSWERED, true);
-                    } else if (flag.equalsIgnoreCase("\\Seen")) {
-                        message.setFlagInternal(Flag.SEEN, true);
-                    } else if (flag.equalsIgnoreCase("\\Flagged")) {
-                        message.setFlagInternal(Flag.FLAGGED, true);
-                    } else if (flag.equalsIgnoreCase("$Forwarded")) {
-                        message.setFlagInternal(Flag.FORWARDED, true);
-                        /* a message contains FORWARDED FLAG -> so we can also create them */
-                        store.getPermanentFlagsIndex().add(Flag.FORWARDED);
-                    }
-                }
-            }
+    private String buildFetchArgument(String partId) {
+        if ("TEXT".equalsIgnoreCase(partId)) {
+            int maximumAutoDownloadMessageSize = store.getStoreConfig().getMaximumAutoDownloadMessageSize();
+            return String.format(Locale.US, "BODY.PEEK[TEXT]<0.%d>", maximumAutoDownloadMessageSize);
+        } else {
+            return String.format("BODY.PEEK[%s]", partId);
         }
 
+    }
+
+    private void setPartBody(Object literal, Part part) throws MessagingException, IOException {
+        if (literal != null) {
+            if (literal instanceof Body) {
+                // Most of the work for this is done in FetchAttachmentCallback.foundLiteral()
+                MimeMessageHelper.setBody(part, (Body) literal);
+            } else if (literal instanceof String) {
+                String bodyString = (String) literal;
+                InputStream bodyStream = new ByteArrayInputStream(bodyString.getBytes());
+
+                String contentTransferEncoding =
+                        part.getHeader(MimeHeader.HEADER_CONTENT_TRANSFER_ENCODING)[0];
+                String contentType = part.getHeader(MimeHeader.HEADER_CONTENT_TYPE)[0];
+                MimeMessageHelper.setBody(part, MimeUtility.createBody(bodyStream, contentTransferEncoding,
+                        contentType));
+            } else {
+                // This shouldn't happen
+                throw new MessagingException("Got FETCH response with bogus parameters");
+            }
+        }
+    }
+
+    /**
+     * @param message Message to populate with details from IMAP FETCH
+     * @param fetchList An IMAP LIST response which contains the result of the FETCH
+     * @return The body of the part if requested (or null)
+     * @throws MessagingException
+     */
+    private Object handleFetchResponse(ImapMessage message, ImapList fetchList) throws MessagingException {
+        Object body = null;
+        if (fetchList.containsKey("FLAGS")) {
+            handleFlagsFromFetchResponse(message, fetchList.getKeyedList("FLAGS"));
+        }
         if (fetchList.containsKey("INTERNALDATE")) {
             Date internalDate = fetchList.getKeyedDate("INTERNALDATE");
             message.setInternalDate(internalDate);
         }
-
         if (fetchList.containsKey("RFC822.SIZE")) {
             int size = fetchList.getKeyedNumber("RFC822.SIZE");
             message.setSize(size);
         }
-
         if (fetchList.containsKey("BODYSTRUCTURE")) {
             ImapList bs = fetchList.getKeyedList("BODYSTRUCTURE");
             if (bs != null) {
@@ -910,24 +899,49 @@ class ImapFolder extends Folder<ImapMessage> {
                 }
             }
         }
-
         if (fetchList.containsKey("BODY")) {
-            int index = fetchList.getKeyIndex("BODY") + 2;
-            int size = fetchList.size();
-            if (index < size) {
-                result = fetchList.getObject(index);
+            body = handleBodyFromFetchResponse(message, fetchList);
+        }
+        return body;
+    }
 
-                // Check if there's an origin octet
-                if (result instanceof String) {
-                    String originOctet = (String) result;
-                    if (originOctet.startsWith("<") && (index + 1) < size) {
-                        result = fetchList.getObject(index + 1);
-                    }
+    private void handleFlagsFromFetchResponse(ImapMessage message, ImapList flags) throws MessagingException {
+        if (flags != null) {
+            for (int i = 0, count = flags.size(); i < count; i++) {
+                String flag = flags.getString(i);
+                if (flag.equalsIgnoreCase("\\Deleted")) {
+                    message.setFlagInternal(Flag.DELETED, true);
+                } else if (flag.equalsIgnoreCase("\\Answered")) {
+                    message.setFlagInternal(Flag.ANSWERED, true);
+                } else if (flag.equalsIgnoreCase("\\Seen")) {
+                    message.setFlagInternal(Flag.SEEN, true);
+                } else if (flag.equalsIgnoreCase("\\Flagged")) {
+                    message.setFlagInternal(Flag.FLAGGED, true);
+                } else if (flag.equalsIgnoreCase("$Forwarded")) {
+                    message.setFlagInternal(Flag.FORWARDED, true);
+                        /* a message contains FORWARDED FLAG -> so we can also create them */
+                    store.getPermanentFlagsIndex().add(Flag.FORWARDED);
                 }
             }
         }
+    }
 
-        return result;
+    private Object handleBodyFromFetchResponse(ImapMessage message, ImapList fetchList) {
+        Object body = null;
+        int index = fetchList.getKeyIndex("BODY") + 2;
+        int size = fetchList.size();
+        if (index < size) {
+            body = fetchList.getObject(index);
+
+            // Check if there's an origin octet
+            if (body instanceof String) {
+                String originOctet = (String) body;
+                if (originOctet.startsWith("<") && (index + 1) < size) {
+                    body = fetchList.getObject(index + 1);
+                }
+            }
+        }
+        return body;
     }
 
     protected List<ImapResponse> handleUntaggedResponses(List<ImapResponse> responses) {
@@ -1268,82 +1282,9 @@ class ImapFolder extends Folder<ImapMessage> {
         final ImapSearcher searcher = new ImapSearcher() {
             @Override
             public List<ImapResponse> search() throws IOException, MessagingException {
-                String imapQuery = "UID SEARCH ";
-                if (requiredFlags != null) {
-                    for (Flag flag : requiredFlags) {
-                        switch (flag) {
-                            case DELETED: {
-                                imapQuery += "DELETED ";
-                                break;
-                            }
-                            case SEEN: {
-                                imapQuery += "SEEN ";
-                                break;
-                            }
-                            case ANSWERED: {
-                                imapQuery += "ANSWERED ";
-                                break;
-                            }
-                            case FLAGGED: {
-                                imapQuery += "FLAGGED ";
-                                break;
-                            }
-                            case DRAFT: {
-                                imapQuery += "DRAFT ";
-                                break;
-                            }
-                            case RECENT: {
-                                imapQuery += "RECENT ";
-                                break;
-                            }
-                            default: {
-                                break;
-                            }
-                        }
-                    }
-                }
-
-                if (forbiddenFlags != null) {
-                    for (Flag flag : forbiddenFlags) {
-                        switch (flag) {
-                            case DELETED: {
-                                imapQuery += "UNDELETED ";
-                                break;
-                            }
-                            case SEEN: {
-                                imapQuery += "UNSEEN ";
-                                break;
-                            }
-                            case ANSWERED: {
-                                imapQuery += "UNANSWERED ";
-                                break;
-                            }
-                            case FLAGGED: {
-                                imapQuery += "UNFLAGGED ";
-                                break;
-                            }
-                            case DRAFT: {
-                                imapQuery += "UNDRAFT ";
-                                break;
-                            }
-                            case RECENT: {
-                                imapQuery += "UNRECENT ";
-                                break;
-                            }
-                            default: {
-                                break;
-                            }
-                        }
-                    }
-                }
-
-                String encodedQuery = ImapUtility.encodeString(queryString);
-                if (store.getStoreConfig().isRemoteSearchFullText()) {
-                    imapQuery += "TEXT " + encodedQuery;
-                } else {
-                    imapQuery += "OR SUBJECT " + encodedQuery + " FROM " + encodedQuery;
-                }
-
+                String imapQuery = ImapQueryBuilder.buildQuery(
+                        requiredFlags, forbiddenFlags, queryString,
+                        store.getStoreConfig().isRemoteSearchFullText());
                 return executeSimpleCommand(imapQuery);
             }
         };
