@@ -20,6 +20,7 @@ import javax.net.ssl.SSLException;
 import java.io.*;
 import java.net.*;
 import java.security.GeneralSecurityException;
+import java.security.KeyManagementException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
@@ -297,57 +298,95 @@ public class Pop3Store extends RemoteStore {
                 throw new MessagingException("Folder does not exist");
             }
 
+            establishConnection();
+
+            String response = executeSimpleCommand(Pop3Constants.STAT_COMMAND);
+            String[] parts = response.split(" ");
+            mMessageCount = Integer.parseInt(parts[1]);
+
+            mUidToMsgMap.clear();
+            mMsgNumToMsgMap.clear();
+            mUidToMsgNumMap.clear();
+        }
+
+        private void establishConnection() throws MessagingException {
             try {
-                SocketAddress socketAddress = new InetSocketAddress(mHost, mPort);
-                if (mConnectionSecurity == ConnectionSecurity.SSL_TLS_REQUIRED) {
-                    mSocket = mTrustedSocketFactory.createSocket(null, mHost, mPort, mClientCertificateAlias);
-                } else {
-                    mSocket = new Socket();
-                }
-
-                mSocket.connect(socketAddress, SOCKET_CONNECT_TIMEOUT);
-                mIn = new BufferedInputStream(mSocket.getInputStream(), 1024);
-                mOut = new BufferedOutputStream(mSocket.getOutputStream(), 512);
-
-                mSocket.setSoTimeout(SOCKET_READ_TIMEOUT);
-                if (!isOpen()) {
-                    throw new MessagingException("Unable to connect socket");
-                }
-
+                connectSocket();
                 String serverGreeting = executeSimpleCommand(null);
-
                 mCapabilities = getCapabilities();
                 if (mConnectionSecurity == ConnectionSecurity.STARTTLS_REQUIRED) {
-
                     if (mCapabilities.stls) {
-                        executeSimpleCommand(Pop3Constants.STLS_COMMAND);
-
-                        mSocket = mTrustedSocketFactory.createSocket(
-                                mSocket,
-                                mHost,
-                                mPort,
-                                mClientCertificateAlias);
-                        mSocket.setSoTimeout(SOCKET_READ_TIMEOUT);
-                        mIn = new BufferedInputStream(mSocket.getInputStream(), 1024);
-                        mOut = new BufferedOutputStream(mSocket.getOutputStream(), 512);
-                        if (!isOpen()) {
-                            throw new MessagingException("Unable to connect socket");
-                        }
+                        performStartTlsUpgrade();
                         mCapabilities = getCapabilities();
                     } else {
-                        /*
-                         * This exception triggers a "Certificate error"
-                         * notification that takes the user to the incoming
-                         * server settings for review. This might be needed if
-                         * the account was configured with an obsolete
-                         * "STARTTLS (if available)" setting.
-                         */
-                        throw new CertificateValidationException(
-                                "STARTTLS connection security not available");
+                        handleStartTlsUnavailable();
                     }
                 }
+                performAuthentication(serverGreeting);
+            } catch (SSLException e) {
+                if (e.getCause() instanceof CertificateException) {
+                    throw new CertificateValidationException(e.getMessage(), e);
+                } else {
+                    throw new MessagingException("Unable to connect", e);
+                }
+            } catch (GeneralSecurityException gse) {
+                throw new MessagingException(
+                        "Unable to open connection to POP server due to security error.", gse);
+            } catch (IOException ioe) {
+                throw new MessagingException("Unable to open connection to POP server.", ioe);
+            }
+        }
 
-                switch (mAuthType) {
+        private void connectSocket()
+                throws MessagingException, IOException, NoSuchAlgorithmException, KeyManagementException {
+            SocketAddress socketAddress = new InetSocketAddress(mHost, mPort);
+            if (mConnectionSecurity == ConnectionSecurity.SSL_TLS_REQUIRED) {
+                mSocket = mTrustedSocketFactory.createSocket(null, mHost, mPort, mClientCertificateAlias);
+            } else {
+                mSocket = new Socket();
+            }
+
+            mSocket.connect(socketAddress, SOCKET_CONNECT_TIMEOUT);
+            mIn = new BufferedInputStream(mSocket.getInputStream(), 1024);
+            mOut = new BufferedOutputStream(mSocket.getOutputStream(), 512);
+
+            mSocket.setSoTimeout(SOCKET_READ_TIMEOUT);
+            if (!isOpen()) {
+                throw new MessagingException("Unable to connect socket");
+            }
+        }
+
+        private void performStartTlsUpgrade()
+                throws MessagingException, NoSuchAlgorithmException, KeyManagementException, IOException {
+            executeSimpleCommand(Pop3Constants.STLS_COMMAND);
+
+            mSocket = mTrustedSocketFactory.createSocket(
+                    mSocket,
+                    mHost,
+                    mPort,
+                    mClientCertificateAlias);
+            mSocket.setSoTimeout(SOCKET_READ_TIMEOUT);
+            mIn = new BufferedInputStream(mSocket.getInputStream(), 1024);
+            mOut = new BufferedOutputStream(mSocket.getOutputStream(), 512);
+            if (!isOpen()) {
+                throw new MessagingException("Unable to connect socket");
+            }
+        }
+
+        private void handleStartTlsUnavailable() throws CertificateValidationException {
+            /*
+             * This exception triggers a "Certificate error"
+             * notification that takes the user to the incoming
+             * server settings for review. This might be needed if
+             * the account was configured with an obsolete
+             * "STARTTLS (if available)" setting.
+             */
+            throw new CertificateValidationException(
+                    "STARTTLS connection security not available");
+        }
+
+        private void performAuthentication(String serverGreeting) throws MessagingException {
+            switch (mAuthType) {
                 case PLAIN:
                     if (mCapabilities.authPlain) {
                         authPlain();
@@ -376,27 +415,7 @@ public class Pop3Store extends RemoteStore {
                 default:
                     throw new MessagingException(
                             "Unhandled authentication method found in the server settings (bug).");
-                }
-            } catch (SSLException e) {
-                if (e.getCause() instanceof CertificateException) {
-                    throw new CertificateValidationException(e.getMessage(), e);
-                } else {
-                    throw new MessagingException("Unable to connect", e);
-                }
-            } catch (GeneralSecurityException gse) {
-                throw new MessagingException(
-                    "Unable to open connection to POP server due to security error.", gse);
-            } catch (IOException ioe) {
-                throw new MessagingException("Unable to open connection to POP server.", ioe);
             }
-
-            String response = executeSimpleCommand(Pop3Constants.STAT_COMMAND);
-            String[] parts = response.split(" ");
-            mMessageCount = Integer.parseInt(parts[1]);
-
-            mUidToMsgMap.clear();
-            mMsgNumToMsgMap.clear();
-            mUidToMsgNumMap.clear();
         }
 
         private void login() throws MessagingException {
