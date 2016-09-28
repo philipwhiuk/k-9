@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -331,53 +332,69 @@ class ImapFolder extends Folder<ImapMessage> {
      * @return The mapping of original message UIDs to the new server UIDs.
      */
     @Override
-    public Map<String, String> copyMessages(List<? extends Message> messages, Folder folder) throws MessagingException {
+    public Map<String, String> copyMessages(List<? extends Message> messages, Folder folder)
+            throws MessagingException {
+
         if (!(folder instanceof ImapFolder)) {
             throw new MessagingException("ImapFolder.copyMessages passed non-ImapFolder");
         }
-
         if (messages.isEmpty()) {
             return null;
         }
-
         ImapFolder imapFolder = (ImapFolder) folder;
         checkOpen(); //only need READ access
-
         String[] uids = new String[messages.size()];
         for (int i = 0, count = messages.size(); i < count; i++) {
             uids[i] = messages.get(i).getUid();
         }
-
         try {
-            String encodedDestinationFolderName = folderNameCodec.encode(imapFolder.getPrefixedName());
-            String escapedDestinationFolderName = ImapUtility.encodeString(encodedDestinationFolderName);
-
-            //TODO: Try to copy/move the messages first and only create the folder if the
-            //      operation fails. This will save a roundtrip if the folder already exists.
-            if (!exists(escapedDestinationFolderName)) {
-                if (K9MailLib.isDebug()) {
-                    Log.i(LOG_TAG, "ImapFolder.copyMessages: attempting to create remote folder '" +
-                            escapedDestinationFolderName + "' for " + getLogId());
-                }
-
-                imapFolder.create(FolderType.HOLDS_MESSAGES);
-            }
-
-            //TODO: Split this into multiple commands if the command exceeds a certain length.
-            List<ImapResponse> responses = executeSimpleCommand(String.format("UID COPY %s %s",
-                    combine(uids, ','), escapedDestinationFolderName));
-
-            // Get the tagged response for the UID COPY command
-            ImapResponse response = getLastResponse(responses);
-
-            CopyUidResponse copyUidResponse = CopyUidResponse.parse(response);
-            if (copyUidResponse == null) {
-                return null;
-            }
-
-            return copyUidResponse.getUidMapping();
+            return performCopy(imapFolder, uids);
         } catch (IOException ioe) {
             throw ioExceptionHandler(connection, ioe);
+        }
+    }
+
+    /**
+     * Actually performs the copy based on message UIDs
+     * @return The UID mapping from the copy response
+     * @throws MessagingException
+     * @throws IOException
+     */
+    @Nullable
+    private Map<String,String> performCopy(ImapFolder imapFolder, String[] uids)
+            throws MessagingException, IOException {
+        String encodedDestinationFolderName = folderNameCodec.encode(imapFolder.getPrefixedName());
+        String escapedDestinationFolderName = ImapUtility.encodeString(encodedDestinationFolderName);
+
+        //TODO: Try to copy/move the messages first and only create the folder if the
+        //      operation fails. This will save a roundtrip if the folder already exists.
+
+        createFolderIfNotExists(imapFolder, escapedDestinationFolderName);
+
+        //TODO: Split this into multiple commands if the command exceeds a certain length.
+        List<ImapResponse> responses = executeSimpleCommand(String.format("UID COPY %s %s",
+                combine(uids, ','), escapedDestinationFolderName));
+
+        // Get the tagged response for the UID COPY command
+        ImapResponse response = getLastResponse(responses);
+
+        CopyUidResponse copyUidResponse = CopyUidResponse.parse(response);
+        if (copyUidResponse == null) {
+            return null;
+        }
+
+        return copyUidResponse.getUidMapping();
+    }
+
+    private void createFolderIfNotExists(
+            ImapFolder imapFolder, String escapedDestinationFolderName) throws MessagingException {
+        if (!exists(escapedDestinationFolderName)) {
+            if (K9MailLib.isDebug()) {
+                Log.i(LOG_TAG, "ImapFolder.copyMessages: attempting to create remote folder '" +
+                        escapedDestinationFolderName + "' for " + getLogId());
+            }
+
+            imapFolder.create(FolderType.HOLDS_MESSAGES);
         }
     }
 
