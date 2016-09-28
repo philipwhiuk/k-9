@@ -1,7 +1,5 @@
 package com.fsck.k9.fragment;
 
-
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -34,7 +32,6 @@ import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.Parcelable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.Spannable;
@@ -122,7 +119,7 @@ import com.handmark.pulltorefresh.library.PullToRefreshListView;
 public class MessageListFragment extends Fragment implements OnItemClickListener,
         ConfirmationDialogFragmentListener, LoaderCallbacks<Cursor> {
 
-    private static final String[] THREADED_PROJECTION = {
+    static final String[] THREADED_PROJECTION = {
         MessageColumns.ID,
         MessageColumns.UID,
         MessageColumns.INTERNAL_DATE,
@@ -167,7 +164,7 @@ public class MessageListFragment extends Fragment implements OnItemClickListener
     private static final int FOLDER_NAME_COLUMN = 18;
     private static final int THREAD_COUNT_COLUMN = 19;
 
-    private static final String[] PROJECTION = Arrays.copyOf(THREADED_PROJECTION,
+    static final String[] PROJECTION = Arrays.copyOf(THREADED_PROJECTION,
             THREAD_COUNT_COLUMN);
 
 
@@ -218,9 +215,9 @@ public class MessageListFragment extends Fragment implements OnItemClickListener
         SORT_COMPARATORS = Collections.unmodifiableMap(map);
     }
 
-    private ListView mListView;
+    ListView mListView;
     private PullToRefreshListView mPullToRefreshView;
-    private Parcelable mSavedListState;
+    Parcelable mSavedListState;
 
     private int mPreviewLines = 0;
 
@@ -287,7 +284,7 @@ public class MessageListFragment extends Fragment implements OnItemClickListener
     private ActionModeCallback mActionModeCallback = new ActionModeCallback();
 
 
-    private MessageListFragmentListener mFragmentListener;
+    MessageListFragmentListener mFragmentListener;
 
     private boolean mThreadedList;
 
@@ -326,139 +323,6 @@ public class MessageListFragment extends Fragment implements OnItemClickListener
      */
     private long mContextMenuUniqueId = 0;
 
-
-    /**
-     * This class is used to run operations that modify UI elements in the UI thread.
-     *
-     * <p>We are using convenience methods that add a {@link android.os.Message} instance or a
-     * {@link Runnable} to the message queue.</p>
-     *
-     * <p><strong>Note:</strong> If you add a method to this class make sure you don't accidentally
-     * perform the operation in the calling thread.</p>
-     */
-    static class MessageListHandler extends Handler {
-        private static final int ACTION_FOLDER_LOADING = 1;
-        private static final int ACTION_REFRESH_TITLE = 2;
-        private static final int ACTION_PROGRESS = 3;
-        private static final int ACTION_REMOTE_SEARCH_FINISHED = 4;
-        private static final int ACTION_GO_BACK = 5;
-        private static final int ACTION_RESTORE_LIST_POSITION = 6;
-        private static final int ACTION_OPEN_MESSAGE = 7;
-
-        private WeakReference<MessageListFragment> mFragment;
-
-        public MessageListHandler(MessageListFragment fragment) {
-            mFragment = new WeakReference<>(fragment);
-        }
-        public void folderLoading(String folder, boolean loading) {
-            android.os.Message msg = android.os.Message.obtain(this, ACTION_FOLDER_LOADING,
-                    (loading) ? 1 : 0, 0, folder);
-            sendMessage(msg);
-        }
-
-        public void refreshTitle() {
-            android.os.Message msg = android.os.Message.obtain(this, ACTION_REFRESH_TITLE);
-            sendMessage(msg);
-        }
-
-        public void progress(final boolean progress) {
-            android.os.Message msg = android.os.Message.obtain(this, ACTION_PROGRESS,
-                    (progress) ? 1 : 0, 0);
-            sendMessage(msg);
-        }
-
-        public void remoteSearchFinished() {
-            android.os.Message msg = android.os.Message.obtain(this, ACTION_REMOTE_SEARCH_FINISHED);
-            sendMessage(msg);
-        }
-
-        public void updateFooter(final String message) {
-            post(new Runnable() {
-                @Override
-                public void run() {
-                    MessageListFragment fragment = mFragment.get();
-                    if (fragment != null) {
-                        fragment.updateFooter(message);
-                    }
-                }
-            });
-        }
-
-        public void goBack() {
-            android.os.Message msg = android.os.Message.obtain(this, ACTION_GO_BACK);
-            sendMessage(msg);
-        }
-
-        public void restoreListPosition() {
-            MessageListFragment fragment = mFragment.get();
-            if (fragment != null) {
-                android.os.Message msg = android.os.Message.obtain(this, ACTION_RESTORE_LIST_POSITION,
-                        fragment.mSavedListState);
-                fragment.mSavedListState = null;
-                sendMessage(msg);
-            }
-        }
-
-        public void openMessage(MessageReference messageReference) {
-            android.os.Message msg = android.os.Message.obtain(this, ACTION_OPEN_MESSAGE,
-                    messageReference);
-            sendMessage(msg);
-        }
-
-        @Override
-        public void handleMessage(android.os.Message msg) {
-            MessageListFragment fragment = mFragment.get();
-            if (fragment == null) {
-                return;
-            }
-
-            // The following messages don't need an attached activity.
-            switch (msg.what) {
-                case ACTION_REMOTE_SEARCH_FINISHED: {
-                    fragment.remoteSearchFinished();
-                    return;
-                }
-            }
-
-            // Discard messages if the fragment isn't attached to an activity anymore.
-            Activity activity = fragment.getActivity();
-            if (activity == null) {
-                return;
-            }
-
-            switch (msg.what) {
-                case ACTION_FOLDER_LOADING: {
-                    String folder = (String) msg.obj;
-                    boolean loading = (msg.arg1 == 1);
-                    fragment.folderLoading(folder, loading);
-                    break;
-                }
-                case ACTION_REFRESH_TITLE: {
-                    fragment.updateTitle();
-                    break;
-                }
-                case ACTION_PROGRESS: {
-                    boolean progress = (msg.arg1 == 1);
-                    fragment.progress(progress);
-                    break;
-                }
-                case ACTION_GO_BACK: {
-                    fragment.mFragmentListener.goBack();
-                    break;
-                }
-                case ACTION_RESTORE_LIST_POSITION: {
-                    fragment.mListView.onRestoreInstanceState((Parcelable) msg.obj);
-                    break;
-                }
-                case ACTION_OPEN_MESSAGE: {
-                    MessageReference messageReference = (MessageReference) msg.obj;
-                    fragment.mFragmentListener.openMessage(messageReference);
-                    break;
-                }
-            }
-        }
-    }
-
     /**
      * @return The comparator to use to display messages in an ordered
      *         fashion. Never {@code null}.
@@ -492,7 +356,7 @@ public class MessageListFragment extends Fragment implements OnItemClickListener
         return new ComparatorChain<>(chain);
     }
 
-    private void folderLoading(String folder, boolean loading) {
+    void folderLoading(String folder, boolean loading) {
         if (mCurrentFolder != null && mCurrentFolder.name.equals(folder)) {
             mCurrentFolder.loading = loading;
         }
@@ -569,7 +433,7 @@ public class MessageListFragment extends Fragment implements OnItemClickListener
         }
     }
 
-    private void progress(final boolean progress) {
+    void progress(final boolean progress) {
         mFragmentListener.enableActionBarProgress(progress);
         if (mPullToRefreshView != null && !progress) {
             mPullToRefreshView.onRefreshComplete();
@@ -1660,7 +1524,6 @@ public class MessageListFragment extends Fragment implements OnItemClickListener
             return (folderNames.isEmpty() || folderNames.contains(folder));
         }
     }
-
 
     class MessageListAdapter extends CursorAdapter {
 
@@ -3153,48 +3016,9 @@ public class MessageListFragment extends Fragment implements OnItemClickListener
 
         String threadId = getThreadId(mSearch);
 
-        Uri uri;
-        String[] projection;
-        boolean needConditions;
-        if (threadId != null) {
-            uri = Uri.withAppendedPath(EmailProvider.CONTENT_URI, "account/" + accountUuid + "/thread/" + threadId);
-            projection = PROJECTION;
-            needConditions = false;
-        } else if (mThreadedList) {
-            uri = Uri.withAppendedPath(EmailProvider.CONTENT_URI, "account/" + accountUuid + "/messages/threaded");
-            projection = THREADED_PROJECTION;
-            needConditions = true;
-        } else {
-            uri = Uri.withAppendedPath(EmailProvider.CONTENT_URI, "account/" + accountUuid + "/messages");
-            projection = PROJECTION;
-            needConditions = true;
-        }
-
-        StringBuilder query = new StringBuilder();
-        List<String> queryArgs = new ArrayList<>();
-        if (needConditions) {
-            boolean selectActive = mActiveMessage != null && mActiveMessage.getAccountUuid().equals(accountUuid);
-
-            if (selectActive) {
-                query.append("(" + MessageColumns.UID + " = ? AND " + SpecialColumns.FOLDER_NAME + " = ?) OR (");
-                queryArgs.add(mActiveMessage.getUid());
-                queryArgs.add(mActiveMessage.getFolderName());
-            }
-
-            SqlQueryBuilder.buildWhereClause(account, mSearch.getConditions(), query, queryArgs);
-
-            if (selectActive) {
-                query.append(')');
-            }
-        }
-
-        String selection = query.toString();
-        String[] selectionArgs = queryArgs.toArray(new String[0]);
-
-        String sortOrder = buildSortOrder();
-
-        return new CursorLoader(getActivity(), uri, projection, selection, selectionArgs,
-                sortOrder);
+        return MLFCursorLoaderFactory.createCursorLoader(
+                threadId, mThreadedList, accountUuid, mActiveMessage,
+                account, mSearch, getActivity(), mSortType, mSortAscending, mSortDateAscending);
     }
 
     private String getThreadId(LocalSearch search) {
@@ -3206,51 +3030,6 @@ public class MessageListFragment extends Fragment implements OnItemClickListener
         }
 
         return null;
-    }
-
-    private String buildSortOrder() {
-        String sortColumn;
-        switch (mSortType) {
-            case SORT_ARRIVAL: {
-                sortColumn = MessageColumns.INTERNAL_DATE;
-                break;
-            }
-            case SORT_ATTACHMENT: {
-                sortColumn = "(" + MessageColumns.ATTACHMENT_COUNT + " < 1)";
-                break;
-            }
-            case SORT_FLAGGED: {
-                sortColumn = "(" + MessageColumns.FLAGGED + " != 1)";
-                break;
-            }
-            case SORT_SENDER: {
-                //FIXME
-                sortColumn = MessageColumns.SENDER_LIST;
-                break;
-            }
-            case SORT_SUBJECT: {
-                sortColumn = MessageColumns.SUBJECT + " COLLATE NOCASE";
-                break;
-            }
-            case SORT_UNREAD: {
-                sortColumn = MessageColumns.READ;
-                break;
-            }
-            case SORT_DATE:
-            default: {
-                sortColumn = MessageColumns.DATE;
-            }
-        }
-
-        String sortDirection = (mSortAscending) ? " ASC" : " DESC";
-        String secondarySort;
-        if (mSortType == SortType.SORT_DATE || mSortType == SortType.SORT_ARRIVAL) {
-            secondarySort = "";
-        } else {
-            secondarySort = MessageColumns.DATE + ((mSortDateAscending) ? " ASC, " : " DESC, ");
-        }
-
-        return sortColumn + sortDirection + ", " + secondarySort + MessageColumns.ID + " DESC";
     }
 
     @Override
@@ -3434,7 +3213,7 @@ public class MessageListFragment extends Fragment implements OnItemClickListener
         return mPreferences.getAccount(accountUuid);
     }
 
-    private void remoteSearchFinished() {
+    void remoteSearchFinished() {
         mRemoteSearchFuture = null;
     }
 
