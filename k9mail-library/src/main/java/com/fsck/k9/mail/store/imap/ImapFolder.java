@@ -31,6 +31,7 @@ import com.fsck.k9.mail.MessageRetrievalListener;
 import com.fsck.k9.mail.MessagingException;
 import com.fsck.k9.mail.Part;
 import com.fsck.k9.mail.filter.EOLConvertingOutputStream;
+import com.fsck.k9.mail.filter.FixedLengthInputStream;
 import com.fsck.k9.mail.internet.MimeBodyPart;
 import com.fsck.k9.mail.internet.MimeHeader;
 import com.fsck.k9.mail.internet.MimeMessageHelper;
@@ -685,36 +686,8 @@ class ImapFolder extends Folder<ImapMessage> {
             messageMap.put(uid, message);
         }
 
-        Set<String> fetchFields = new LinkedHashSet<>();
-        fetchFields.add("UID");
-
-        if (fetchProfile.contains(FetchProfile.Item.FLAGS)) {
-            fetchFields.add("FLAGS");
-        }
-
-        if (fetchProfile.contains(FetchProfile.Item.ENVELOPE)) {
-            fetchFields.add("INTERNALDATE");
-            fetchFields.add("RFC822.SIZE");
-            fetchFields.add("BODY.PEEK[HEADER.FIELDS (date subject from content-type to cc " +
-                    "reply-to message-id references in-reply-to " + K9MailLib.IDENTITY_HEADER + ")]");
-        }
-
-        if (fetchProfile.contains(FetchProfile.Item.STRUCTURE)) {
-            fetchFields.add("BODYSTRUCTURE");
-        }
-
-        if (fetchProfile.contains(FetchProfile.Item.BODY_SANE)) {
-            int maximumAutoDownloadMessageSize = store.getStoreConfig().getMaximumAutoDownloadMessageSize();
-            if (maximumAutoDownloadMessageSize > 0) {
-                fetchFields.add(String.format(Locale.US, "BODY.PEEK[]<0.%d>", maximumAutoDownloadMessageSize));
-            } else {
-                fetchFields.add("BODY.PEEK[]");
-            }
-        }
-
-        if (fetchProfile.contains(FetchProfile.Item.BODY)) {
-            fetchFields.add("BODY.PEEK[]");
-        }
+        Set<String> fetchFields = ImapFetchFieldsBuilder.fromFetchProfile(fetchProfile,
+                store.getStoreConfig().getMaximumAutoDownloadMessageSize());
 
         String spaceSeparatedFetchFields = combine(fetchFields.toArray(new String[fetchFields.size()]), ' ');
 
@@ -771,20 +744,10 @@ class ImapFolder extends Folder<ImapMessage> {
                         }
 
                         ImapMessage imapMessage = (ImapMessage) message;
-                        Object literal = handleFetchResponse(imapMessage, fetchList);
+                        Object body = handleFetchResponse(imapMessage, fetchList);
 
-                        if (literal != null) {
-                            if (literal instanceof String) {
-                                String bodyString = (String) literal;
-                                InputStream bodyStream = new ByteArrayInputStream(bodyString.getBytes());
-                                imapMessage.parse(bodyStream);
-                            } else if (literal instanceof Integer) {
-                                // All the work was done in FetchBodyCallback.foundLiteral()
-                            } else {
-                                // This shouldn't happen
-                                throw new MessagingException("Got FETCH response with bogus parameters");
-                            }
-                        }
+                        handleParsedBody(imapMessage, body);
+
 
                         if (listener != null) {
                             listener.messageFinished(imapMessage, messageNumber, messageMap.size());
@@ -796,6 +759,35 @@ class ImapFolder extends Folder<ImapMessage> {
                 } while (response.getTag() == null);
             } catch (IOException ioe) {
                 throw ioExceptionHandler(connection, ioe);
+            }
+        }
+    }
+
+    /**
+     * We expect one of 2 types for body:
+     *
+     * <ul>
+     *     <li>A raw string, indicating that we still need to parse the body onto the message</li>
+     *     <li>An integer (specifically the value 1) used as a return code from
+     *          {@link FetchBodyCallback#foundLiteral(ImapResponse, FixedLengthInputStream)}</li>
+     * </ul>
+     *
+     * @param imapMessage The message to parse the body onto.
+     * @param body The body (or placeholder value)
+     * @throws IOException
+     * @throws MessagingException
+     */
+    private void handleParsedBody(ImapMessage imapMessage, Object body) throws IOException, MessagingException {
+        if (body != null) {
+            if (body instanceof String) {
+                String bodyString = (String) body;
+                InputStream bodyStream = new ByteArrayInputStream(bodyString.getBytes());
+                imapMessage.parse(bodyStream);
+            } else if (body instanceof Integer) {
+                // All the work was done in FetchBodyCallback.foundLiteral()
+            } else {
+                // This shouldn't happen
+                throw new MessagingException("Got FETCH response with bogus parameters");
             }
         }
     }
@@ -863,13 +855,13 @@ class ImapFolder extends Folder<ImapMessage> {
 
     }
 
-    private void setPartBody(Object literal, Part part) throws MessagingException, IOException {
-        if (literal != null) {
-            if (literal instanceof Body) {
+    private void setPartBody(Object body, Part part) throws MessagingException, IOException {
+        if (body != null) {
+            if (body instanceof Body) {
                 // Most of the work for this is done in FetchAttachmentCallback.foundLiteral()
-                MimeMessageHelper.setBody(part, (Body) literal);
-            } else if (literal instanceof String) {
-                String bodyString = (String) literal;
+                MimeMessageHelper.setBody(part, (Body) body);
+            } else if (body instanceof String) {
+                String bodyString = (String) body;
                 InputStream bodyStream = new ByteArrayInputStream(bodyString.getBytes());
 
                 String contentTransferEncoding =
