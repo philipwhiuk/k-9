@@ -50,19 +50,7 @@ public class AndroidAccountOAuth2TokenStore implements OAuth2TokenProvider {
                     @Override
                     public void run(AccountManagerFuture<Bundle> future) {
                         try {
-                            Bundle bundle = future.getResult();
-                            Object keyAccountName = bundle.get(AccountManager.KEY_ACCOUNT_NAME);
-                            if (keyAccountName == null) {
-                                callback.failure(new AuthorizationException(activity.getString(
-                                        R.string.xoauth2_no_account)));
-                                return;
-                            }
-                            if (keyAccountName.equals(emailAddress)) {
-                                callback.success();
-                            } else {
-                                callback.failure(new AuthorizationException(activity.getString(
-                                        R.string.xoauth2_incorrect_auth_info_provided)));
-                            }
+                            handleAccountManagerResponse(future, activity, callback, emailAddress);
                         } catch (OperationCanceledException e) {
                             callback.failure(new AuthorizationException(activity.getString(
                                     R.string.xoauth2_auth_cancelled_by_user), e));
@@ -75,6 +63,23 @@ public class AndroidAccountOAuth2TokenStore implements OAuth2TokenProvider {
                         }
                     }
                 }, null);
+        }
+    }
+
+    private void handleAccountManagerResponse(
+            AccountManagerFuture<Bundle> future, final Activity activity,
+            final OAuth2TokenProviderAuthCallback callback, final String emailAddress)
+            throws AuthenticatorException, OperationCanceledException, IOException {
+        Bundle bundle = future.getResult();
+        Object keyAccountName = bundle.get(AccountManager.KEY_ACCOUNT_NAME);
+        if (keyAccountName == null) {
+            callback.failure(new AuthorizationException(activity.getString(
+                    R.string.xoauth2_no_account)));
+        } else if (keyAccountName.equals(emailAddress)) {
+            callback.success();
+        } else {
+            callback.failure(new AuthorizationException(activity.getString(
+                    R.string.xoauth2_incorrect_auth_info_provided)));
         }
     }
 
