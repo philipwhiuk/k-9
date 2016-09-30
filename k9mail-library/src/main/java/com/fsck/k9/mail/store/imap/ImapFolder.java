@@ -858,7 +858,7 @@ class ImapFolder extends Folder<ImapMessage> {
     private void setPartBody(Object body, Part part) throws MessagingException, IOException {
         if (body != null) {
             if (body instanceof Body) {
-                // Most of the work for this is done in FetchAttachmentCallback.foundLiteral()
+                // Most of the work for this is done in FetchPartCallback.foundLiteral()
                 MimeMessageHelper.setBody(part, (Body) body);
             } else if (body instanceof String) {
                 String bodyString = (String) body;
