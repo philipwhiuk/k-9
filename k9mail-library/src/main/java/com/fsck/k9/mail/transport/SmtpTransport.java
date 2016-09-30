@@ -333,7 +333,6 @@ public class SmtpTransport extends Transport {
                  */
                 case LOGIN:
                 case PLAIN:
-                    Log.w(LOG_TAG, "Authenticating using plain auth");
                     // try saslAuthPlain first, because it supports UTF-8 explicitly
                     if (authPlainSupported) {
                         saslAuthPlain(mUsername, mPassword);
@@ -550,8 +549,10 @@ public class SmtpTransport extends Transport {
             entireMessageSent = true; // After the "\r\n." is attempted, we may have sent the message
             executeSimpleCommand(".");
         } catch (NegativeSmtpReplyException e) {
+            e.printStackTrace();
             throw e;
         } catch (Exception e) {
+            e.printStackTrace();
             MessagingException me = new MessagingException("Unable to send message", e);
             me.setPermanentFailure(entireMessageSent);
 
