@@ -396,7 +396,7 @@ public class SmtpTransportTest {
                     e.getMessage());
         }
 
-        server.verifyConnectionStillOpen();
+        server.verifyConnectionClosed();
         server.verifyInteractionCompleted();
 
         InOrder inOrder = inOrder(oAuth2TokenProvider);
