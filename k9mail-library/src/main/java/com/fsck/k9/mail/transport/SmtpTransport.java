@@ -320,7 +320,7 @@ public class SmtpTransport extends Transport {
             parseOptionalSizeValue(extensions);
 
             if (!TextUtils.isEmpty(mUsername)
-                    && (TextUtils.isEmpty(mPassword) ||
+                    && (!TextUtils.isEmpty(mPassword) ||
                         AuthType.EXTERNAL == mAuthType ||
                         AuthType.XOAUTH2 == mAuthType)) {
 
@@ -333,6 +333,7 @@ public class SmtpTransport extends Transport {
                  */
                 case LOGIN:
                 case PLAIN:
+                    Log.w(LOG_TAG, "Authenticating using plain auth");
                     // try saslAuthPlain first, because it supports UTF-8 explicitly
                     if (authPlainSupported) {
                         saslAuthPlain(mUsername, mPassword);
@@ -807,9 +808,14 @@ public class SmtpTransport extends Transport {
     }
 
     private void attemptXoauth2(String username) throws MessagingException, IOException {
+        String token = oauthTokenProvider.getToken(username, OAuth2TokenProvider.OAUTH2_TIMEOUT);
+
+        if (token == null) {
+            throw new AuthenticationFailedException("No OAuth 2.0 token provided");
+        }
+
         executeSimpleCommand("AUTH XOAUTH2 " +
-                Authentication.computeXoauth(username,
-                        oauthTokenProvider.getToken(username, OAuth2TokenProvider.OAUTH2_TIMEOUT)),
+                Authentication.computeXoauth(username, token),
                 true);
     }
 
