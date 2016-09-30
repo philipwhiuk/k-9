@@ -212,6 +212,8 @@ public class SmtpTransportTest {
         server.expect("EHLO localhost");
         server.output("250-localhost Hello client.localhost");
         server.output("250 AUTH");
+        server.expect("QUIT");
+        server.output("221 BYE");
 
         try {
             SmtpTransport transport = startServerAndCreateSmtpTransport(server);
@@ -222,7 +224,7 @@ public class SmtpTransportTest {
                     e.getMessage());
         }
 
-        server.verifyConnectionStillOpen();
+        server.verifyConnectionClosed();
         server.verifyInteractionCompleted();
     }
 
@@ -264,6 +266,8 @@ public class SmtpTransportTest {
         server.expect("EHLO localhost");
         server.output("250-localhost Hello client.localhost");
         server.output("250 AUTH PLAIN LOGIN");
+        server.expect("QUIT");
+        server.output("221 BYE");
 
         try {
             SmtpTransport transport = startServerAndCreateSmtpTransport(server);
@@ -274,7 +278,7 @@ public class SmtpTransportTest {
                     e.getMessage());
         }
 
-        server.verifyConnectionStillOpen();
+        server.verifyConnectionClosed();
         server.verifyInteractionCompleted();
     }
 
@@ -313,6 +317,8 @@ public class SmtpTransportTest {
         server.expect("EHLO localhost");
         server.output("250-localhost Hello client.localhost");
         server.output("250 AUTH PLAIN LOGIN");
+        server.expect("QUIT");
+        server.output("221 BYE");
 
         try {
             SmtpTransport transport = startServerAndCreateSmtpTransport(server);
@@ -378,6 +384,8 @@ public class SmtpTransportTest {
         server.output("535 5.7.1 Username and Password not accepted.");
         server.expect("AUTH XOAUTH2 dXNlcj11c2VyAWF1dGg9QmVhcmVyIGJjMTIzNAEB");
         server.output("535 5.7.1 Username and Password not accepted.");
+        server.expect("QUIT");
+        server.output("221 BYE");
 
         try {
             SmtpTransport transport = startServerAndCreateSmtpTransport(server);
@@ -434,6 +442,8 @@ public class SmtpTransportTest {
         server.expect("EHLO localhost");
         server.output("250-localhost Hello client.localhost");
         server.output("250 AUTH");
+        server.expect("QUIT");
+        server.output("221 BYE");
 
         try {
             SmtpTransport transport = startServerAndCreateSmtpTransport(server);
@@ -443,7 +453,7 @@ public class SmtpTransportTest {
             assertEquals(CertificateValidationException.Reason.MissingCapability, e.getReason());
         }
 
-        server.verifyConnectionStillOpen();
+        server.verifyConnectionClosed();
         server.verifyInteractionCompleted();
     }
     @Test
@@ -484,6 +494,8 @@ public class SmtpTransportTest {
         server.expect("EHLO localhost");
         server.output("250-localhost Hello client.localhost");
         server.output("250 AUTH PLAIN LOGIN");
+        server.expect("QUIT");
+        server.output("221 BYE");
 
         try {
             SmtpTransport transport = startServerAndCreateSmtpTransport(server);
@@ -642,6 +654,36 @@ public class SmtpTransportTest {
         } catch (SmtpTransport.NegativeSmtpReplyException e) {
             assertEquals(421, e.getReplyCode());
             assertEquals("4.7.0 Temporary system problem", e.getReplyText());
+        }
+    }
+
+    @Test
+    public void sendMessage_withConnectionClosed_throwsException()
+            throws MessagingException, IOException, InterruptedException {
+
+        TestMessage message = new TestMessage();
+        message.setFrom(new Address("user@localhost"));
+        message.setRecipients(Message.RecipientType.TO, new Address[]{new Address("user2@localhost")});
+
+        MockSmtpServer server = new MockSmtpServer();
+        setupConnectAndPlainAuthentication(server);
+        server.expect("MAIL FROM:<user@localhost>");
+        server.output("250 OK");
+        server.expect("RCPT TO:<user2@localhost>");
+        server.output("250 OK");
+        server.expect("DATA");
+        server.output("354 End data with <CR><LF>.<CR><LF>");
+        server.expect("");
+        server.closeConnection();
+
+        SmtpTransport transport = startServerAndCreateSmtpTransport(server);
+
+        try {
+            transport.sendMessage(message);
+            fail("Expected exception");
+        } catch (MessagingException e) {
+            assertTrue(e.isPermanentFailure());
+            assertEquals("Unable to send message", e.getMessage());
         }
     }
 }
