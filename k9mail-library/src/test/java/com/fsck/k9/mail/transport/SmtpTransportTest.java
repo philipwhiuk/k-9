@@ -23,6 +23,8 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyLong;
@@ -42,6 +44,7 @@ public class SmtpTransportTest {
     private String username;
     private String password;
     private String clientCertificateAlias;
+    private List<String> extensions;
     private StoreConfig storeConfig = mock(StoreConfig.class);
     private OAuth2TokenProvider oAuth2TokenProvider = mock(OAuth2TokenProvider.class);
     private TrustedSocketFactory socketFactory;
@@ -60,6 +63,7 @@ public class SmtpTransportTest {
         authenticationType = null;
         clientCertificateAlias = null;
         connectionSecurity = null;
+        extensions = new ArrayList<>();
     }
 
     private SmtpTransport startServerAndCreateSmtpTransport(MockSmtpServer server)
@@ -91,6 +95,9 @@ public class SmtpTransportTest {
         server.expect("EHLO localhost");
         server.output("250-localhost Hello client.localhost");
         server.output("250-SIZE 1000000");
+        for (String extension: extensions) {
+            server.output("250-"+extension);
+        }
         server.output("250 AUTH LOGIN PLAIN CRAM-MD5");
         server.expect("AUTH PLAIN AHVzZXIAcGFzc3dvcmQ=");
         server.output("235 2.7.0 Authentication successful");
@@ -277,6 +284,33 @@ public class SmtpTransportTest {
         MockSmtpServer server = new MockSmtpServer();
         setupConnectAndPlainAuthentication(server);
         server.expect("MAIL FROM:<user@localhost>");
+        server.output("250 OK");
+        server.expect("RCPT TO:<user2@localhost>");
+        server.output("250 OK");
+        server.expect("DATA");
+        server.output("354 End data with <CR><LF>.<CR><LF>");
+        server.expect("");
+        server.expect(".");
+        server.output("250 OK: queued as 12345");
+        server.expect("QUIT");
+        server.output("221 BYE");
+
+
+        SmtpTransport transport = startServerAndCreateSmtpTransport(server);
+        transport.sendMessage(message);
+    }
+
+    @Test
+    public void sendMessage_with8BitEncoding_usesEncoding()
+            throws MessagingException, IOException, InterruptedException {
+        extensions.add("8BITMIME");
+        TestMessage message = new TestMessage();
+        message.setFrom(new Address("user@localhost"));
+        message.setRecipients(Message.RecipientType.TO, new Address[]{new Address("user2@localhost")});
+
+        MockSmtpServer server = new MockSmtpServer();
+        setupConnectAndPlainAuthentication(server);
+        server.expect("MAIL FROM:<user@localhost> BODY=8BITMIME");
         server.output("250 OK");
         server.expect("RCPT TO:<user2@localhost>");
         server.output("250 OK");
