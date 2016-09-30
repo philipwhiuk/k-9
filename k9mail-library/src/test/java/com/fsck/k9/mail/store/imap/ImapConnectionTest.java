@@ -26,10 +26,6 @@ import com.fsck.k9.mail.ssl.TrustedSocketFactory;
 import com.fsck.k9.mail.store.imap.mockserver.MockImapServer;
 import com.fsck.k9.testHelpers.TestTrustedSocketFactory;
 
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 import okio.ByteString;
 import org.junit.Before;
 import org.junit.Test;
