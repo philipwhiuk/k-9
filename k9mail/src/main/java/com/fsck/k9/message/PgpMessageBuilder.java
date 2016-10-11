@@ -102,7 +102,7 @@ public class PgpMessageBuilder extends MessageBuilder {
 
     private void startOrContinueBuildMessage(@Nullable Intent pgpApiIntent) {
         try {
-            boolean shouldSign = cryptoStatus.isSigningEnabled();
+            boolean shouldSign = cryptoStatus.isPgpSigningEnabled();
             boolean shouldEncrypt = cryptoStatus.isEncryptionEnabled() && !opportunisticSkipEncryption;
             boolean isPgpInlineMode = cryptoStatus.isPgpInlineModeEnabled();
 
@@ -276,7 +276,7 @@ public class PgpMessageBuilder extends MessageBuilder {
     }
 
     private void mimeBuildSignedMessage(@NonNull BodyPart signedBodyPart, Intent result) throws MessagingException {
-        if (!cryptoStatus.isSigningEnabled()) {
+        if (!cryptoStatus.isPgpSigningEnabled()) {
             throw new IllegalStateException("call to mimeBuildSignedMessage while signing isn't enabled!");
         }
 

@@ -138,8 +138,12 @@ public class ComposeCryptoStatus {
         return cryptoMode == CryptoMode.OPPORTUNISTIC;
     }
 
-    public boolean isSigningEnabled() {
+    public boolean isPgpSigningEnabled() {
         return cryptoMode != CryptoMode.DISABLE && signingKeyId != null;
+    }
+
+    public boolean isSMimeSigningEnabled() {
+        return cryptoMode != CryptoMode.DISABLE && signingCertificateId != null;
     }
 
     public boolean isPgpInlineModeEnabled() {

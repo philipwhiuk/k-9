@@ -415,7 +415,7 @@ public class RecipientPresenter implements OpenPgpApi.PermissionPingCallback, SM
     public boolean isForceTextMessageFormat() {
         if (cryptoEnablePgpInline) {
             ComposeCryptoStatus cryptoStatus = getCurrentCryptoStatus();
-            return cryptoStatus.isEncryptionEnabled() || cryptoStatus.isSigningEnabled();
+            return cryptoStatus.isEncryptionEnabled() || cryptoStatus.isPgpSigningEnabled();
         } else {
             return false;
         }
@@ -423,7 +423,9 @@ public class RecipientPresenter implements OpenPgpApi.PermissionPingCallback, SM
 
     public boolean isAllowSavingDraftRemotely() {
         ComposeCryptoStatus cryptoStatus = getCurrentCryptoStatus();
-        return cryptoStatus.isEncryptionEnabled() || cryptoStatus.isSigningEnabled();
+        return cryptoStatus.isEncryptionEnabled()
+                || cryptoStatus.isPgpSigningEnabled()
+                || cryptoStatus.isSMimeSigningEnabled();
     }
 
     @SuppressWarnings("UnusedParameters")

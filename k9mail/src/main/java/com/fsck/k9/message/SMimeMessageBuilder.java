@@ -68,15 +68,15 @@ public class SMimeMessageBuilder extends MessageBuilder {
             throw new IllegalStateException("message can only be built once!");
         }
         if (cryptoStatus == null) {
-            throw new IllegalStateException("PgpMessageBuilder must have cryptoStatus set before building!");
+            throw new IllegalStateException("SMimeMessageBuilder must have cryptoStatus set before building!");
         }
         if (cryptoStatus.isCryptoDisabled()) {
-            throw new AssertionError("PgpMessageBuilder must not be used if crypto is disabled!");
+            throw new AssertionError("SMimeMessageBuilder must not be used if crypto is disabled!");
         }
 
         try {
             if (!cryptoStatus.isProviderStateOk()) {
-                throw new MessagingException("OpenPGP Provider is not ready!");
+                throw new MessagingException("SMime Provider is not ready!");
             }
 
             currentProcessedMimeMessage = build();
@@ -98,7 +98,7 @@ public class SMimeMessageBuilder extends MessageBuilder {
 
     private void startOrContinueBuildMessage(@Nullable Intent sMimeApiIntent) {
         try {
-            boolean shouldSign = cryptoStatus.isSigningEnabled();
+            boolean shouldSign = cryptoStatus.isSMimeSigningEnabled();
             boolean shouldEncrypt = cryptoStatus.isEncryptionEnabled() && !opportunisticSkipEncryption;
 
             if (!shouldSign && !shouldEncrypt) {
@@ -131,17 +131,17 @@ public class SMimeMessageBuilder extends MessageBuilder {
     @NonNull
     private Intent buildSMimeApiIntent(boolean shouldSign, boolean shouldEncrypt)
             throws MessagingException {
-        Intent pgpApiIntent;
+        Intent sMimeApiIntent;
         if (shouldEncrypt) {
             if (!shouldSign) {
                 throw new IllegalStateException("encrypt-only is not supported at this point and should never happen!");
             }
             // pgpApiIntent = new Intent(shouldSign ? OpenPgpApi.ACTION_SIGN_AND_ENCRYPT : OpenPgpApi.ACTION_ENCRYPT);
-            pgpApiIntent = new Intent(SMimeApi.ACTION_SIGN_AND_ENCRYPT);
+            sMimeApiIntent = new Intent(SMimeApi.ACTION_SIGN_AND_ENCRYPT);
 
             long[] encryptCertificateIds = cryptoStatus.getEncryptCertificateIds();
             if (encryptCertificateIds != null) {
-                pgpApiIntent.putExtra(SMimeApi.EXTRA_CERTIFICATE_IDS, encryptCertificateIds);
+                sMimeApiIntent.putExtra(SMimeApi.EXTRA_CERTIFICATE_IDS, encryptCertificateIds);
             }
 
             if(!isDraft()) {
@@ -150,19 +150,19 @@ public class SMimeMessageBuilder extends MessageBuilder {
                 if (!hasRecipientAddresses) {
                     throw new MessagingException("encryption is enabled, but no recipient specified!");
                 }
-                pgpApiIntent.putExtra(SMimeApi.EXTRA_USER_IDS, encryptRecipientAddresses);
-                pgpApiIntent.putExtra(SMimeApi.EXTRA_ENCRYPT_OPPORTUNISTIC, cryptoStatus.isEncryptionOpportunistic());
+                sMimeApiIntent.putExtra(SMimeApi.EXTRA_USER_IDS, encryptRecipientAddresses);
+                sMimeApiIntent.putExtra(SMimeApi.EXTRA_ENCRYPT_OPPORTUNISTIC, cryptoStatus.isEncryptionOpportunistic());
             }
         } else {
-            pgpApiIntent = new Intent(SMimeApi.ACTION_DETACHED_SIGN);
+            sMimeApiIntent = new Intent(SMimeApi.ACTION_DETACHED_SIGN);
         }
 
         if (shouldSign) {
-            pgpApiIntent.putExtra(SMimeApi.EXTRA_SIGN_CERTIFICATE_ID, cryptoStatus.getSigningCertificateId());
+            sMimeApiIntent.putExtra(SMimeApi.EXTRA_SIGN_CERTIFICATE_ID, cryptoStatus.getSigningCertificateId());
         }
 
-        pgpApiIntent.putExtra(SMimeApi.EXTRA_REQUEST_ASCII_ARMOR, true);
-        return pgpApiIntent;
+        sMimeApiIntent.putExtra(SMimeApi.EXTRA_REQUEST_ASCII_ARMOR, true);
+        return sMimeApiIntent;
     }
 
     private PendingIntent launchSMimeApiIntent(@NonNull Intent sMimeIntent,
@@ -232,29 +232,24 @@ public class SMimeMessageBuilder extends MessageBuilder {
     }
 
     private void mimeBuildMessage(
-            @NonNull Intent result, @NonNull MimeBodyPart bodyPart, @Nullable BinaryTempFileBody pgpResultTempBody)
+            @NonNull Intent result, @NonNull MimeBodyPart bodyPart, @Nullable BinaryTempFileBody sMimeResultTempBody)
             throws MessagingException {
-        if (pgpResultTempBody == null) {
-            boolean shouldHaveResultPart = cryptoStatus.isPgpInlineModeEnabled() ||
-                    (cryptoStatus.isEncryptionEnabled() && !opportunisticSkipEncryption);
+        if (sMimeResultTempBody == null) {
+            boolean shouldHaveResultPart = cryptoStatus.isEncryptionEnabled()
+                    && !opportunisticSkipEncryption;
             if (shouldHaveResultPart) {
-                throw new AssertionError("encryption or pgp/inline is enabled, but no output part!");
+                throw new AssertionError("encryption is enabled, but no output part!");
             }
 
             mimeBuildSignedMessage(bodyPart, result);
             return;
         }
 
-        if (cryptoStatus.isPgpInlineModeEnabled()) {
-            mimeBuildInlineMessage(pgpResultTempBody);
-            return;
-        }
-
-        mimeBuildEncryptedMessage(pgpResultTempBody);
+        mimeBuildEncryptedMessage(sMimeResultTempBody);
     }
 
     private void mimeBuildSignedMessage(@NonNull BodyPart signedBodyPart, Intent result) throws MessagingException {
-        if (!cryptoStatus.isSigningEnabled()) {
+        if (!cryptoStatus.isSMimeSigningEnabled()) {
             throw new IllegalStateException("call to mimeBuildSignedMessage while signing isn't enabled!");
         }
 
@@ -267,22 +262,13 @@ public class SMimeMessageBuilder extends MessageBuilder {
         multipartSigned.setSubType("signed");
         multipartSigned.addBodyPart(signedBodyPart);
         multipartSigned.addBodyPart(
-                //TODO: MIME TYPE
-                new MimeBodyPart(new BinaryMemoryBody(signedData, MimeUtil.ENC_7BIT), "application/pgp-signature"));
+                new MimeBodyPart(new BinaryMemoryBody(signedData, MimeUtil.ENC_7BIT), "application/pcks7-signature"));
         MimeMessageHelper.setBody(currentProcessedMimeMessage, multipartSigned);
 
-        //TODO: MIME TYPE
         String contentType = String.format(
-                "multipart/signed; boundary=\"%s\";\r\n  protocol=\"application/pgp-signature\"",
+                "multipart/signed; boundary=\"%s\";\r\n  protocol=\"application/pcks7-signature\"",
                 multipartSigned.getBoundary());
 
-        //TODO: ???
-        if (result.hasExtra(SMimeApi.RESULT_SIGNATURE_MICALG)) {
-            String micAlgParameter = result.getStringExtra(SMimeApi.RESULT_SIGNATURE_MICALG);
-            contentType += String.format("; micalg=\"%s\"", micAlgParameter);
-        } else {
-            Log.e(K9.LOG_TAG, "missing micalg parameter for pgp multipart/signed!");
-        }
         currentProcessedMimeMessage.setHeader(MimeHeader.HEADER_CONTENT_TYPE, contentType);
     }
 
