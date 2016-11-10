@@ -188,18 +188,24 @@ class ImapConnection {
 
     private Socket connect() throws GeneralSecurityException, MessagingException, IOException {
         Exception connectException = null;
+        boolean networkConnection = true;
 
-        InetAddress[] inetAddresses = InetAddress.getAllByName(settings.getHost());
-        for (InetAddress address : inetAddresses) {
-            try {
-                return connectToAddress(address);
-            } catch (IOException e) {
-                Log.w(LOG_TAG, "Could not connect to " + address, e);
-                connectException = e;
+        if (connectivityManager.getActiveNetworkInfo() != null
+                && connectivityManager.getActiveNetworkInfo().isConnected()) {
+            InetAddress[] inetAddresses = InetAddress.getAllByName(settings.getHost());
+            for (InetAddress address : inetAddresses) {
+                try {
+                    return connectToAddress(address);
+                } catch (IOException e) {
+                    Log.w(LOG_TAG, "Could not connect to " + address, e);
+                    connectException = e;
+                }
             }
+        } else {
+            networkConnection = false;
         }
 
-        throw new MessagingException("Cannot connect to host", connectException);
+        throw new MessagingException("Cannot connect to host", connectException, networkConnection);
     }
 
     private Socket connectToAddress(InetAddress address) throws NoSuchAlgorithmException, KeyManagementException,
@@ -331,20 +337,20 @@ class ImapConnection {
         switch (settings.getAuthType()) {
             case XOAUTH2:
                 if (oauthTokenProvider == null) {
-                    throw new MessagingException("No OAuthToken Provider available.");
+                    throw new AuthenticationFailedException("No OAuthToken Provider available.");
                 }
                 if (hasCapability(Capabilities.AUTH_XOAUTH2)
                         && hasCapability(Capabilities.SASL_IR)) {
                     authXoauth2withSASLIR();
                 } else {
-                    throw new MessagingException("Server doesn't support SASL XOAUTH2.");
+                    throw new AuthenticationFailedException("Server doesn't support SASL XOAUTH2.");
                 }
                 break;
             case CRAM_MD5: {
                 if (hasCapability(Capabilities.AUTH_CRAM_MD5)) {
                     authCramMD5();
                 } else {
-                    throw new MessagingException("Server doesn't support encrypted passwords using CRAM-MD5.");
+                    throw new AuthenticationFailedException("Server doesn't support encrypted passwords using CRAM-MD5.");
                 }
                 break;
             }
@@ -354,7 +360,8 @@ class ImapConnection {
                 } else if (!hasCapability(Capabilities.LOGINDISABLED)) {
                     login();
                 } else {
-                    throw new MessagingException("Server doesn't support unencrypted passwords using AUTH=PLAIN " +
+                    throw new AuthenticationFailedException(
+                            "Server doesn't support unencrypted passwords using AUTH=PLAIN " +
                             "and LOGIN is disabled.");
                 }
                 break;
@@ -369,7 +376,8 @@ class ImapConnection {
                 break;
             }
             default: {
-                throw new MessagingException("Unhandled authentication method found in the server settings (bug).");
+                throw new AuthenticationFailedException(
+                        "Unhandled authentication method found in the server settings (bug).");
             }
         }
     }

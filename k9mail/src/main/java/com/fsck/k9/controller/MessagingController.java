@@ -986,7 +986,11 @@ public class MessagingController {
                 l.synchronizeMailboxFailed(account, folder, "Authentication failure");
             }
         } catch (Exception e) {
-            Log.e(K9.LOG_TAG, "synchronizeMailbox", e);
+            boolean isNetworkConnectionIssue = (e instanceof MessagingException)
+                    && !((MessagingException) e).hadActiveNetworkConnection();
+
+            if (!isNetworkConnectionIssue)
+                Log.e(K9.LOG_TAG, "synchronizeMailbox", e);
             // If we don't set the last checked, it can try too often during
             // failure conditions
             String rootMessage = getRootCauseMessage(e);
@@ -1004,9 +1008,11 @@ public class MessagingController {
                 l.synchronizeMailboxFailed(account, folder, rootMessage);
             }
             notifyUserIfCertificateProblem(account, e, true);
-            addErrorMessage(account, null, e);
-            Log.e(K9.LOG_TAG, "Failed synchronizing folder " + account.getDescription() + ":" + folder + " @ " + new Date());
 
+            if (!isNetworkConnectionIssue) {
+                addErrorMessage(account, null, e);
+                Log.e(K9.LOG_TAG, "Failed synchronizing folder " + account.getDescription() + ":" + folder + " @ " + new Date());
+            }
         } finally {
             if (providedRemoteFolder == null) {
                 closeFolder(remoteFolder);

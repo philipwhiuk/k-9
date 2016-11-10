@@ -5,6 +5,7 @@ public class MessagingException extends Exception {
     public static final long serialVersionUID = -1;
 
     private boolean permanentFailure = false;
+    private boolean activeNetworkConnection = true;
 
     public MessagingException(String message) {
         super(message);
@@ -24,8 +25,17 @@ public class MessagingException extends Exception {
         permanentFailure = perm;
     }
 
+    public MessagingException(String message, Throwable throwable, boolean activeNetworkConnection) {
+        super(message, throwable);
+        this.activeNetworkConnection = activeNetworkConnection;
+    }
+
     public boolean isPermanentFailure() {
         return permanentFailure;
+    }
+
+    public boolean hadActiveNetworkConnection() {
+        return activeNetworkConnection;
     }
 
     //TODO setters in Exception are bad style, remove (it's nearly unused anyway)

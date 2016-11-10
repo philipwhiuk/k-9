@@ -162,7 +162,9 @@ class ImapFolder extends Folder<ImapMessage> {
         } catch (IOException ioe) {
             throw ioExceptionHandler(connection, ioe);
         } catch (MessagingException me) {
-            Log.e(LOG_TAG, "Unable to open connection for " + getLogId(), me);
+            if (me.hadActiveNetworkConnection()) {
+                Log.e(LOG_TAG, "Unable to open connection for " + getLogId(), me);
+            }
             throw me;
         }
     }

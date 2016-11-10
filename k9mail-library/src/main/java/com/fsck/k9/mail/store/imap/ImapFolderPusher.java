@@ -10,6 +10,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.PowerManager;
 import android.util.Log;
 
@@ -139,89 +141,48 @@ class ImapFolderPusher extends ImapFolder {
             long lastUidNext = -1L;
             while (!stop) {
                 try {
-                    long oldUidNext = getOldUidNext();
-
-                        /*
-                         * This makes sure 'oldUidNext' is never smaller than 'UIDNEXT' from
-                         * the last loop iteration. This way we avoid looping endlessly causing
-                         * the battery to drain.
-                         *
-                         * See issue 4907
-                         */
-                    if (oldUidNext < lastUidNext) {
-                        oldUidNext = lastUidNext;
-                    }
-
+                    long oldUidNext = getValidNextOldUid(lastUidNext);
                     boolean openedNewConnection = openConnectionIfNecessary();
-
                     if (stop) {
                         break;
                     }
-
                     boolean pushPollOnConnect = store.getStoreConfig().isPushPollOnConnect();
                     if (pushPollOnConnect && (openedNewConnection || needsPoll)) {
                         needsPoll = false;
                         syncFolderOnConnect();
                     }
-
                     if (stop) {
                         break;
                     }
-
                     long newUidNext = getNewUidNext();
                     lastUidNext = newUidNext;
                     long startUid = getStartUid(oldUidNext, newUidNext);
-
                     if (newUidNext > startUid) {
                         notifyMessagesArrived(startUid, newUidNext);
                     } else {
                         processStoredUntaggedResponses();
-
                         if (K9MailLib.isDebug()) {
                             Log.i(LOG_TAG, "About to IDLE for " + getLogId());
                         }
-
                         prepareForIdle();
-
                         ImapConnection conn = connection;
                         setReadTimeoutForIdle(conn);
                         sendIdle(conn);
-
                         returnFromIdle();
                     }
                 } catch (AuthenticationFailedException e) {
-                    reacquireWakeLockAndCleanUp();
-
+                    reacquireWakeLockAndCleanUp(e);
                     if (K9MailLib.isDebug()) {
                         Log.e(K9MailLib.LOG_TAG, "Authentication failed. Stopping ImapFolderPusher.", e);
                     }
-
                     pushReceiver.authenticationFailed();
                     stop = true;
                 } catch (Exception e) {
-                    reacquireWakeLockAndCleanUp();
-
+                    reacquireWakeLockAndCleanUp(e);
                     if (stop) {
                         Log.i(LOG_TAG, "Got exception while idling, but stop is set for " + getLogId());
                     } else {
-                        pushReceiver.pushError("Push error for " + getName(), e);
-                        Log.e(LOG_TAG, "Got exception while idling for " + getLogId(), e);
-
-                        pushReceiver.sleep(wakeLock, delayTime);
-
-                        delayTime *= 2;
-                        if (delayTime > MAX_DELAY_TIME) {
-                            delayTime = MAX_DELAY_TIME;
-                        }
-
-                        idleFailureCount++;
-                        if (idleFailureCount > IDLE_FAILURE_COUNT_LIMIT) {
-                            Log.e(LOG_TAG, "Disabling pusher for " + getLogId() + " after " + idleFailureCount +
-                                    " consecutive errors");
-                            pushReceiver.pushError("Push disabled for " + getName() + " after " + idleFailureCount +
-                                    " consecutive errors", e);
-                            stop = true;
-                        }
+                        handleExceptionWhileIdling(e);
                     }
                 }
             }
@@ -241,7 +202,55 @@ class ImapFolderPusher extends ImapFolder {
             }
         }
 
-        private void reacquireWakeLockAndCleanUp() {
+        private void handleExceptionWhileIdling(Exception e) {
+            pushReceiver.pushError("Push error for " + getName(), e);
+            Log.e(LOG_TAG, "Got exception while idling for " + getLogId(), e);
+
+
+            pushReceiver.sleep(wakeLock, delayTime);
+
+            delayTime *= 2;
+            if (delayTime > MAX_DELAY_TIME) {
+                delayTime = MAX_DELAY_TIME;
+            }
+            if (hasActiveNetworkConnection()) {
+                idleFailureCount++;
+                if (idleFailureCount > IDLE_FAILURE_COUNT_LIMIT) {
+                    Log.e(LOG_TAG, "Disabling pusher for " + getLogId() + " after " + idleFailureCount +
+                            " consecutive errors");
+                    pushReceiver.pushError("Push disabled for " + getName() + " after " + idleFailureCount +
+                            " consecutive errors", e);
+                    stop = true;
+                }
+            }
+
+        }
+
+        private boolean hasActiveNetworkConnection() {
+            ConnectivityManager cm = (ConnectivityManager) pushReceiver.getContext()
+                    .getSystemService(Context.CONNECTIVITY_SERVICE);
+
+            NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+            return activeNetwork != null &&
+                    activeNetwork.isConnected();
+        }
+
+        private long getValidNextOldUid(long lastUidNext) {
+            long oldUidNext = getOldUidNext();
+            /*
+             * This makes sure 'oldUidNext' is never smaller than 'UIDNEXT' from
+             * the last loop iteration. This way we avoid looping endlessly causing
+             * the battery to drain.
+             *
+             * See issue 4907
+             */
+            if (oldUidNext < lastUidNext) {
+                oldUidNext = lastUidNext;
+            }
+            return oldUidNext;
+        }
+
+        private void reacquireWakeLockAndCleanUp(Exception e) {
             wakeLock.acquire(PUSH_WAKE_LOCK_TIMEOUT);
 
             clearStoredUntaggedResponses();
@@ -252,6 +261,7 @@ class ImapFolderPusher extends ImapFolder {
                 connection.close();
             } catch (Exception me) {
                 Log.e(LOG_TAG, "Got exception while closing for exception for " + getLogId(), me);
+                Log.e(LOG_TAG, "Cause of closure for " + getLogId(), e);
             }
 
             connection = null;
