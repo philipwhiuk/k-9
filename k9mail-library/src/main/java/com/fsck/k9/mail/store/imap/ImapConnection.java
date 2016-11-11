@@ -7,11 +7,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ConnectException;
+import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.SocketException;
+import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
@@ -28,6 +31,7 @@ import java.util.zip.InflaterInputStream;
 
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.provider.Settings;
 import android.util.Log;
 
 import com.fsck.k9.mail.Authentication;
@@ -197,8 +201,10 @@ class ImapConnection {
                 try {
                     return connectToAddress(address);
                 } catch (IOException e) {
-                    Log.w(LOG_TAG, "Could not connect to " + address, e);
-                    connectException = e;
+                    if (!behindCaptivePortal()) {
+                        Log.w(LOG_TAG, "Could not connect to " + address, e);
+                        connectException = e;
+                    }
                 }
             }
         } else {
@@ -206,6 +212,37 @@ class ImapConnection {
         }
 
         throw new MessagingException("Cannot connect to host", connectException, networkConnection);
+    }
+
+    private boolean behindCaptivePortal() {
+        if(connectivityManager.getActiveNetworkInfo().getType() != ConnectivityManager.TYPE_WIFI)
+            return false;
+        String server = "connectivitycheck.gstatic.com";
+        try {
+            URL mURL = new URL("http", server, "/generate_204");
+            HttpURLConnection urlConnection = null;
+            int httpResponseCode = 500;
+            try {
+                urlConnection = (HttpURLConnection) mURL.openConnection();
+                urlConnection.setInstanceFollowRedirects(false);
+                urlConnection.setConnectTimeout(10000);
+                urlConnection.setReadTimeout(10000);
+                urlConnection.setUseCaches(false);
+                urlConnection.getInputStream();
+                httpResponseCode = urlConnection.getResponseCode();
+            } catch (IOException ioe) {
+            } finally {
+                if (urlConnection != null) urlConnection.disconnect();
+            }
+            if (httpResponseCode == 204) {
+                return false;
+            } else {
+                return true;
+            }
+        } catch (MalformedURLException e) {
+            Log.e(K9MailLib.LOG_TAG, "Invalid captive portal URL, server=" + server);
+            return false;
+        }
     }
 
     private Socket connectToAddress(InetAddress address) throws NoSuchAlgorithmException, KeyManagementException,
