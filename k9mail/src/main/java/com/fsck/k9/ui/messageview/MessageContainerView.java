@@ -41,6 +41,7 @@ import com.fsck.k9.mailstore.ICalendarViewInfo;
 import com.fsck.k9.mailstore.MessageViewInfo;
 import com.fsck.k9.ui.messageview.ical.ICalendarPublishView;
 import com.fsck.k9.ui.messageview.ical.ICalendarReplyView;
+import com.fsck.k9.ui.messageview.ical.ICalendarRequestView;
 import com.fsck.k9.ui.messageview.ical.ICalendarView;
 import com.fsck.k9.ui.messageview.ical.ICalendarViewCallback;
 import com.fsck.k9.view.MessageHeader.OnLayoutChangedListener;
@@ -465,9 +466,13 @@ public class MessageContainerView extends LinearLayout implements OnLayoutChange
                         view = (ICalendarPublishView) mInflater
                                 .inflate(R.layout.message_view_ical_publish, mCalendars, false);
                         break;
+                    case "REQUEST":
+                        view = (ICalendarRequestView) mInflater
+                                .inflate(R.layout.message_view_ical_request, mCalendars, false);
+                        break;
                     case "REPLY":
                         view = (ICalendarReplyView) mInflater
-                                .inflate(R.layout.message_view_ical_publish, mCalendars, false);
+                                .inflate(R.layout.message_view_ical_reply, mCalendars, false);
                         break;
                     default:
                         Log.i(K9.LOG_TAG, "Unhandled iCalendar method type:"
