@@ -78,6 +78,11 @@
         android:title="@string/account_settings_sync"
         android:key="incoming_prefs">
 
+        <PreferenceScreen
+            android:key="incoming"
+            android:title="@string/account_settings_incoming_label"
+            android:summary="@string/account_settings_incoming_summary" />
+
         <ListPreference
             android:persistent="false"
             android:key="account_display_count"
@@ -150,11 +155,6 @@
             android:dialogTitle="@string/account_setup_expunge_policy_label" />
 
         <PreferenceScreen
-            android:key="incoming"
-            android:title="@string/account_settings_incoming_label"
-            android:summary="@string/account_settings_incoming_summary" />
-
-        <PreferenceScreen
             android:key="push_advanced"
             android:title="@string/account_settings_push_advanced_title">
 
@@ -184,6 +184,11 @@
     <PreferenceScreen
         android:title="@string/account_settings_composition"
         android:key="composing">
+
+        <PreferenceScreen
+            android:key="outgoing"
+            android:title="@string/account_settings_outgoing_label"
+            android:summary="@string/account_settings_outgoing_summary" />
 
         <PreferenceScreen
             android:key="composition"
@@ -248,11 +253,6 @@
             android:title="@string/account_settings_quote_prefix_label"
             android:summary=""
             android:dialogTitle="@string/account_settings_quote_prefix_label" />
-
-        <PreferenceScreen
-            android:key="outgoing"
-            android:title="@string/account_settings_outgoing_label"
-            android:summary="@string/account_settings_outgoing_summary" />
 
     </PreferenceScreen>
 
