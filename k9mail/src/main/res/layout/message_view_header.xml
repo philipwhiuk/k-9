@@ -87,29 +87,26 @@
 
                 <RelativeLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="158dp"
                     android:padding="6dip"
                     android:layout_marginLeft="2dp" >
 
                     <!-- From -->
                     <TextView
                         android:id="@+id/from"
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_alignParentTop="true"
                         android:layout_alignParentLeft="true"
                         android:layout_toLeftOf="@+id/status_icon_strip"
-                        android:layout_alignBottom="@+id/status_icon_strip"
                         android:paddingTop="0dp"
                         android:paddingRight="6dip"
-                        android:singleLine="true"
-                        android:ellipsize="end"
                         android:textColor="?android:attr/textColorPrimary"
                         android:textAppearance="?android:attr/textAppearanceMedium"
                         android:textStyle="bold"
                         android:text="@string/general_no_sender"
                         android:gravity="center_vertical"
-                        />
+                        android:layout_alignParentTop="true"
+                        android:minLines="2" />
                     
                     <!-- To -->
                     <TextView

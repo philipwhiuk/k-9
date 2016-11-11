@@ -273,6 +273,11 @@ public class MimeMessage extends Message {
     }
 
     @Override
+    public Address[] getSender() {
+        return Address.parse(MimeUtility.unfold(getFirstHeader("Sender")));
+    }
+
+    @Override
     public void setFrom(Address from) {
         if (from != null) {
             setHeader("From", from.toEncodedString());

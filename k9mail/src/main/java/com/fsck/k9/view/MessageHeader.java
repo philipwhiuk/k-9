@@ -259,6 +259,7 @@ public class MessageHeader extends LinearLayout implements OnClickListener, OnLo
     public void populate(final Message message, final Account account) {
         final Contacts contacts = K9.showContactName() ? mContacts : null;
         final CharSequence from = MessageHelper.toFriendly(message.getFrom(), contacts);
+        final CharSequence sender = MessageHelper.toFriendly(message.getSender(), contacts);
         final CharSequence to = MessageHelper.toFriendly(message.getRecipients(Message.RecipientType.TO), contacts);
         final CharSequence cc = MessageHelper.toFriendly(message.getRecipients(Message.RecipientType.CC), contacts);
 
@@ -320,7 +321,11 @@ public class MessageHeader extends LinearLayout implements OnClickListener, OnLo
             }
         }
 
-        mFromView.setText(from);
+        if (from.equals(sender) || sender == null || sender.length() == 0) {
+            mFromView.setText(from);
+        } else {
+            mFromView.setText(mContext.getString(R.string.message_onBehalfOf, sender, from));
+        }
 
         updateAddressField(mToView, to, mToLabel);
         updateAddressField(mCcView, cc, mCcLabel);
