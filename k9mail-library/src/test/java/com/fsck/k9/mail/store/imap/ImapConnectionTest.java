@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.UnknownHostException;
 
 import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 
 import com.fsck.k9.mail.AuthType;
 import com.fsck.k9.mail.AuthenticationFailedException;
@@ -76,7 +77,23 @@ public class ImapConnectionTest {
     }
 
     @Test
+    public void open_withNoNetworkInfo_shouldThrowExceptionForNoConnection() throws IOException {
+        MockImapServer server = new MockImapServer();
+        ImapConnection imapConnection = startServerAndCreateImapConnection(server);
+        try {
+
+            imapConnection.open();
+
+            fail("Expected exception");
+        } catch (MessagingException e) {
+            assertEquals(false, e.hadActiveNetworkConnection());
+            assertEquals(false, e.isPermanentFailure());
+        }
+    }
+
+    @Test
     public void open_withCapabilitiesInInitialResponse_shouldNotIssueCapabilitiesCommand() throws Exception {
+        setupWifiInternetConnection();
         settings.setAuthType(AuthType.PLAIN);
         MockImapServer server = new MockImapServer();
         server.output("* OK [CAPABILITY IMAP4 IMAP4REV1 AUTH=PLAIN]");
@@ -98,6 +115,7 @@ public class ImapConnectionTest {
     @Test
     public void open_authPlain() throws Exception {
         settings.setAuthType(AuthType.PLAIN);
+        setupWifiInternetConnection();
         MockImapServer server = new MockImapServer();
         preAuthenticationDialog(server, "AUTH=PLAIN");
         server.expect("2 AUTHENTICATE PLAIN");
@@ -116,6 +134,7 @@ public class ImapConnectionTest {
     @Test
     public void open_afterCloseWasCalled_shouldThrow() throws Exception {
         settings.setAuthType(AuthType.PLAIN);
+        setupWifiInternetConnection();
         MockImapServer server = new MockImapServer();
         preAuthenticationDialog(server);
         server.expect("2 LOGIN \"" + USERNAME + "\" \"" + PASSWORD + "\"");
@@ -137,6 +156,7 @@ public class ImapConnectionTest {
     @Test
     public void open_authPlainWithLoginDisabled_shouldThrow() throws Exception {
         settings.setAuthType(AuthType.PLAIN);
+        setupWifiInternetConnection();
         MockImapServer server = new MockImapServer();
         preAuthenticationDialog(server, "LOGINDISABLED");
         ImapConnection imapConnection = startServerAndCreateImapConnection(server);
@@ -156,6 +176,7 @@ public class ImapConnectionTest {
     @Test
     public void open_authPlainWithAuthenticationFailure_shouldFallbackToLogin() throws Exception {
         settings.setAuthType(AuthType.PLAIN);
+        setupWifiInternetConnection();
         MockImapServer server = new MockImapServer();
         preAuthenticationDialog(server, "AUTH=PLAIN");
         server.expect("2 AUTHENTICATE PLAIN");
@@ -175,6 +196,7 @@ public class ImapConnectionTest {
 
     @Test
     public void open_authPlainAndLoginFallbackWithAuthenticationFailure_shouldThrow() throws Exception {
+        setupWifiInternetConnection();
         settings.setAuthType(AuthType.PLAIN);
         MockImapServer server = new MockImapServer();
         preAuthenticationDialog(server, "AUTH=PLAIN");
@@ -201,6 +223,7 @@ public class ImapConnectionTest {
     @Test
     public void open_authPlainWithoutAuthPlainCapability_shouldUseLoginMethod() throws Exception {
         settings.setAuthType(AuthType.PLAIN);
+        setupWifiInternetConnection();
         MockImapServer server = new MockImapServer();
         preAuthenticationDialog(server);
         server.expect("2 LOGIN \"" + USERNAME + "\" \"" + PASSWORD + "\"");
@@ -217,6 +240,7 @@ public class ImapConnectionTest {
     @Test
     public void open_authCramMd5() throws Exception {
         settings.setAuthType(AuthType.CRAM_MD5);
+        setupWifiInternetConnection();
         MockImapServer server = new MockImapServer();
         preAuthenticationDialog(server, "AUTH=CRAM-MD5");
         server.expect("2 AUTHENTICATE CRAM-MD5");
@@ -235,6 +259,7 @@ public class ImapConnectionTest {
     @Test
     public void open_authCramMd5WithAuthenticationFailure_shouldThrow() throws Exception {
         settings.setAuthType(AuthType.CRAM_MD5);
+        setupWifiInternetConnection();
         MockImapServer server = new MockImapServer();
         preAuthenticationDialog(server, "AUTH=CRAM-MD5");
         server.expect("2 AUTHENTICATE CRAM-MD5");
@@ -258,6 +283,7 @@ public class ImapConnectionTest {
     @Test
     public void open_authCramMd5WithoutAuthCramMd5Capability_shouldThrow() throws Exception {
         settings.setAuthType(AuthType.CRAM_MD5);
+        setupWifiInternetConnection();
         MockImapServer server = new MockImapServer();
         preAuthenticationDialog(server, "AUTH=PLAIN");
         ImapConnection imapConnection = startServerAndCreateImapConnection(server);
@@ -275,6 +301,7 @@ public class ImapConnectionTest {
 
     @Test
     public void open_authXoauthWithSaslIr() throws Exception {
+        setupWifiInternetConnection();
         settings.setAuthType(AuthType.XOAUTH2);
         when(oAuth2TokenProvider.getToken("user", OAuth2TokenProvider.OAUTH2_TIMEOUT))
                 .thenReturn("token");
@@ -296,6 +323,7 @@ public class ImapConnectionTest {
     @Test
     public void open_authXoauthWithSaslIrThrowsExeptionOn401Response() throws Exception {
         settings.setAuthType(AuthType.XOAUTH2);
+        setupWifiInternetConnection();
         when(oAuth2TokenProvider.getToken("user", OAuth2TokenProvider.OAUTH2_TIMEOUT))
                 .thenReturn("token").thenReturn("token2");
         MockImapServer server = new MockImapServer();
@@ -321,6 +349,7 @@ public class ImapConnectionTest {
     @Test
     public void open_authXoauthWithSaslIrInvalidatesAndRetriesNewTokenOn400Response() throws Exception {
         settings.setAuthType(AuthType.XOAUTH2);
+        setupWifiInternetConnection();
         when(oAuth2TokenProvider.getToken("user", OAuth2TokenProvider.OAUTH2_TIMEOUT))
                 .thenReturn("token").thenReturn("token2");
         MockImapServer server = new MockImapServer();
@@ -351,6 +380,7 @@ public class ImapConnectionTest {
     @Test
     public void open_authXoauthWithSaslIrInvalidatesAndRetriesNewTokenOnInvalidJsonResponse() throws Exception {
         settings.setAuthType(AuthType.XOAUTH2);
+        setupWifiInternetConnection();
         when(oAuth2TokenProvider.getToken("user", OAuth2TokenProvider.OAUTH2_TIMEOUT))
                 .thenReturn("token").thenReturn("token2");
         MockImapServer server = new MockImapServer();
@@ -381,6 +411,7 @@ public class ImapConnectionTest {
     @Test
     public void open_authXoauthWithSaslIrInvalidatesAndRetriesNewTokenOnMissingStatusJsonResponse() throws Exception {
         settings.setAuthType(AuthType.XOAUTH2);
+        setupWifiInternetConnection();
         when(oAuth2TokenProvider.getToken("user", OAuth2TokenProvider.OAUTH2_TIMEOUT))
                 .thenReturn("token").thenReturn("token2");
         MockImapServer server = new MockImapServer();
@@ -410,6 +441,7 @@ public class ImapConnectionTest {
 
     @Test
     public void open_authXoauthWithSaslIrWithOldTokenThrowsExceptionIfRetryFails() throws Exception {
+        setupWifiInternetConnection();
         settings.setAuthType(AuthType.XOAUTH2);
         when(oAuth2TokenProvider.getToken("user", OAuth2TokenProvider.OAUTH2_TIMEOUT))
                 .thenReturn("token").thenReturn("token2");
@@ -443,6 +475,7 @@ public class ImapConnectionTest {
     @Test
     public void open_authXoauthWithSaslIrParsesCapabilities() throws Exception {
         settings.setAuthType(AuthType.XOAUTH2);
+        setupWifiInternetConnection();
         when(oAuth2TokenProvider.getToken("user", OAuth2TokenProvider.OAUTH2_TIMEOUT))
                 .thenReturn("token");
         MockImapServer server = new MockImapServer();
@@ -462,6 +495,7 @@ public class ImapConnectionTest {
     @Test
     public void open_authExternal() throws Exception {
         settings.setAuthType(AuthType.EXTERNAL);
+        setupWifiInternetConnection();
         MockImapServer server = new MockImapServer();
         preAuthenticationDialog(server, "AUTH=EXTERNAL");
         server.expect("2 AUTHENTICATE EXTERNAL " + ByteString.encodeUtf8(USERNAME).base64());
@@ -477,6 +511,7 @@ public class ImapConnectionTest {
 
     @Test
     public void open_authExternalWithAuthenticationFailure_shouldThrow() throws Exception {
+        setupWifiInternetConnection();
         settings.setAuthType(AuthType.EXTERNAL);
         MockImapServer server = new MockImapServer();
         preAuthenticationDialog(server, "AUTH=EXTERNAL");
@@ -498,6 +533,7 @@ public class ImapConnectionTest {
 
     @Test
     public void open_authExternalWithoutAuthExternalCapability_shouldThrow() throws Exception {
+        setupWifiInternetConnection();
         settings.setAuthType(AuthType.EXTERNAL);
         MockImapServer server = new MockImapServer();
         preAuthenticationDialog(server, "AUTH=PLAIN");
@@ -516,6 +552,7 @@ public class ImapConnectionTest {
 
     @Test
     public void open_withNamespaceCapability_shouldIssueNamespaceCommand() throws Exception {
+        setupWifiInternetConnection();
         MockImapServer server = new MockImapServer();
         simplePreAuthAndLoginDialog(server, "NAMESPACE");
         server.expect("3 NAMESPACE");
@@ -531,6 +568,7 @@ public class ImapConnectionTest {
 
     @Test
     public void open_withConnectionError_shouldThrow() throws Exception {
+        setupWifiInternetConnection();
         settings.setHost("127.1.2.3");
         settings.setPort(143);
         ImapConnection imapConnection = createImapConnection(
@@ -549,6 +587,7 @@ public class ImapConnectionTest {
     public void open_withInvalidHostname_shouldThrow() throws Exception {
         settings.setHost("host name");
         settings.setPort(143);
+        setupWifiInternetConnection();
         ImapConnection imapConnection = createImapConnection(
                 settings, socketFactory, connectivityManager, oAuth2TokenProvider);
 
@@ -563,6 +602,7 @@ public class ImapConnectionTest {
 
     @Test
     public void open_withStartTlsCapability_shouldIssueStartTlsCommand() throws Exception {
+        setupWifiInternetConnection();
         settings.setAuthType(AuthType.PLAIN);
         settings.setConnectionSecurity(ConnectionSecurity.STARTTLS_REQUIRED);
         MockImapServer server = new MockImapServer();
@@ -589,6 +629,7 @@ public class ImapConnectionTest {
     @Test
     public void open_withStartTlsButWithoutStartTlsCapability_shouldThrow() throws Exception {
         settings.setConnectionSecurity(ConnectionSecurity.STARTTLS_REQUIRED);
+        setupWifiInternetConnection();
         MockImapServer server = new MockImapServer();
         preAuthenticationDialog(server);
         ImapConnection imapConnection = startServerAndCreateImapConnection(server);
@@ -609,6 +650,7 @@ public class ImapConnectionTest {
     public void open_withNegativeResponseToStartTlsCommand_shouldThrow() throws Exception {
         settings.setAuthType(AuthType.PLAIN);
         settings.setConnectionSecurity(ConnectionSecurity.STARTTLS_REQUIRED);
+        setupWifiInternetConnection();
         MockImapServer server = new MockImapServer();
         preAuthenticationDialog(server, "STARTTLS");
         server.expect("2 STARTTLS");
@@ -629,6 +671,7 @@ public class ImapConnectionTest {
     @Test
     public void open_withCompressDeflateCapability_shouldEnableCompression() throws Exception {
         settings.setUseCompression(true);
+        setupWifiInternetConnection();
         MockImapServer server = new MockImapServer();
         simplePreAuthAndLoginDialog(server, "COMPRESS=DEFLATE");
         server.expect("3 COMPRESS DEFLATE");
@@ -645,6 +688,7 @@ public class ImapConnectionTest {
 
     @Test
     public void open_withNegativeResponseToCompressionCommand_shouldContinue() throws Exception {
+        setupWifiInternetConnection();
         settings.setAuthType(AuthType.PLAIN);
         settings.setUseCompression(true);
         MockImapServer server = new MockImapServer();
@@ -664,6 +708,7 @@ public class ImapConnectionTest {
     public void open_withIoExceptionDuringCompressionCommand_shouldThrow() throws Exception {
         settings.setAuthType(AuthType.PLAIN);
         settings.setUseCompression(true);
+        setupWifiInternetConnection();
         MockImapServer server = new MockImapServer();
         simplePreAuthAndLoginDialog(server, "COMPRESS=DEFLATE");
         server.expect("3 COMPRESS DEFLATE");
@@ -682,8 +727,10 @@ public class ImapConnectionTest {
 
     @Test
     public void open_withIoExceptionDuringListCommand_shouldThrow() throws Exception {
+        setupWifiInternetConnection();
         settings.setAuthType(AuthType.PLAIN);
         settings.setUseCompression(true);
+        setupWifiInternetConnection();
         MockImapServer server = new MockImapServer();
         simplePreAuthAndLoginDialog(server, "");
         server.expect("3 LIST \"\" \"\"");
@@ -704,6 +751,7 @@ public class ImapConnectionTest {
     public void open_withNegativeResponseToListCommand() throws Exception {
         settings.setAuthType(AuthType.PLAIN);
         settings.setUseCompression(true);
+        setupWifiInternetConnection();
         MockImapServer server = new MockImapServer();
         simplePreAuthAndLoginDialog(server, "");
         server.expect("3 LIST \"\" \"\"");
@@ -728,6 +776,7 @@ public class ImapConnectionTest {
 
     @Test
     public void isConnected_afterOpen_shouldReturnTrue() throws Exception {
+        setupWifiInternetConnection();
         MockImapServer server = new MockImapServer();
         ImapConnection imapConnection = simpleOpen(server);
 
@@ -741,6 +790,7 @@ public class ImapConnectionTest {
 
     @Test
     public void isConnected_afterOpenAndClose_shouldReturnFalse() throws Exception {
+        setupWifiInternetConnection();
         MockImapServer server = new MockImapServer();
         ImapConnection imapConnection = simpleOpen(server);
         imapConnection.close();
@@ -763,6 +813,7 @@ public class ImapConnectionTest {
 
     @Test
     public void close_afterOpen_shouldCloseConnection() throws Exception {
+        setupWifiInternetConnection();
         MockImapServer server = new MockImapServer();
         ImapConnection imapConnection = simpleOpen(server);
 
@@ -775,6 +826,7 @@ public class ImapConnectionTest {
 
     @Test
     public void isIdleCapable_withoutIdleCapability() throws Exception {
+        setupWifiInternetConnection();
         MockImapServer server = new MockImapServer();
         ImapConnection imapConnection = simpleOpen(server);
 
@@ -787,6 +839,7 @@ public class ImapConnectionTest {
 
     @Test
     public void isIdleCapable_withIdleCapability() throws Exception {
+        setupWifiInternetConnection();
         MockImapServer server = new MockImapServer();
         ImapConnection imapConnection = simpleOpenWithCapabilities(server, "IDLE");
 
@@ -800,6 +853,7 @@ public class ImapConnectionTest {
     @Test
     public void sendContinuation() throws Exception {
         settings.setAuthType(AuthType.PLAIN);
+        setupWifiInternetConnection();
         MockImapServer server = new MockImapServer();
         simpleOpenDialog(server, "IDLE");
         server.expect("4 IDLE");
@@ -876,5 +930,12 @@ public class ImapConnectionTest {
 
         server.expect("2 LOGIN \"" + USERNAME + "\" \"" + PASSWORD + "\"");
         server.output("2 OK LOGIN completed");
+    }
+
+    private void setupWifiInternetConnection() {
+        NetworkInfo networkInfo = mock(NetworkInfo.class);
+        when(networkInfo.getType()).thenReturn(ConnectivityManager.TYPE_WIFI);
+        when(networkInfo.isConnected()).thenReturn(true);
+        when(connectivityManager.getActiveNetworkInfo()).thenReturn(networkInfo);
     }
 }
