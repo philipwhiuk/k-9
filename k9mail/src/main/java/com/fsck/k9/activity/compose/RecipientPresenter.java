@@ -47,6 +47,7 @@ public class RecipientPresenter implements PermissionPingCallback {
     private static final String STATE_KEY_CC_SHOWN = "state:ccShown";
     private static final String STATE_KEY_BCC_SHOWN = "state:bccShown";
     private static final String STATE_KEY_LAST_FOCUSED_TYPE = "state:lastFocusedType";
+    private static final String STATE_KEY_CURRENT_CRYPTO_METHOD = "state:currentCryptoMethod";
     private static final String STATE_KEY_CURRENT_CRYPTO_MODE = "state:currentCryptoMode";
     private static final String STATE_KEY_CRYPTO_ENABLE_PGP_INLINE = "state:cryptoEnablePgpInline";
 
@@ -74,8 +75,8 @@ public class RecipientPresenter implements PermissionPingCallback {
 
     // persistent state, saved during onSaveInstanceState
     private RecipientType lastFocusedType = RecipientType.TO;
-    // TODO initialize cryptoMode to other values under some circumstances, e.g. if we reply to an encrypted e-mail
-    private CryptoMode currentCryptoMode = CryptoMode.OPPORTUNISTIC;
+    private CryptoMethod currentCryptoMethod;
+    private CryptoMode currentCryptoMode;
     private boolean cryptoEnablePgpInline = false;
 
 
@@ -85,6 +86,10 @@ public class RecipientPresenter implements PermissionPingCallback {
         this.context = context;
         this.composePgpInlineDecider = composePgpInlineDecider;
         this.replyToParser = replyToParser;
+        // TODO initialize cryptoMode to other values under some circumstances, e.g. if we reply to an encrypted e-mail
+        // TODO set to default cryptoMode
+        this.currentCryptoMethod = CryptoMethod.valueOf(account.getCryptoDefaultMethod());
+        this.currentCryptoMode = CryptoMode.valueOf(account.getCryptoDefaultMode());
 
         recipientMvpView.setPresenter(this);
         recipientMvpView.setLoaderManager(loaderManager);
@@ -186,6 +191,7 @@ public class RecipientPresenter implements PermissionPingCallback {
         recipientMvpView.setCcVisibility(savedInstanceState.getBoolean(STATE_KEY_CC_SHOWN));
         recipientMvpView.setBccVisibility(savedInstanceState.getBoolean(STATE_KEY_BCC_SHOWN));
         lastFocusedType = RecipientType.valueOf(savedInstanceState.getString(STATE_KEY_LAST_FOCUSED_TYPE));
+        currentCryptoMethod = CryptoMethod.valueOf(savedInstanceState.getString(STATE_KEY_CURRENT_CRYPTO_METHOD));
         currentCryptoMode = CryptoMode.valueOf(savedInstanceState.getString(STATE_KEY_CURRENT_CRYPTO_MODE));
         cryptoEnablePgpInline = savedInstanceState.getBoolean(STATE_KEY_CRYPTO_ENABLE_PGP_INLINE);
         updateRecipientExpanderVisibility();
@@ -355,10 +361,14 @@ public class RecipientPresenter implements PermissionPingCallback {
     }
 
     public ComposeCryptoStatus getCurrentCryptoStatus() {
+
         if (cachedCryptoStatus == null) {
             ComposeCryptoStatusBuilder builder = new ComposeCryptoStatusBuilder()
                     .setCryptoProviderState(cryptoProviderState)
+                    .setCryptoMethod(currentCryptoMethod)
                     .setCryptoMode(currentCryptoMode)
+                    .setSMimeCertificate(account.getSMimeCertificate())
+                    .setCryptoSupportSignOnly(account.getCryptoSupportSignOnly())
                     .setEnablePgpInline(cryptoEnablePgpInline)
                     .setRecipients(getAllRecipients());
 
@@ -789,6 +799,12 @@ public class RecipientPresenter implements PermissionPingCallback {
         } else {
             throw new IllegalStateException("This icon should not be clickable while no special mode is active!");
         }
+    }
+
+    public enum CryptoMethod {
+        NO_CRYPTO,
+        SMIME,
+        PGP_MIME,
     }
 
     public enum CryptoProviderState {

@@ -122,6 +122,8 @@ public class RecipientLoader extends AsyncTaskLoader<List<Recipient>> {
             fillCryptoStatusData(recipientMap);
         }
 
+        fillSMimeCertificateData(recipientMap);
+
         return recipients;
     }
 
@@ -302,6 +304,10 @@ public class RecipientLoader extends AsyncTaskLoader<List<Recipient>> {
             observerKey = new ForceLoadContentObserver();
             getContext().getContentResolver().registerContentObserver(queryUri, false, observerKey);
         }
+    }
+
+    private void fillSMimeCertificateData(Map<String, Recipient> recipientMap) {
+        //TODO: Get SMime certificate info
     }
 
     private void initializeCryptoStatusForAllRecipients(Map<String, Recipient> recipientMap) {

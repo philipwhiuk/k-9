@@ -21,6 +21,7 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.util.Log;
 
+import com.fsck.k9.activity.compose.RecipientPresenter;
 import com.fsck.k9.activity.setup.AccountSetupCheckSettings.CheckDirection;
 import com.fsck.k9.helper.Utility;
 import com.fsck.k9.mail.Address;
@@ -157,6 +158,7 @@ public class Account implements BaseAccount, StoreConfig {
 
     public static final SortType DEFAULT_SORT_TYPE = SortType.SORT_DATE;
     public static final boolean DEFAULT_SORT_ASCENDING = false;
+    public static final String NO_CRYPTO = "";
     public static final String NO_OPENPGP_PROVIDER = "";
     public static final long NO_OPENPGP_KEY = 0;
 
@@ -223,6 +225,9 @@ public class Account implements BaseAccount, StoreConfig {
     private String mCryptoApp;
     private long mCryptoKey;
     private boolean mCryptoSupportSignOnly;
+    private String mCryptoDefaultMethod;
+    private String mCryptoDefaultMode;
+    private String mSMimeCertificate;
     private boolean mMarkMessageAsReadOnView;
     private boolean mAlwaysShowCcBcc;
     private boolean mAllowRemoteSearch;
@@ -320,6 +325,8 @@ public class Account implements BaseAccount, StoreConfig {
         mCryptoApp = NO_OPENPGP_PROVIDER;
         mCryptoKey = NO_OPENPGP_KEY;
         mCryptoSupportSignOnly = false;
+        mCryptoDefaultMethod = NO_CRYPTO;
+        mCryptoDefaultMode = RecipientPresenter.CryptoMode.OPPORTUNISTIC.toString();
         mAllowRemoteSearch = false;
         mRemoteSearchFullText = false;
         mRemoteSearchNumResults = DEFAULT_REMOTE_SEARCH_NUM_RESULTS;
@@ -738,6 +745,8 @@ public class Account implements BaseAccount, StoreConfig {
         editor.putBoolean(mUuid + ".stripSignature", mStripSignature);
         editor.putString(mUuid + ".cryptoApp", mCryptoApp);
         editor.putLong(mUuid + ".cryptoKey", mCryptoKey);
+        editor.putString(mUuid + ".cryptoDefaultMethod", mCryptoDefaultMethod);
+        editor.putString(mUuid + ".cryptoDefaultMode", mCryptoDefaultMode);
         editor.putBoolean(mUuid + ".cryptoSupportSignOnly", mCryptoSupportSignOnly);
         editor.putBoolean(mUuid + ".allowRemoteSearch", mAllowRemoteSearch);
         editor.putBoolean(mUuid + ".remoteSearchFullText", mRemoteSearchFullText);
@@ -1602,6 +1611,14 @@ public class Account implements BaseAccount, StoreConfig {
         mStripSignature = stripSignature;
     }
 
+    public String getCryptoDefaultMethod() {
+        return mCryptoDefaultMethod;
+    }
+
+    public String getCryptoDefaultMode() {
+        return mCryptoDefaultMode;
+    }
+
     public String getCryptoApp() {
         return mCryptoApp;
     }
@@ -1620,6 +1637,10 @@ public class Account implements BaseAccount, StoreConfig {
 
     public void setCryptoKey(long keyId) {
         mCryptoKey = keyId;
+    }
+
+    public String getSMimeCertificate() {
+        return mSMimeCertificate;
     }
 
     public boolean getCryptoSupportSignOnly() {

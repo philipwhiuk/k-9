@@ -526,6 +526,9 @@ public class RecipientSelectView extends TokenCompleteTextView<Recipient> implem
         @NonNull
         private RecipientCryptoStatus cryptoStatus;
 
+        @Nullable
+        private String sMimeCertificate;
+
         public Recipient(@NonNull Address address) {
             this.address = address;
             this.contactId = null;
@@ -592,6 +595,14 @@ public class RecipientSelectView extends TokenCompleteTextView<Recipient> implem
 
         public void setCryptoStatus(@NonNull RecipientCryptoStatus cryptoStatus) {
             this.cryptoStatus = cryptoStatus;
+        }
+
+        public String getSMimeCertificate() {
+            return sMimeCertificate;
+        }
+
+        public void setSMimeCertificate(String sMimeCertificate) {
+            this.sMimeCertificate = sMimeCertificate;
         }
 
         @Nullable

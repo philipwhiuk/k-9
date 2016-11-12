@@ -17,13 +17,16 @@ public class ReceivedHeaders {
     public static final String RECEIVED = "Received";
     public static Pattern fromPattern = Pattern.compile("from\\s+([A-Za-z0-9.]*?) ");
     public static Pattern byPattern = Pattern.compile("by\\s+([A-Za-z0-9.]*?) ");
-    public static Pattern usingPattern = Pattern.compile("using\\s+(.*?) with cipher (.*?) (([0-9]*/[0-9]*?) bits)");
+    public static Pattern usingPattern = Pattern.compile("using\\s+(.*?) with cipher (.*?) \\(([0-9]*/[0-9]*?) bits\\)");
     public static Pattern usingMSPattern = Pattern.compile("with Microsoft SMTP\\s+Server \\(version=(.*?), cipher=(.*?)\\)");
 
     public static SecureTransportState wasMessageTransmittedSecurely(Message message) {
         String[] headers = message.getHeader(RECEIVED);
         Log.e(K9.LOG_TAG, "Received headers: " + headers.length);
 
+        if (headers.length == 0) {
+            return SecureTransportState.UNKNOWN;
+        }
         for(String header: headers) {
             String fromAddress = "", toAddress = "", sslVersion = null, cipher, bits;
             header = header.trim();
@@ -50,8 +53,8 @@ public class ReceivedHeaders {
             }
 
             if (fromAddress.equals("localhost") || fromAddress.equals("127.0.0.1") ||
-                    toAddress.equals("localhost") || toAddress.equals("127.0.0.1")) {
-                //Loopback is considered secure
+                    toAddress.equals("localhost") || toAddress.equals("127.0.0.1") || fromAddress.equals(toAddress) ) {
+                //Loopback and self is considered secure
                 continue;
             }
 
@@ -62,8 +65,7 @@ public class ReceivedHeaders {
 
             //TODO: Blacklisted ciphers and key lengths
 
-            return SecureTransportState.SECURE;
         }
-        return SecureTransportState.UNKNOWN;
+        return SecureTransportState.SECURE;
     }
 }

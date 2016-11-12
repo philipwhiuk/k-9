@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.fsck.k9.activity.compose.RecipientMvpView.CryptoSpecialModeDisplayType;
 import com.fsck.k9.activity.compose.RecipientMvpView.CryptoStatusDisplayType;
+import com.fsck.k9.activity.compose.RecipientPresenter.CryptoMethod;
 import com.fsck.k9.activity.compose.RecipientPresenter.CryptoMode;
 import com.fsck.k9.activity.compose.RecipientPresenter.CryptoProviderState;
 import com.fsck.k9.view.RecipientSelectView.Recipient;
@@ -17,16 +18,18 @@ import com.fsck.k9.view.RecipientSelectView.RecipientCryptoStatus;
  */
 public class ComposeCryptoStatus {
 
-
+    private CryptoMethod cryptoMethod;
     private CryptoProviderState cryptoProviderState;
     private CryptoMode cryptoMode;
     private boolean allKeysAvailable;
     private boolean allKeysVerified;
+    private boolean allSMimeCertificatesAvailable;
     private boolean hasRecipients;
     private Long signingKeyId;
     private Long selfEncryptKeyId;
     private String[] recipientAddresses;
     private boolean enablePgpInline;
+    private String sMimeCertificate;
 
 
     public long[] getEncryptKeyIds() {
@@ -44,7 +47,53 @@ public class ComposeCryptoStatus {
         return signingKeyId;
     }
 
-    CryptoStatusDisplayType getCryptoStatusDisplayType() {
+    public CryptoStatusDisplayType getCryptoStatusDisplayType() {
+        switch (cryptoMethod) {
+            case NO_CRYPTO:
+                return CryptoStatusDisplayType.UNCONFIGURED;
+            case SMIME:
+                return getSMimeCryptoStatus();
+            case PGP_MIME:
+                return getPGPMimeCryptoStatus();
+            default:
+                throw new AssertionError("all CryptoProviderMethods must be handled!");
+        }
+    }
+
+    public CryptoStatusDisplayType getSMimeCryptoStatus() {
+        if (sMimeCertificate == null) {
+            return CryptoStatusDisplayType.UNCONFIGURED;
+        } else {
+            switch (cryptoMode) {
+                case PRIVATE:
+                    if (!hasRecipients) {
+                        return CryptoStatusDisplayType.PRIVATE_EMPTY;
+                    } else if (allSMimeCertificatesAvailable) {
+                        return CryptoStatusDisplayType.PRIVATE_TRUSTED;
+                    } else if (allSMimeCertificatesAvailable) {
+                        return CryptoStatusDisplayType.PRIVATE_UNTRUSTED;
+                    }
+                    return CryptoStatusDisplayType.PRIVATE_NOKEY;
+                case OPPORTUNISTIC:
+                    if (!hasRecipients) {
+                        return CryptoStatusDisplayType.OPPORTUNISTIC_EMPTY;
+                    } else if (allSMimeCertificatesAvailable) {
+                        return CryptoStatusDisplayType.OPPORTUNISTIC_TRUSTED;
+                    } else if (allSMimeCertificatesAvailable) {
+                        return CryptoStatusDisplayType.OPPORTUNISTIC_UNTRUSTED;
+                    }
+                    return CryptoStatusDisplayType.OPPORTUNISTIC_NOKEY;
+                case SIGN_ONLY:
+                    return CryptoStatusDisplayType.SIGN_ONLY;
+                case DISABLE:
+                    return CryptoStatusDisplayType.DISABLED;
+                default:
+                    throw new AssertionError("all CryptoModes must be handled!");
+            }
+        }
+    }
+
+    public CryptoStatusDisplayType getPGPMimeCryptoStatus() {
         switch (cryptoProviderState) {
             case UNCONFIGURED:
                 return CryptoStatusDisplayType.UNCONFIGURED;
@@ -139,19 +188,37 @@ public class ComposeCryptoStatus {
     public static class ComposeCryptoStatusBuilder {
 
         private CryptoProviderState cryptoProviderState;
+        private CryptoMethod cryptoMethod;
         private CryptoMode cryptoMode;
         private Long signingKeyId;
         private Long selfEncryptKeyId;
         private List<Recipient> recipients;
         private Boolean enablePgpInline;
+        private Boolean cryptoSupportSignOnly;
+        private String sMimeCertificate;
 
         public ComposeCryptoStatusBuilder setCryptoProviderState(CryptoProviderState cryptoProviderState) {
             this.cryptoProviderState = cryptoProviderState;
             return this;
         }
 
+        public ComposeCryptoStatusBuilder setCryptoMethod(CryptoMethod cryptoMethod) {
+            this.cryptoMethod = cryptoMethod;
+            return this;
+        }
+
         public ComposeCryptoStatusBuilder setCryptoMode(CryptoMode cryptoMode) {
             this.cryptoMode = cryptoMode;
+            return this;
+        }
+
+        public ComposeCryptoStatusBuilder setSMimeCertificate(String sMimeCertificate) {
+            this.sMimeCertificate = sMimeCertificate;
+            return this;
+        }
+
+        public ComposeCryptoStatusBuilder setCryptoSupportSignOnly(boolean cryptoSupportSignOnly) {
+            this.cryptoSupportSignOnly = cryptoSupportSignOnly;
             return this;
         }
 
@@ -179,6 +246,9 @@ public class ComposeCryptoStatus {
             if (cryptoProviderState == null) {
                 throw new AssertionError("cryptoProviderState must be set!");
             }
+            if (cryptoMethod == null) {
+                throw new AssertionError("crypto method must be set!");
+            }
             if (cryptoMode == null) {
                 throw new AssertionError("crypto mode must be set!");
             }
@@ -205,16 +275,28 @@ public class ComposeCryptoStatus {
                 }
             }
 
+            boolean allSMimeCertificatesAvailable = true;
+            for (Recipient recipient : recipients) {
+                String sMimeCertificate = recipient.getSMimeCertificate();
+                recipientAddresses.add(recipient.address.getAddress());
+                if (sMimeCertificate == null) {
+                    allSMimeCertificatesAvailable = false;
+                }
+            }
+
             ComposeCryptoStatus result = new ComposeCryptoStatus();
+            result.cryptoMethod = cryptoMethod;
             result.cryptoProviderState = cryptoProviderState;
             result.cryptoMode = cryptoMode;
             result.recipientAddresses = recipientAddresses.toArray(new String[0]);
             result.allKeysAvailable = allKeysAvailable;
             result.allKeysVerified = allKeysVerified;
+            result.allSMimeCertificatesAvailable = allSMimeCertificatesAvailable;
             result.hasRecipients = hasRecipients;
             result.signingKeyId = signingKeyId;
             result.selfEncryptKeyId = selfEncryptKeyId;
             result.enablePgpInline = enablePgpInline;
+            result.sMimeCertificate = sMimeCertificate;
             return result;
         }
     }
