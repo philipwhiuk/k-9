@@ -12,9 +12,9 @@ android {
         targetSdkVersion 22
     }
 
-    // Do not abort build if lint finds errors
+    // Abort build if lint finds errors
     lintOptions {
-        abortOnError false
+        abortOnError true
     }
 }
 

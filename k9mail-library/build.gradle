@@ -13,6 +13,12 @@ repositories {
     jcenter()
 }
 
+android {
+    lintOptions {
+        abortOnError true
+    }
+}
+
 dependencies {
     compile 'org.apache.james:apache-mime4j-core:0.7.2'
     compile 'org.apache.james:apache-mime4j-dom:0.7.2'
