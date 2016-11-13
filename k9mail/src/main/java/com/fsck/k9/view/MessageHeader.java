@@ -63,7 +63,6 @@ public class MessageHeader extends LinearLayout implements OnClickListener, OnLo
 
     private View mChip;
     private CheckBox mFlagged;
-    private ImageView mSecureTransport;
     private int defaultSubjectColor;
     private TextView mAdditionalHeadersView;
     private View mAnsweredIcon;
@@ -120,7 +119,6 @@ public class MessageHeader extends LinearLayout implements OnClickListener, OnLo
         mChip = findViewById(R.id.chip);
         mDateView = (TextView) findViewById(R.id.date);
         mFlagged = (CheckBox) findViewById(R.id.flagged);
-        mSecureTransport = (ImageView) findViewById(R.id.secureTransport);
 
         defaultSubjectColor = mSubjectView.getCurrentTextColor();
         mFontSizes.setViewTextSize(mSubjectView, mFontSizes.getMessageViewSubject());
@@ -340,12 +338,6 @@ public class MessageHeader extends LinearLayout implements OnClickListener, OnLo
         mForwardedIcon.setVisibility(message.isSet(Flag.FORWARDED) ? View.VISIBLE : View.GONE);
         mFlagged.setChecked(message.isSet(Flag.FLAGGED));
 
-        SecureTransportState state = ReceivedHeaders.wasMessageTransmittedSecurely(message);
-        Drawable secureTransportDrawable = mContext.getResources().getDrawable(state.getDrawableId());
-        mSecureTransport.setImageDrawable(secureTransportDrawable);
-        int color = mContext.getResources().getColor(state.getColorId());
-        mSecureTransport.setColorFilter(color, PorterDuff.Mode.SRC_IN);
-
         mChip.setBackgroundColor(mAccount.getChipColor());
 
         setVisibility(View.VISIBLE);
@@ -366,13 +358,13 @@ public class MessageHeader extends LinearLayout implements OnClickListener, OnLo
 
     public void setCryptoStatusLoading() {
         mCryptoStatusIcon.setVisibility(View.VISIBLE);
-        mCryptoStatusIcon.setEnabled(false);
+        mCryptoStatusIcon.setEnabled(true);
         mCryptoStatusIcon.setCryptoDisplayStatus(MessageCryptoDisplayStatus.LOADING);
     }
 
     public void setCryptoStatusDisabled() {
         mCryptoStatusIcon.setVisibility(View.VISIBLE);
-        mCryptoStatusIcon.setEnabled(false);
+        mCryptoStatusIcon.setEnabled(true);
         mCryptoStatusIcon.setCryptoDisplayStatus(MessageCryptoDisplayStatus.DISABLED);
     }
 

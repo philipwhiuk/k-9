@@ -22,12 +22,15 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.fsck.k9.R;
+import com.fsck.k9.mail.internet.SecureTransportState;
 import com.fsck.k9.view.MessageCryptoDisplayStatus;
 import com.fsck.k9.view.ThemeUtils;
+import com.fsck.k9.view.TransportCryptoDisplayStatus;
 
 
-public class CryptoInfoDialog extends DialogFragment {
-    public static final String ARG_DISPLAY_STATUS = "display_status";
+public class SecurityInfoDialog extends DialogFragment {
+    public static final String ARG_CRYPTO_DISPLAY_STATUS = "crypto_display_status";
+    public static final String ARG_TRANSPORT_DISPLAY_STATUS = "transport_display_status";
     public static final int ICON_ANIM_DELAY = 400;
     public static final int ICON_ANIM_DURATION = 350;
 
@@ -45,12 +48,18 @@ public class CryptoInfoDialog extends DialogFragment {
     private ImageView bottomIcon_2;
     private TextView bottomText;
 
+    private View transportIconFrame;
+    private ImageView transportIcon;
+    private TextView transportText;
 
-    public static CryptoInfoDialog newInstance(MessageCryptoDisplayStatus displayStatus) {
-        CryptoInfoDialog frag = new CryptoInfoDialog();
+
+    public static SecurityInfoDialog newInstance(MessageCryptoDisplayStatus displayStatus,
+                                                 TransportCryptoDisplayStatus transportState) {
+        SecurityInfoDialog frag = new SecurityInfoDialog();
 
         Bundle args = new Bundle();
-        args.putString(ARG_DISPLAY_STATUS, displayStatus.toString());
+        args.putString(ARG_CRYPTO_DISPLAY_STATUS, displayStatus.toString());
+        args.putString(ARG_TRANSPORT_DISPLAY_STATUS, transportState.toString());
         frag.setArguments(args);
 
         return frag;
@@ -74,9 +83,17 @@ public class CryptoInfoDialog extends DialogFragment {
         bottomIcon_2 = (ImageView) bottomIconFrame.findViewById(R.id.crypto_info_bottom_icon_2);
         bottomText = (TextView) dialogView.findViewById(R.id.crypto_info_bottom_text);
 
-        MessageCryptoDisplayStatus displayStatus =
-                MessageCryptoDisplayStatus.valueOf(getArguments().getString(ARG_DISPLAY_STATUS));
-        setMessageForDisplayStatus(displayStatus);
+        transportIconFrame = dialogView.findViewById(R.id.transport_info_frame);
+        transportIcon = (ImageView) transportIconFrame.findViewById(R.id.transport_info_icon);
+        transportText = (TextView) dialogView.findViewById(R.id.transport_info_text);
+
+        MessageCryptoDisplayStatus cryptoDisplayStatus =
+                MessageCryptoDisplayStatus.valueOf(getArguments().getString(ARG_CRYPTO_DISPLAY_STATUS));
+        setMessageForCryptoDisplayStatus(cryptoDisplayStatus);
+
+        TransportCryptoDisplayStatus transportState =
+                TransportCryptoDisplayStatus.valueOf(getArguments().getString(ARG_TRANSPORT_DISPLAY_STATUS));
+        setMessageForTransportDisplayStatus(transportState);
 
         b.setView(dialogView);
         b.setPositiveButton(R.string.crypto_info_ok, new OnClickListener() {
@@ -85,7 +102,8 @@ public class CryptoInfoDialog extends DialogFragment {
                 dismiss();
             }
         });
-        if (displayStatus.hasAssociatedKey()) {
+
+        if (cryptoDisplayStatus.hasAssociatedKey()) {
             b.setNeutralButton(R.string.crypto_info_view_key, new OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
@@ -101,7 +119,7 @@ public class CryptoInfoDialog extends DialogFragment {
         return b.create();
     }
 
-    private void setMessageForDisplayStatus(MessageCryptoDisplayStatus displayStatus) {
+    private void setMessageForCryptoDisplayStatus(MessageCryptoDisplayStatus displayStatus) {
         if (displayStatus.textResTop == null) {
             throw new AssertionError("Crypto info dialog can only be displayed for items with text!");
         }
@@ -117,6 +135,17 @@ public class CryptoInfoDialog extends DialogFragment {
             setMessageWithAnimation(displayStatus.colorAttr,
                     displayStatus.textResTop, displayStatus.statusIconRes,
                     displayStatus.textResBottom, displayStatus.statusDotsRes);
+        }
+    }
+
+    private void setMessageForTransportDisplayStatus(TransportCryptoDisplayStatus displayStatus) {
+        if (displayStatus.textRes == null) {
+            throw new AssertionError("Crypto info dialog can only be displayed for items with text!");
+        } else {
+            @ColorInt int color = ThemeUtils.getStyledColor(getActivity(), displayStatus.colorAttr);
+            transportIcon.setImageResource(displayStatus.statusIconRes);
+            transportIcon.setColorFilter(color);
+            transportText.setText(displayStatus.textRes);
         }
     }
 

@@ -95,4 +95,36 @@
         tools:text="Signed by trusted key."
         />
 
+    <FrameLayout
+        android:layout_width="36dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/crypto_info_bottom_text"
+        android:layout_alignBottom="@+id/transport_info_text"
+        android:id="@+id/transport_info_frame"
+        >
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left|center_vertical"
+            android:id="@+id/transport_info_icon"
+            android:tint="?attr/openpgp_grey"
+            tools:src="@drawable/status_lock_closed"
+            />
+
+    </FrameLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/crypto_info_bottom_text"
+        android:layout_toRightOf="@+id/transport_info_frame"
+        android:layout_marginLeft="20dp"
+        android:id="@+id/transport_info_text"
+        android:minLines="2"
+        android:gravity="center_vertical"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        tools:text="Signed by trusted key."
+        />
+
 </RelativeLayout>

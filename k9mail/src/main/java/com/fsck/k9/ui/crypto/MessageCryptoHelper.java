@@ -53,6 +53,18 @@ import org.openintents.openpgp.util.OpenPgpApi.OpenPgpDataSource;
 import org.openintents.openpgp.util.OpenPgpServiceConnection;
 import org.openintents.openpgp.util.OpenPgpServiceConnection.OnBound;
 import org.openintents.openpgp.util.OpenPgpUtils;
+import org.openintents.smime.ISMimeService;
+import org.openintents.smime.SMimeDecryptionResult;
+import org.openintents.smime.SMimeError;
+import org.openintents.smime.SMimeSignatureResult;
+import org.openintents.smime.util.SMimeApi;
+import org.openintents.smime.util.SMimeApi.CancelableBackgroundOperation;
+import org.openintents.smime.util.SMimeApi.ISMimeSinkResultCallback;
+import org.openintents.smime.util.SMimeApi.SMimeDataSink;
+import org.openintents.smime.util.SMimeApi.SMimeDataSource;
+import org.openintents.smime.util.SMimeServiceConnection;
+import org.openintents.smime.util.SMimeServiceConnection.OnBound;
+import org.openintents.smime.util.SMimeUtils;
 
 
 public class MessageCryptoHelper {
@@ -140,6 +152,11 @@ public class MessageCryptoHelper {
                 partsToDecryptOrVerify.add(cryptoPart);
                 continue;
             }
+            if (MessageDecryptVerifier.isSMimeEncryptedOrSignedPart(part)) {
+                CryptoPart cryptoPart = new CryptoPart(CryptoPartType.SMIME_ENCRYPTED, part);
+                partsToDecryptOrVerify.add(cryptoPart);
+                continue;
+            }
             addErrorAnnotation(part, CryptoError.ENCRYPTED_BUT_UNSUPPORTED, MessageHelper.createEmptyPart());
         }
     }
@@ -156,6 +173,11 @@ public class MessageCryptoHelper {
                 partsToDecryptOrVerify.add(cryptoPart);
                 continue;
             }
+            if (MessageDecryptVerifier.isSMimeEncryptedOrSignedPart(part)) {
+                CryptoPart cryptoPart = new CryptoPart(CryptoPartType.SMIME_SIGNED, part);
+                partsToDecryptOrVerify.add(cryptoPart);
+            }
+
             MimeBodyPart replacementPart = getMultipartSignedContentPartIfAvailable(part);
             addErrorAnnotation(part, CryptoError.SIGNED_BUT_UNSUPPORTED, replacementPart);
         }
@@ -257,7 +279,7 @@ public class MessageCryptoHelper {
             CryptoPartType cryptoPartType = currentCryptoPart.type;
             switch (cryptoPartType) {
                 case PGP_SIGNED: {
-                    callAsyncDetachedVerify(intent);
+                    callAsyncDetachedPgpVerify(intent);
                     return;
                 }
                 case PGP_ENCRYPTED: {
@@ -266,6 +288,14 @@ public class MessageCryptoHelper {
                 }
                 case PGP_INLINE: {
                     callAsyncInlineOperation(intent);
+                    return;
+                }
+                case SMIME_SIGNED: {
+                    callAsyncDetachedSMimeVerify(intent);
+                    return;
+                }
+                case SMIME_ENCRYPTED: {
+                    callAsyncDecrypt(intent);
                     return;
                 }
             }
@@ -346,7 +376,29 @@ public class MessageCryptoHelper {
         });
     }
 
-    private void callAsyncDetachedVerify(Intent intent) throws IOException, MessagingException {
+    private void callAsyncDetachedSMimeVerify(Intent intent) throws IOException, MessagingException {
+        SMimeDataSource dataSource = getDataSourceForSignedData(currentCryptoPart.part);
+
+        byte[] signatureData = MessageDecryptVerifier.getSignatureData(currentCryptoPart.part);
+        intent.putExtra(SMimeApi.EXTRA_DETACHED_SIGNATURE, signatureData);
+
+        sMimeApi.executeApiAsync(intent, dataSource, new IOpenPgpSinkResultCallback<Void>() {
+            @Override
+            public void onReturn(Intent result, Void dummy) {
+                cancelableBackgroundOperation = null;
+                currentCryptoResult = result;
+                onCryptoOperationReturned(null);
+            }
+
+            @Override
+            public void onProgress(int current, int max) {
+                Log.d(K9.LOG_TAG, "received progress status: " + current + " / " + max);
+                callbackProgress(current, max);
+            }
+        });
+    }
+
+    private void callAsyncDetachedPgpVerify(Intent intent) throws IOException, MessagingException {
         OpenPgpDataSource dataSource = getDataSourceForSignedData(currentCryptoPart.part);
 
         byte[] signatureData = MessageDecryptVerifier.getSignatureData(currentCryptoPart.part);
@@ -679,7 +731,9 @@ public class MessageCryptoHelper {
     private enum CryptoPartType {
         PGP_INLINE,
         PGP_ENCRYPTED,
-        PGP_SIGNED
+        PGP_SIGNED,
+        SMIME_SIGNED,
+        SMIME_ENCRYPTED
     }
 
     @Nullable

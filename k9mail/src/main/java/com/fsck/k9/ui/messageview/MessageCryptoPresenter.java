@@ -139,22 +139,14 @@ public class MessageCryptoPresenter implements OnCryptoClickListener {
 
     @Override
     public void onCryptoClick() {
-        if (cryptoResultAnnotation == null) {
-            return;
-        }
         MessageCryptoDisplayStatus displayStatus =
                 MessageCryptoDisplayStatus.fromResultAnnotation(cryptoResultAnnotation);
         switch (displayStatus) {
-            case LOADING:
-                // no need to do anything, there is a progress bar...
-                break;
             case UNENCRYPTED_SIGN_UNKNOWN:
                 launchPendingIntent(cryptoResultAnnotation);
                 break;
-            default:
-                displayCryptoInfoDialog(displayStatus);
-                break;
         }
+        displayCryptoInfoDialog(displayStatus);
     }
 
     @SuppressWarnings("UnusedParameters") // for consistency with Activity.onActivityResult

@@ -43,15 +43,18 @@ import com.fsck.k9.fragment.ProgressDialogFragment;
 import com.fsck.k9.helper.FileBrowserHelper;
 import com.fsck.k9.helper.FileBrowserHelper.FileBrowserFailOverCallback;
 import com.fsck.k9.mail.Flag;
+import com.fsck.k9.mail.internet.ReceivedHeaders;
+import com.fsck.k9.mail.internet.SecureTransportState;
 import com.fsck.k9.mailstore.AttachmentViewInfo;
 import com.fsck.k9.mailstore.ICalendarViewInfo;
 import com.fsck.k9.mailstore.LocalMessage;
 import com.fsck.k9.mailstore.MessageViewInfo;
-import com.fsck.k9.ui.messageview.CryptoInfoDialog.OnClickShowCryptoKeyListener;
+import com.fsck.k9.ui.messageview.SecurityInfoDialog.OnClickShowCryptoKeyListener;
 import com.fsck.k9.ui.messageview.MessageCryptoPresenter.MessageCryptoMvpView;
 import com.fsck.k9.ui.messageview.ical.ICalendarViewCallback;
 import com.fsck.k9.view.MessageCryptoDisplayStatus;
 import com.fsck.k9.view.MessageHeader;
+import com.fsck.k9.view.TransportCryptoDisplayStatus;
 
 
 public class MessageViewFragment extends Fragment implements ConfirmationDialogFragmentListener,
@@ -730,7 +733,12 @@ public class MessageViewFragment extends Fragment implements ConfirmationDialogF
 
         @Override
         public void showCryptoInfoDialog(MessageCryptoDisplayStatus displayStatus) {
-            CryptoInfoDialog dialog = CryptoInfoDialog.newInstance(displayStatus);
+            TransportCryptoDisplayStatus transportCrypto = mMessage != null ?
+                    TransportCryptoDisplayStatus.fromResultAnnotation(
+                            ReceivedHeaders.wasMessageTransmittedSecurely(mMessage)) :
+                    TransportCryptoDisplayStatus.UNKNOWN;
+
+            SecurityInfoDialog dialog = SecurityInfoDialog.newInstance(displayStatus, transportCrypto);
             dialog.setTargetFragment(MessageViewFragment.this, 0);
             dialog.show(getFragmentManager(), "crypto_info_dialog");
         }
