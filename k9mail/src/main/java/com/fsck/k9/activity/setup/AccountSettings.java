@@ -21,6 +21,7 @@ import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.PreferenceScreen;
 import android.preference.RingtonePreference;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.fsck.k9.Account;
 import com.fsck.k9.Account.DeletePolicy;
@@ -39,6 +40,7 @@ import com.fsck.k9.activity.ChooseIdentity;
 import com.fsck.k9.activity.ColorPickerDialog;
 import com.fsck.k9.activity.K9PreferenceActivity;
 import com.fsck.k9.activity.ManageIdentities;
+import com.fsck.k9.activity.compose.RecipientPresenter;
 import com.fsck.k9.crypto.OpenPgpApiHelper;
 import com.fsck.k9.mail.Folder;
 import com.fsck.k9.mail.Store;
@@ -112,6 +114,8 @@ public class AccountSettings extends K9PreferenceActivity {
     private static final String PREFERENCE_STRIP_SIGNATURE = "strip_signature";
     private static final String PREFERENCE_SYNC_REMOTE_DELETIONS = "account_sync_remote_deletetions";
     private static final String PREFERENCE_CRYPTO = "crypto";
+    private static final String PREFERENCE_CRYPTO_DEFAULT_METHOD = "crypto_default_method";
+    private static final String PREFERENCE_CRYPTO_DEFAULT_MODE = "crypto_default_mode";
     private static final String PREFERENCE_CRYPTO_APP = "crypto_app";
     private static final String PREFERENCE_CRYPTO_KEY = "crypto_key";
     private static final String PREFERENCE_CRYPTO_SUPPORT_SIGN_ONLY = "crypto_support_sign_only";
@@ -180,6 +184,8 @@ public class AccountSettings extends K9PreferenceActivity {
     private ListPreference mIdleRefreshPeriod;
     private ListPreference mMaxPushFolders;
     private boolean mHasCrypto = false;
+    private ListPreference mCryptoDefaultMethod;
+    private ListPreference mCryptoDefaultMode;
     private OpenPgpAppPreference mCryptoApp;
     private OpenPgpKeyPreference mCryptoKey;
     private CheckBoxPreference mCryptoSupportSignOnly;
@@ -696,8 +702,40 @@ public class AccountSettings extends K9PreferenceActivity {
             }
         });
 
+
+
+        mCryptoDefaultMethod = (ListPreference) findPreference(PREFERENCE_CRYPTO_DEFAULT_METHOD);
+        if (mAccount.getCryptoDefaultMethod().equals(RecipientPresenter.CryptoMethod.PGP_MIME) && !mHasCrypto) {
+            mCryptoDefaultMethod.setValue(RecipientPresenter.CryptoMethod.NO_CRYPTO.toString());
+            mAccount.setCryptoDefaultMethod(RecipientPresenter.CryptoMethod.NO_CRYPTO.toString());
+        } else {
+            mCryptoDefaultMethod.setValue(mAccount.getCryptoDefaultMethod());
+        }
+        mCryptoDefaultMethod.setSummary(mCryptoDefaultMethod.getEntry());
+
+        mCryptoDefaultMethod.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                String value = newValue.toString();
+                if (RecipientPresenter.CryptoMethod.PGP_MIME.toString().equals(value) && !mHasCrypto) {
+                    Toast.makeText(AccountSettings.this,
+                            getString(R.string.account_settings_crypto_mode_pgpmime_unavailable),
+                            Toast.LENGTH_SHORT);
+                    value = RecipientPresenter.CryptoMethod.NO_CRYPTO.toString();
+                }
+
+                int index = mCryptoDefaultMethod.findIndexOfValue(value);
+                mCryptoDefaultMethod.setSummary(mCryptoDefaultMethod.getEntries()[index]);
+                mCryptoDefaultMethod.setValue(value);
+                return false;
+            }
+        });
+
+        mCryptoDefaultMode = (ListPreference) findPreference(PREFERENCE_CRYPTO_DEFAULT_MODE);
         mHasCrypto = OpenPgpUtils.isAvailable(this);
+
+
         if (mHasCrypto) {
+
             mCryptoApp = (OpenPgpAppPreference) findPreference(PREFERENCE_CRYPTO_APP);
             mCryptoKey = (OpenPgpKeyPreference) findPreference(PREFERENCE_CRYPTO_KEY);
             mCryptoSupportSignOnly = (CheckBoxPreference) findPreference(PREFERENCE_CRYPTO_SUPPORT_SIGN_ONLY);

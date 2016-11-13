@@ -709,6 +709,19 @@ Please submit bug reports, contribute new features and ask questions at
     <string name="account_settings_identities_label">Manage identities</string>
     <string name="account_settings_identities_summary">Set up alternate \'From\' addresses and signatures</string>
 
+    <string name="account_settings_default_crypto_method">Default method</string>
+    <string name="account_settings_crypto_method_none">None</string>
+    <string name="account_settings_crypto_method_pgpmime">PGP/MIME</string>
+    <string name="account_settings_crypto_method_smime">S/MIME</string>
+
+    <string name="account_settings_default_crypto_mode">Default mode</string>
+    <string name="account_settings_crypto_method_disable">Disabled</string>
+    <string name="account_settings_crypto_method_sign_only">Sign Only</string>
+    <string name="account_settings_crypto_method_opportunistic">Sign, Encrypt If Possible</string>
+    <string name="account_settings_crypto_method_private">Always Sign and Encrypt</string>
+
+    <string name="account_settings_crypto_mode_pgpmime_unavailable">No PGP/MIME app installed.</string>
+
     <string name="manage_identities_title">Manage identities</string>
 
     <string name="manage_identities_context_menu_title">Manage identity</string>

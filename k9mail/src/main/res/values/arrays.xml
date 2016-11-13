@@ -754,4 +754,30 @@
         <item>NEVER</item>
         <item>WHEN_IN_LANDSCAPE</item>
     </string-array>
+
+    <string-array name="account_settings_crypto_method_entries">
+        <item>@string/account_settings_crypto_method_none</item>
+        <item>@string/account_settings_crypto_method_pgpmime</item>
+        <item>@string/account_settings_crypto_method_smime</item>
+    </string-array>
+
+    <string-array name="account_settings_crypto_method_values" translatable="false">
+        <item>NO_CRYPTO</item>
+        <item>PGP_MIME</item>
+        <item>SMIME</item>
+    </string-array>
+
+    <string-array name="account_settings_crypto_mode_entries">
+        <item>@string/account_settings_crypto_method_disable</item>
+        <item>@string/account_settings_crypto_method_sign_only</item>
+        <item>@string/account_settings_crypto_method_opportunistic</item>
+        <item>@string/account_settings_crypto_method_private</item>
+    </string-array>
+
+    <string-array name="account_settings_crypto_mode_values" translatable="false">
+        <item>DISABLE</item>
+        <item>SIGN_ONLY</item>
+        <item>OPPORTUNISTIC</item>
+        <item>PRIVATE</item>
+    </string-array>
 </resources>

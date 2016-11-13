@@ -325,7 +325,7 @@ public class Account implements BaseAccount, StoreConfig {
         mCryptoApp = NO_OPENPGP_PROVIDER;
         mCryptoKey = NO_OPENPGP_KEY;
         mCryptoSupportSignOnly = false;
-        mCryptoDefaultMethod = NO_CRYPTO;
+        mCryptoDefaultMethod = RecipientPresenter.CryptoMethod.NO_CRYPTO.toString();
         mCryptoDefaultMode = RecipientPresenter.CryptoMode.OPPORTUNISTIC.toString();
         mAllowRemoteSearch = false;
         mRemoteSearchFullText = false;
@@ -477,6 +477,8 @@ public class Account implements BaseAccount, StoreConfig {
         String cryptoApp = storage.getString(mUuid + ".cryptoApp", NO_OPENPGP_PROVIDER);
         setCryptoApp(cryptoApp);
         mCryptoKey = storage.getLong(mUuid + ".cryptoKey", NO_OPENPGP_KEY);
+        mCryptoDefaultMethod = storage.getString(mUuid + ".cryptoDefaultMethod", RecipientPresenter.CryptoMethod.NO_CRYPTO.toString());
+        mCryptoDefaultMode = storage.getString(mUuid + ".cryptoDefaultMode", RecipientPresenter.CryptoMode.OPPORTUNISTIC.toString());
         mCryptoSupportSignOnly = storage.getBoolean(mUuid + ".cryptoSupportSignOnly", false);
         mAllowRemoteSearch = storage.getBoolean(mUuid + ".allowRemoteSearch", false);
         mRemoteSearchFullText = storage.getBoolean(mUuid + ".remoteSearchFullText", false);
@@ -1613,6 +1615,10 @@ public class Account implements BaseAccount, StoreConfig {
 
     public String getCryptoDefaultMethod() {
         return mCryptoDefaultMethod;
+    }
+
+    public void setCryptoDefaultMethod(String cryptoMethod) {
+        mCryptoDefaultMethod = cryptoMethod;
     }
 
     public String getCryptoDefaultMode() {
