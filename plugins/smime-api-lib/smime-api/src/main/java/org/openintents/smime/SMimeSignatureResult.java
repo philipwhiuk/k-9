@@ -24,7 +24,7 @@ import java.util.List;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import org.openintents.smime.util.OpenPgpUtils;
+import org.openintents.smime.util.SMimeUtils;
 
 @SuppressWarnings("unused")
 public class SMimeSignatureResult implements Parcelable {
@@ -182,7 +182,7 @@ public class SMimeSignatureResult implements Parcelable {
         String out = "\nresult: " + result;
         out += "\nprimaryUserId: " + primaryUserId;
         out += "\nuserIds: " + userIds;
-        out += "\nkeyId: " + OpenPgpUtils.convertKeyIdToHex(keyId);
+        out += "\nkeyId: " + SMimeUtils.convertKeyIdToHex(keyId);
         return out;
     }
 

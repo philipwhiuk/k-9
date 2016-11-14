@@ -32,7 +32,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
 import android.widget.TextView;
 
-import org.openintents.openpgp.R;
+import org.openintents.smime.R;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,10 +42,10 @@ import java.util.List;
  * http://grepcode.com/file_/repository.grepcode.com/java/ext/com.google.android/android/4.4_r1/android/preference/ListPreference.java/?v=source
  */
 public class SMimeAppPreference extends DialogPreference {
-    private static final String OPENKEYCHAIN_PACKAGE = "org.sufficientlysecure.keychain";
+    private static final String OPENSMIME_PACKAGE = "com.whiuk.philip.smime";
     private static final String MARKET_INTENT_URI_BASE = "market://details?id=%s";
     private static final Intent MARKET_INTENT = new Intent(Intent.ACTION_VIEW, Uri.parse(
-            String.format(MARKET_INTENT_URI_BASE, OPENKEYCHAIN_PACKAGE)));
+            String.format(MARKET_INTENT_URI_BASE, OPENSMIME_PACKAGE)));
 
     private static final ArrayList<String> PROVIDER_BLACKLIST = new ArrayList<String>();
 
@@ -53,8 +53,8 @@ public class SMimeAppPreference extends DialogPreference {
         // Unfortunately, the current released version of APG includes a broken version of the API
     }
 
-    private ArrayList<OpenPgpProviderEntry> mLegacyList = new ArrayList<>();
-    private ArrayList<OpenPgpProviderEntry> mList = new ArrayList<>();
+    private ArrayList<SMimeProviderEntry> mLegacyList = new ArrayList<>();
+    private ArrayList<SMimeProviderEntry> mList = new ArrayList<>();
 
     private String mSelectedPackage;
 
@@ -75,7 +75,7 @@ public class SMimeAppPreference extends DialogPreference {
      * @param icon
      */
     public void addLegacyProvider(int position, String packageName, String simpleName, Drawable icon) {
-        mLegacyList.add(position, new OpenPgpProviderEntry(packageName, simpleName, icon));
+        mLegacyList.add(position, new SMimeProviderEntry(packageName, simpleName, icon));
     }
 
     @Override
@@ -85,7 +85,7 @@ public class SMimeAppPreference extends DialogPreference {
         populateAppList();
 
         // Init ArrayAdapter with OpenPGP Providers
-        ListAdapter adapter = new ArrayAdapter<OpenPgpProviderEntry>(getContext(),
+        ListAdapter adapter = new ArrayAdapter<SMimeProviderEntry>(getContext(),
                 android.R.layout.select_dialog_singlechoice, android.R.id.text1, mList) {
             public View getView(int position, View convertView, ViewGroup parent) {
                 // User super class to create the View
@@ -109,7 +109,7 @@ public class SMimeAppPreference extends DialogPreference {
 
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        OpenPgpProviderEntry entry = mList.get(which);
+                        SMimeProviderEntry entry = mList.get(which);
 
                         if (entry.intent != null) {
                             /*
@@ -188,7 +188,7 @@ public class SMimeAppPreference extends DialogPreference {
     }
 
     private int getIndexOfProviderList(String packageName) {
-        for (OpenPgpProviderEntry app : mList) {
+        for (SMimeProviderEntry app : mList) {
             if (app.packageName.equals(packageName)) {
                 return mList.indexOf(app);
             }
@@ -238,28 +238,28 @@ public class SMimeAppPreference extends DialogPreference {
     }
 
     public String getEntryByValue(String packageName) {
-        for (OpenPgpProviderEntry app : mList) {
+        for (SMimeProviderEntry app : mList) {
             if (app.packageName.equals(packageName) && app.intent == null) {
                 return app.simpleName;
             }
         }
 
-        return getContext().getString(R.string.openpgp_list_preference_none);
+        return getContext().getString(R.string.smime_list_preference_none);
     }
 
     private void populateAppList() {
         mList.clear();
 
         // add "none"-entry
-        mList.add(0, new OpenPgpProviderEntry("",
-                getContext().getString(R.string.openpgp_list_preference_none),
+        mList.add(0, new SMimeProviderEntry("",
+                getContext().getString(R.string.smime_list_preference_none),
                 getContext().getResources().getDrawable(R.drawable.ic_action_cancel_launchersize)));
 
         // add all additional (legacy) providers
         mList.addAll(mLegacyList);
 
-        // search for OpenPGP providers...
-        ArrayList<OpenPgpProviderEntry> providerList = new ArrayList<>();
+        // search for SMIME providers...
+        ArrayList<SMimeProviderEntry> providerList = new ArrayList<>();
         Intent intent = new Intent(SMimeApi.SERVICE_INTENT);
         List<ResolveInfo> resInfo = getContext().getPackageManager().queryIntentServices(intent, 0);
 
@@ -274,7 +274,7 @@ public class SMimeAppPreference extends DialogPreference {
                 Drawable icon = resolveInfo.serviceInfo.loadIcon(getContext().getPackageManager());
 
                 if (!PROVIDER_BLACKLIST.contains(packageName)) {
-                    providerList.add(new OpenPgpProviderEntry(packageName, simpleName, icon));
+                    providerList.add(new SMimeProviderEntry(packageName, simpleName, icon));
                 }
             }
         }
@@ -290,8 +290,8 @@ public class SMimeAppPreference extends DialogPreference {
                 String marketName = String.valueOf(resolveInfo.activityInfo.applicationInfo
                         .loadLabel(getContext().getPackageManager()));
                 String simpleName = String.format(getContext().getString(R.string
-                        .openpgp_install_openkeychain_via), marketName);
-                mList.add(new OpenPgpProviderEntry(OPENKEYCHAIN_PACKAGE, simpleName,
+                        .smime_install_opensmime_via), marketName);
+                mList.add(new SMimeProviderEntry(OPENSMIME_PACKAGE, simpleName,
                         icon, marketIntent));
             }
         } else {
@@ -300,19 +300,19 @@ public class SMimeAppPreference extends DialogPreference {
         }
     }
 
-    private static class OpenPgpProviderEntry {
+    private static class SMimeProviderEntry {
         private String packageName;
         private String simpleName;
         private Drawable icon;
         private Intent intent;
 
-        public OpenPgpProviderEntry(String packageName, String simpleName, Drawable icon) {
+        public SMimeProviderEntry(String packageName, String simpleName, Drawable icon) {
             this.packageName = packageName;
             this.simpleName = simpleName;
             this.icon = icon;
         }
 
-        public OpenPgpProviderEntry(String packageName, String simpleName, Drawable icon, Intent intent) {
+        public SMimeProviderEntry(String packageName, String simpleName, Drawable icon, Intent intent) {
             this(packageName, simpleName, icon);
             this.intent = intent;
         }

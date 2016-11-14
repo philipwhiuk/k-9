@@ -3,9 +3,9 @@
 
     <string name="smime_list_preference_none">None</string>
     <string name="smime_install_opensmime_via">Install OpenSMIME via %s</string>
-    <string name="opensmime_cert_selected">Certificate selected</string>
-    <string name="opensmime_no_cert_selected">No certificate selected</string>
-    <string name="opensmime_signing_unencrypted_enabled">Signing of unencrypted messages is enabled</string>
-    <string name="opensmime_signing_unencrypted_disabled">Signing of unencrypted messages is disabled</string>
+    <string name="smime_cert_selected">Certificate selected</string>
+    <string name="smime_no_cert_selected">No certificate selected</string>
+    <string name="smime_signing_unencrypted_enabled">Signing of unencrypted messages is enabled</string>
+    <string name="smime_signing_unencrypted_disabled">Signing of unencrypted messages is disabled</string>
 
 </resources>

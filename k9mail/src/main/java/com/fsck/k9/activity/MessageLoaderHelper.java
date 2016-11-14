@@ -262,7 +262,8 @@ public class MessageLoaderHelper {
         if (retainCryptoHelperFragment.hasData()) {
             messageCryptoHelper = retainCryptoHelperFragment.getData();
         } else {
-            messageCryptoHelper = new MessageCryptoHelper(context, account.getOpenPgpProvider());
+            messageCryptoHelper = new MessageCryptoHelper(context, account.getOpenPgpProvider(),
+                    account.getSMimeProvider());
             retainCryptoHelperFragment.setData(messageCryptoHelper);
         }
         messageCryptoHelper.asyncStartOrResumeProcessingMessage(

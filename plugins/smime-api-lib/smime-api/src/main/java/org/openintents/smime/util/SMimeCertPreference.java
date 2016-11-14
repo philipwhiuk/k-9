@@ -30,41 +30,41 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 
-import org.openintents.openpgp.IOpenPgpService2;
-import org.openintents.smime.OpenPgpError;
-import org.openintents.openpgp.R;
+import org.openintents.smime.ISMimeService;
+import org.openintents.smime.SMimeError;
+import org.openintents.smime.R;
 import org.openintents.smime.SMimeError;
 
-public class SMimeKeyPreference extends Preference {
-    private long mKeyId;
-    private String mOpenPgpProvider;
+public class SMimeCertPreference extends Preference {
+    private long mCertId;
+    private String mSMimeProvider;
     private SMimeServiceConnection mServiceConnection;
     private String mDefaultUserId;
 
-    public static final int REQUEST_CODE_KEY_PREFERENCE = 9999;
+    public static final int REQUEST_CODE_CERT_PREFERENCE = 8999;
 
     private static final int NO_KEY = 0;
 
-    public SMimeKeyPreference(Context context, AttributeSet attrs) {
+    public SMimeCertPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
     @Override
     public CharSequence getSummary() {
-        return (mKeyId == NO_KEY) ? getContext().getString(R.string.openpgp_no_key_selected)
-                : getContext().getString(R.string.openpgp_key_selected);
+        return (mCertId == NO_KEY) ? getContext().getString(R.string.smime_no_cert_selected)
+                : getContext().getString(R.string.smime_cert_selected);
     }
 
     private void updateEnabled() {
-        if (TextUtils.isEmpty(mOpenPgpProvider)) {
+        if (TextUtils.isEmpty(mSMimeProvider)) {
             setEnabled(false);
         } else {
             setEnabled(true);
         }
     }
 
-    public void setOpenPgpProvider(String packageName) {
-        mOpenPgpProvider = packageName;
+    public void setSMimeProvider(String packageName) {
+        mSMimeProvider = packageName;
         updateEnabled();
     }
 
@@ -77,7 +77,7 @@ public class SMimeKeyPreference extends Preference {
         // bind to service
         mServiceConnection = new SMimeServiceConnection(
                 getContext().getApplicationContext(),
-                mOpenPgpProvider,
+                mSMimeProvider,
                 new SMimeServiceConnection.OnBound() {
                     @Override
                     public void onBound(ISMimeService service) {
@@ -99,7 +99,7 @@ public class SMimeKeyPreference extends Preference {
         data.putExtra(SMimeApi.EXTRA_USER_ID, mDefaultUserId);
 
         SMimeApi api = new SMimeApi(getContext(), mServiceConnection.getService());
-        api.executeApiAsync(data, null, null, new MyCallback(REQUEST_CODE_KEY_PREFERENCE));
+        api.executeApiAsync(data, null, null, new MyCallback(REQUEST_CODE_CERT_PREFERENCE));
     }
 
     private class MyCallback implements SMimeApi.ISMimeCallback {
@@ -164,15 +164,15 @@ public class SMimeKeyPreference extends Preference {
      * Public API
      */
     public long getValue() {
-        return mKeyId;
+        return mCertId;
     }
 
     private void setAndPersist(long newValue) {
-        mKeyId = newValue;
+        mCertId = newValue;
 
         // Save to persistent storage (this method will make sure this
         // preference should be persistent, along with other useful checks)
-        persistLong(mKeyId);
+        persistLong(mCertId);
 
         // Data has changed, notify so UI can be refreshed!
         notifyChanged();
@@ -192,7 +192,7 @@ public class SMimeKeyPreference extends Preference {
     protected void onSetInitialValue(boolean restoreValue, Object defaultValue) {
         if (restoreValue) {
             // Restore state
-            mKeyId = getPersistedLong(mKeyId);
+            mCertId = getPersistedLong(mCertId);
         } else {
             // Set state
             long value = (Long) defaultValue;
@@ -216,8 +216,8 @@ public class SMimeKeyPreference extends Preference {
 
         // Save the instance state
         final SavedState myState = new SavedState(superState);
-        myState.keyId = mKeyId;
-        myState.openPgpProvider = mOpenPgpProvider;
+        myState.certId = mCertId;
+        myState.sMimeProvider = mSMimeProvider;
         myState.defaultUserId = mDefaultUserId;
         return myState;
     }
@@ -233,8 +233,8 @@ public class SMimeKeyPreference extends Preference {
         // Restore the instance state
         SavedState myState = (SavedState) state;
         super.onRestoreInstanceState(myState.getSuperState());
-        mKeyId = myState.keyId;
-        mOpenPgpProvider = myState.openPgpProvider;
+        mCertId = myState.certId;
+        mSMimeProvider = myState.sMimeProvider;
         mDefaultUserId = myState.defaultUserId;
         notifyChanged();
     }
@@ -246,15 +246,15 @@ public class SMimeKeyPreference extends Preference {
      * It is important to always call through to super methods.
      */
     private static class SavedState extends BaseSavedState {
-        long keyId;
-        String openPgpProvider;
+        long certId;
+        String sMimeProvider;
         String defaultUserId;
 
         public SavedState(Parcel source) {
             super(source);
 
-            keyId = source.readInt();
-            openPgpProvider = source.readString();
+            certId = source.readInt();
+            sMimeProvider = source.readString();
             defaultUserId = source.readString();
         }
 
@@ -262,8 +262,8 @@ public class SMimeKeyPreference extends Preference {
         public void writeToParcel(Parcel dest, int flags) {
             super.writeToParcel(dest, flags);
 
-            dest.writeLong(keyId);
-            dest.writeString(openPgpProvider);
+            dest.writeLong(certId);
+            dest.writeString(sMimeProvider);
             dest.writeString(defaultUserId);
         }
 
@@ -284,7 +284,7 @@ public class SMimeKeyPreference extends Preference {
     }
 
     public boolean handleOnActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_CODE_KEY_PREFERENCE && resultCode == Activity.RESULT_OK) {
+        if (requestCode == REQUEST_CODE_CERT_PREFERENCE && resultCode == Activity.RESULT_OK) {
             getSignKeyId(data);
             return true;
         } else {

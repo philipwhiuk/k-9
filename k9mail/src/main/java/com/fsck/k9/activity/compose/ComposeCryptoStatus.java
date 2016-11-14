@@ -21,15 +21,17 @@ public class ComposeCryptoStatus {
     private CryptoMethod cryptoMethod;
     private CryptoProviderState cryptoProviderState;
     private CryptoMode cryptoMode;
+    private boolean openPgpSupportSignOnly;
+    private boolean sMimeSupportSignOnly;
     private boolean allKeysAvailable;
     private boolean allKeysVerified;
-    private boolean allSMimeCertificatesAvailable;
+    private boolean allCertificatesAvailable;
     private boolean hasRecipients;
     private Long signingKeyId;
     private Long selfEncryptKeyId;
     private String[] recipientAddresses;
     private boolean enablePgpInline;
-    private String sMimeCertificate;
+    private Long sMimeCertificate;
 
 
     public long[] getEncryptKeyIds() {
@@ -68,18 +70,18 @@ public class ComposeCryptoStatus {
                 case PRIVATE:
                     if (!hasRecipients) {
                         return CryptoStatusDisplayType.PRIVATE_EMPTY;
-                    } else if (allSMimeCertificatesAvailable) {
+                    } else if (allCertificatesAvailable) {
                         return CryptoStatusDisplayType.PRIVATE_TRUSTED;
-                    } else if (allSMimeCertificatesAvailable) {
+                    } else if (allCertificatesAvailable) {
                         return CryptoStatusDisplayType.PRIVATE_UNTRUSTED;
                     }
                     return CryptoStatusDisplayType.PRIVATE_NOKEY;
                 case OPPORTUNISTIC:
                     if (!hasRecipients) {
                         return CryptoStatusDisplayType.OPPORTUNISTIC_EMPTY;
-                    } else if (allSMimeCertificatesAvailable) {
+                    } else if (allCertificatesAvailable) {
                         return CryptoStatusDisplayType.OPPORTUNISTIC_TRUSTED;
-                    } else if (allSMimeCertificatesAvailable) {
+                    } else if (allCertificatesAvailable) {
                         return CryptoStatusDisplayType.OPPORTUNISTIC_UNTRUSTED;
                     }
                     return CryptoStatusDisplayType.OPPORTUNISTIC_NOKEY;
@@ -194,8 +196,9 @@ public class ComposeCryptoStatus {
         private Long selfEncryptKeyId;
         private List<Recipient> recipients;
         private Boolean enablePgpInline;
-        private Boolean cryptoSupportSignOnly;
-        private String sMimeCertificate;
+        private Boolean openPgpSupportSignOnly;
+        private Boolean sMimeSupportSignOnly;
+        private long sMimeCertificate;
 
         public ComposeCryptoStatusBuilder setCryptoProviderState(CryptoProviderState cryptoProviderState) {
             this.cryptoProviderState = cryptoProviderState;
@@ -212,13 +215,18 @@ public class ComposeCryptoStatus {
             return this;
         }
 
-        public ComposeCryptoStatusBuilder setSMimeCertificate(String sMimeCertificate) {
+        public ComposeCryptoStatusBuilder setSMimeCertificate(long sMimeCertificate) {
             this.sMimeCertificate = sMimeCertificate;
             return this;
         }
 
-        public ComposeCryptoStatusBuilder setCryptoSupportSignOnly(boolean cryptoSupportSignOnly) {
-            this.cryptoSupportSignOnly = cryptoSupportSignOnly;
+        public ComposeCryptoStatusBuilder setOpenPgpSupportSignOnly(boolean cryptoSupportSignOnly) {
+            this.openPgpSupportSignOnly = cryptoSupportSignOnly;
+            return this;
+        }
+
+        public ComposeCryptoStatusBuilder setSMimeSupportSignOnly(boolean cryptoSupportSignOnly) {
+            this.sMimeSupportSignOnly = cryptoSupportSignOnly;
             return this;
         }
 
@@ -275,12 +283,12 @@ public class ComposeCryptoStatus {
                 }
             }
 
-            boolean allSMimeCertificatesAvailable = true;
+            boolean allCertificatesAvailable = true;
             for (Recipient recipient : recipients) {
                 String sMimeCertificate = recipient.getSMimeCertificate();
                 recipientAddresses.add(recipient.address.getAddress());
                 if (sMimeCertificate == null) {
-                    allSMimeCertificatesAvailable = false;
+                    allCertificatesAvailable = false;
                 }
             }
 
@@ -291,7 +299,7 @@ public class ComposeCryptoStatus {
             result.recipientAddresses = recipientAddresses.toArray(new String[0]);
             result.allKeysAvailable = allKeysAvailable;
             result.allKeysVerified = allKeysVerified;
-            result.allSMimeCertificatesAvailable = allSMimeCertificatesAvailable;
+            result.allCertificatesAvailable = allCertificatesAvailable;
             result.hasRecipients = hasRecipients;
             result.signingKeyId = signingKeyId;
             result.selfEncryptKeyId = selfEncryptKeyId;

@@ -367,16 +367,22 @@ public class RecipientPresenter implements PermissionPingCallback {
                     .setCryptoProviderState(cryptoProviderState)
                     .setCryptoMethod(currentCryptoMethod)
                     .setCryptoMode(currentCryptoMode)
-                    .setSMimeCertificate(account.getSMimeCertificate())
-                    .setCryptoSupportSignOnly(account.getCryptoSupportSignOnly())
+                    .setOpenPgpSupportSignOnly(account.getOpenPgpSupportSignOnly())
+                    .setSMimeSupportSignOnly(account.getSMimeSupportSignOnly())
                     .setEnablePgpInline(cryptoEnablePgpInline)
                     .setRecipients(getAllRecipients());
 
-            long accountCryptoKey = account.getCryptoKey();
-            if (accountCryptoKey != Account.NO_OPENPGP_KEY) {
+            long accountOpenPgpKey = account.getOpenPgpKey();
+            if (accountOpenPgpKey != Account.NO_OPENPGP_KEY) {
                 // TODO split these into individual settings? maybe after key is bound to identity
-                builder.setSigningKeyId(accountCryptoKey);
-                builder.setSelfEncryptId(accountCryptoKey);
+                builder.setSigningKeyId(accountOpenPgpKey);
+                builder.setSelfEncryptId(accountOpenPgpKey);
+            }
+
+            long accountSMimeCert = account.getSMimeCertificate();
+            if (accountSMimeCert != Account.NO_SMIME_CERTIFICATE) {
+                // TODO split these into individual settings? maybe after certificate is bound to identity
+                builder.setSMimeCertificate(accountSMimeCert);
             }
 
             cachedCryptoStatus = builder.build();
@@ -560,11 +566,15 @@ public class RecipientPresenter implements PermissionPingCallback {
                 Log.e(K9.LOG_TAG, "click on crypto status while unconfigured - this should not really happen?!");
                 return;
             case OK:
+<<<<<<< 029dc9bf071def36897bd334c45001b7184496c7
                 if (cachedCryptoStatus.isSignOnly()) {
                     recipientMvpView.showErrorIsSignOnly();
                 } else {
                     recipientMvpView.showCryptoDialog(currentCryptoMode);
                 }
+=======
+                recipientMvpView.showCryptoDialog(currentCryptoMode, account.getOpenPgpSupportSignOnly(), account.getSMimeSupportSignOnly());
+>>>>>>> SMIME Further Work
                 return;
 
             case LOST_CONNECTION:

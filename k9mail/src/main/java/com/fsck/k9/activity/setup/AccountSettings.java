@@ -50,7 +50,12 @@ import com.fsck.k9.service.MailService;
 
 import org.openintents.openpgp.util.OpenPgpAppPreference;
 import org.openintents.openpgp.util.OpenPgpKeyPreference;
+import org.openintents.openpgp.util.OpenPgpSignPreference;
 import org.openintents.openpgp.util.OpenPgpUtils;
+import org.openintents.smime.util.SMimeAppPreference;
+import org.openintents.smime.util.SMimeCertPreference;
+import org.openintents.smime.util.SMimeSignPreference;
+import org.openintents.smime.util.SMimeUtils;
 
 
 public class AccountSettings extends K9PreferenceActivity {
@@ -112,13 +117,16 @@ public class AccountSettings extends K9PreferenceActivity {
     private static final String PREFERENCE_DEFAULT_QUOTED_TEXT_SHOWN = "default_quoted_text_shown";
     private static final String PREFERENCE_REPLY_AFTER_QUOTE = "reply_after_quote";
     private static final String PREFERENCE_STRIP_SIGNATURE = "strip_signature";
-    private static final String PREFERENCE_SYNC_REMOTE_DELETIONS = "account_sync_remote_deletetions";
+    private static final String PREFERENCE_SYNC_REMOTE_DELETIONS = "account_sync_remote_deletions";
     private static final String PREFERENCE_CRYPTO = "crypto";
     private static final String PREFERENCE_CRYPTO_DEFAULT_METHOD = "crypto_default_method";
     private static final String PREFERENCE_CRYPTO_DEFAULT_MODE = "crypto_default_mode";
-    private static final String PREFERENCE_CRYPTO_APP = "crypto_app";
-    private static final String PREFERENCE_CRYPTO_KEY = "crypto_key";
-    private static final String PREFERENCE_CRYPTO_SUPPORT_SIGN_ONLY = "crypto_support_sign_only";
+    private static final String PREFERENCE_OPENPGP_APP = "openpgp_app";
+    private static final String PREFERENCE_OPENPGP_KEY = "openpgp_key";
+    private static final String PREFERENCE_OPENPGP_SUPPORT_SIGN_ONLY = "openpgp_support_sign_only";
+    private static final String PREFERENCE_SMIME_APP = "smime_app";
+    private static final String PREFERENCE_SMIME_CERT = "smime_cert";
+    private static final String PREFERENCE_SMIME_SUPPORT_SIGN_ONLY = "smime_support_sign_only";
     private static final String PREFERENCE_CLOUD_SEARCH_ENABLED = "remote_search_enabled";
     private static final String PREFERENCE_REMOTE_SEARCH_NUM_RESULTS = "account_remote_search_num_results";
     private static final String PREFERENCE_REMOTE_SEARCH_FULL_TEXT = "account_remote_search_full_text";
@@ -183,12 +191,16 @@ public class AccountSettings extends K9PreferenceActivity {
     private CheckBoxPreference mPushPollOnConnect;
     private ListPreference mIdleRefreshPeriod;
     private ListPreference mMaxPushFolders;
-    private boolean mHasCrypto = false;
     private ListPreference mCryptoDefaultMethod;
     private ListPreference mCryptoDefaultMode;
-    private OpenPgpAppPreference mCryptoApp;
-    private OpenPgpKeyPreference mCryptoKey;
-    private CheckBoxPreference mCryptoSupportSignOnly;
+    private boolean mHasOpenPgp = false;
+    private OpenPgpAppPreference mOpenPgpApp;
+    private OpenPgpKeyPreference mOpenPgpKey;
+    private OpenPgpSignPreference mOpenPgpSupportSignOnly;
+    private boolean mHasSMime = false;
+    private SMimeAppPreference mSMimeApp;
+    private SMimeCertPreference mSMimeCert;
+    private SMimeSignPreference mSMimeSupportSignOnly;
 
     private PreferenceScreen mSearchScreen;
     private CheckBoxPreference mCloudSearchEnabled;
@@ -705,7 +717,8 @@ public class AccountSettings extends K9PreferenceActivity {
 
 
         mCryptoDefaultMethod = (ListPreference) findPreference(PREFERENCE_CRYPTO_DEFAULT_METHOD);
-        if (mAccount.getCryptoDefaultMethod().equals(RecipientPresenter.CryptoMethod.PGP_MIME) && !mHasCrypto) {
+        if (mAccount.getCryptoDefaultMethod().equals(RecipientPresenter.CryptoMethod.PGP_MIME)
+                && !mHasOpenPgp) {
             mCryptoDefaultMethod.setValue(RecipientPresenter.CryptoMethod.NO_CRYPTO.toString());
             mAccount.setCryptoDefaultMethod(RecipientPresenter.CryptoMethod.NO_CRYPTO.toString());
         } else {
@@ -716,7 +729,7 @@ public class AccountSettings extends K9PreferenceActivity {
         mCryptoDefaultMethod.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             public boolean onPreferenceChange(Preference preference, Object newValue) {
                 String value = newValue.toString();
-                if (RecipientPresenter.CryptoMethod.PGP_MIME.toString().equals(value) && !mHasCrypto) {
+                if (RecipientPresenter.CryptoMethod.PGP_MIME.toString().equals(value) && !mHasOpenPgp) {
                     Toast.makeText(AccountSettings.this,
                             getString(R.string.account_settings_crypto_mode_pgpmime_unavailable),
                             Toast.LENGTH_SHORT);
@@ -731,43 +744,77 @@ public class AccountSettings extends K9PreferenceActivity {
         });
 
         mCryptoDefaultMode = (ListPreference) findPreference(PREFERENCE_CRYPTO_DEFAULT_MODE);
-        mHasCrypto = OpenPgpUtils.isAvailable(this);
+        mOpenPgpSupportSignOnly = (OpenPgpSignPreference) findPreference(PREFERENCE_OPENPGP_SUPPORT_SIGN_ONLY);
+        mSMimeSupportSignOnly = (SMimeSignPreference) findPreference(PREFERENCE_SMIME_SUPPORT_SIGN_ONLY);
 
+        mHasOpenPgp = OpenPgpUtils.isAvailable(this);
+        if (mHasOpenPgp) {
 
-        if (mHasCrypto) {
+            mOpenPgpApp = (OpenPgpAppPreference) findPreference(PREFERENCE_OPENPGP_APP);
+            mOpenPgpKey = (OpenPgpKeyPreference) findPreference(PREFERENCE_OPENPGP_KEY);
 
-            mCryptoApp = (OpenPgpAppPreference) findPreference(PREFERENCE_CRYPTO_APP);
-            mCryptoKey = (OpenPgpKeyPreference) findPreference(PREFERENCE_CRYPTO_KEY);
-            mCryptoSupportSignOnly = (CheckBoxPreference) findPreference(PREFERENCE_CRYPTO_SUPPORT_SIGN_ONLY);
-
-            mCryptoApp.setValue(String.valueOf(mAccount.getCryptoApp()));
-            mCryptoApp.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            mOpenPgpApp.setValue(String.valueOf(mAccount.getOpenPgpApp()));
+            mOpenPgpApp.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 public boolean onPreferenceChange(Preference preference, Object newValue) {
                     String value = newValue.toString();
-                    mCryptoApp.setValue(value);
+                    mOpenPgpApp.setValue(value);
 
-                    mCryptoKey.setOpenPgpProvider(value);
+                    mOpenPgpKey.setOpenPgpProvider(value);
                     return false;
                 }
             });
 
-            mCryptoKey.setValue(mAccount.getCryptoKey());
-            mCryptoKey.setOpenPgpProvider(mCryptoApp.getValue());
+            mOpenPgpKey.setValue(mAccount.getOpenPgpKey());
+            mOpenPgpKey.setOpenPgpProvider(mOpenPgpApp.getValue());
             // TODO: other identities?
-            mCryptoKey.setDefaultUserId(OpenPgpApiHelper.buildUserId(mAccount.getIdentity(0)));
-            mCryptoKey.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            mOpenPgpKey.setDefaultUserId(OpenPgpApiHelper.buildUserId(mAccount.getIdentity(0)));
+            mOpenPgpKey.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 public boolean onPreferenceChange(Preference preference, Object newValue) {
                     long value = (Long) newValue;
-                    mCryptoKey.setValue(value);
+                    mOpenPgpKey.setValue(value);
                     return false;
                 }
             });
 
-            mCryptoSupportSignOnly.setChecked(mAccount.getCryptoSupportSignOnly());
-        } else {
+            mOpenPgpSupportSignOnly.setChecked(mAccount.getOpenPgpSupportSignOnly());
+        }
+
+        mHasSMime = SMimeUtils.isAvailable(this);
+        if (mHasSMime) {
+
+            mSMimeApp = (SMimeAppPreference) findPreference(PREFERENCE_SMIME_APP);
+            mSMimeCert = (SMimeCertPreference) findPreference(PREFERENCE_SMIME_CERT);
+
+            mSMimeApp.setValue(String.valueOf(mAccount.getOpenPgpApp()));
+            mSMimeApp.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                public boolean onPreferenceChange(Preference preference, Object newValue) {
+                    String value = newValue.toString();
+                    mSMimeApp.setValue(value);
+
+                    mSMimeCert.setSMimeProvider(value);
+                    return false;
+                }
+            });
+
+            mSMimeCert.setValue(mAccount.getOpenPgpKey());
+            mSMimeCert.setSMimeProvider(mSMimeApp.getValue());
+            // TODO: other identities?
+            mSMimeCert.setDefaultUserId(OpenPgpApiHelper.buildUserId(mAccount.getIdentity(0)));
+            mSMimeCert.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                public boolean onPreferenceChange(Preference preference, Object newValue) {
+                    long value = (Long) newValue;
+                    mSMimeCert.setValue(value);
+                    return false;
+                }
+            });
+
+            mSMimeSupportSignOnly.setChecked(mAccount.getSMimeSupportSignOnly());
+        }
+
+        if(!mHasOpenPgp && !mHasSMime) {
             final Preference mCryptoMenu = findPreference(PREFERENCE_CRYPTO);
             mCryptoMenu.setEnabled(false);
-            mCryptoMenu.setSummary(R.string.account_settings_no_openpgp_provider_installed);
+            mCryptoMenu.setSummary(R.string.account_settings_no_crypto_provider_installed);
         }
     }
 
@@ -829,14 +876,23 @@ public class AccountSettings extends K9PreferenceActivity {
         mAccount.setReplyAfterQuote(mReplyAfterQuote.isChecked());
         mAccount.setStripSignature(mStripSignature.isChecked());
         mAccount.setLocalStorageProviderId(mLocalStorageProvider.getValue());
-        if (mHasCrypto) {
-            mAccount.setCryptoApp(mCryptoApp.getValue());
-            mAccount.setCryptoKey(mCryptoKey.getValue());
-            mAccount.setCryptoSupportSignOnly(mCryptoSupportSignOnly.isChecked());
+        if (mHasOpenPgp) {
+            mAccount.setOpenPgpApp(mOpenPgpApp.getValue());
+            mAccount.setOpenPgpKey(mOpenPgpKey.getValue());
+            mAccount.setOpenPgpSupportSignOnly(mOpenPgpSupportSignOnly.isChecked());
         } else {
-            mAccount.setCryptoApp(Account.NO_OPENPGP_PROVIDER);
-            mAccount.setCryptoKey(Account.NO_OPENPGP_KEY);
-            mAccount.setCryptoSupportSignOnly(false);
+            mAccount.setOpenPgpApp(Account.NO_OPENPGP_PROVIDER);
+            mAccount.setOpenPgpKey(Account.NO_OPENPGP_KEY);
+            mAccount.setOpenPgpSupportSignOnly(false);
+        }
+        if (mHasSMime) {
+            mAccount.setSMimeApp(mSMimeApp.getValue());
+            mAccount.setSMimeCert(mSMimeCert.getValue());
+            mAccount.setSMimeSupportSignOnly(mSMimeSupportSignOnly.isChecked());
+        } else {
+            mAccount.setSMimeApp(Account.NO_SMIME_PROVIDER);
+            mAccount.setSMimeCert(Account.NO_SMIME_CERTIFICATE);
+            mAccount.setSMimeSupportSignOnly(false);
         }
 
         // In webdav account we use the exact folder name also for inbox,
@@ -904,9 +960,16 @@ public class AccountSettings extends K9PreferenceActivity {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (mCryptoKey != null && mCryptoKey.handleOnActivityResult(requestCode, resultCode, data)) {
-            return;
+        if (requestCode == OpenPgpKeyPreference.REQUEST_CODE_KEY_PREFERENCE) {
+            if (mOpenPgpKey != null && mOpenPgpKey.handleOnActivityResult(requestCode, resultCode, data)) {
+                return;
+            }
+        } else if (requestCode == SMimeCertPreference.REQUEST_CODE_CERT_PREFERENCE) {
+            if (mSMimeCert != null && mSMimeCert.handleOnActivityResult(requestCode, resultCode, data)) {
+                return;
+            }
         }
+
         if (resultCode == RESULT_OK) {
             switch (requestCode) {
             case SELECT_AUTO_EXPAND_FOLDER:

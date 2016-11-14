@@ -18,13 +18,6 @@
 package org.openintents.smime;
 
 interface ISMimeService {
-
-    /**
-     * do NOT use this, data returned from the service through "output" may be truncated
-     * @deprecated
-     */
-    Intent execute(in Intent data, in ParcelFileDescriptor input, in ParcelFileDescriptor output);
-
     /**
      * see SMimeApi for documentation
      */

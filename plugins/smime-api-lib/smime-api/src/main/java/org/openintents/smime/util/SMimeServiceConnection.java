@@ -22,7 +22,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 
-import org.openintents.openpgp.IOpenPgpService2;
+import org.openintents.smime.ISMimeService;
 
 public class SMimeServiceConnection {
 

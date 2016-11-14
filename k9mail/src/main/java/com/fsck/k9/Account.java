@@ -161,6 +161,8 @@ public class Account implements BaseAccount, StoreConfig {
     public static final String NO_CRYPTO = "";
     public static final String NO_OPENPGP_PROVIDER = "";
     public static final long NO_OPENPGP_KEY = 0;
+    public static final String NO_SMIME_PROVIDER = "";
+    public static final long NO_SMIME_CERTIFICATE = 0;
 
     private DeletePolicy mDeletePolicy = DeletePolicy.NEVER;
 
@@ -222,12 +224,14 @@ public class Account implements BaseAccount, StoreConfig {
     private boolean mReplyAfterQuote;
     private boolean mStripSignature;
     private boolean mSyncRemoteDeletions;
-    private String mCryptoApp;
-    private long mCryptoKey;
-    private boolean mCryptoSupportSignOnly;
+    private String mOpenPgpApp;
+    private long mOpenPgpKey;
+    private boolean mOpenPgpSupportSignOnly;
+    private String mSMimeApp;
+    private long mSMimeCert;
+    private boolean mSMimeSupportSignOnly;
     private String mCryptoDefaultMethod;
     private String mCryptoDefaultMode;
-    private String mSMimeCertificate;
     private boolean mMarkMessageAsReadOnView;
     private boolean mAlwaysShowCcBcc;
     private boolean mAllowRemoteSearch;
@@ -322,9 +326,12 @@ public class Account implements BaseAccount, StoreConfig {
         mReplyAfterQuote = DEFAULT_REPLY_AFTER_QUOTE;
         mStripSignature = DEFAULT_STRIP_SIGNATURE;
         mSyncRemoteDeletions = true;
-        mCryptoApp = NO_OPENPGP_PROVIDER;
-        mCryptoKey = NO_OPENPGP_KEY;
-        mCryptoSupportSignOnly = false;
+        mOpenPgpApp = NO_OPENPGP_PROVIDER;
+        mOpenPgpKey = NO_OPENPGP_KEY;
+        mOpenPgpSupportSignOnly = false;
+        mSMimeApp = NO_SMIME_PROVIDER;
+        mSMimeCert = NO_SMIME_CERTIFICATE;
+        mSMimeSupportSignOnly = false;
         mCryptoDefaultMethod = RecipientPresenter.CryptoMethod.NO_CRYPTO.toString();
         mCryptoDefaultMode = RecipientPresenter.CryptoMode.OPPORTUNISTIC.toString();
         mAllowRemoteSearch = false;
@@ -474,12 +481,19 @@ public class Account implements BaseAccount, StoreConfig {
         mIsSignatureBeforeQuotedText = storage.getBoolean(mUuid  + ".signatureBeforeQuotedText", false);
         identities = loadIdentities(storage);
 
-        String cryptoApp = storage.getString(mUuid + ".cryptoApp", NO_OPENPGP_PROVIDER);
-        setCryptoApp(cryptoApp);
-        mCryptoKey = storage.getLong(mUuid + ".cryptoKey", NO_OPENPGP_KEY);
+        String openPgpApp = storage.getString(mUuid + ".openPgpApp", NO_OPENPGP_PROVIDER);
+        setOpenPgpApp(openPgpApp);
+        mOpenPgpKey = storage.getLong(mUuid + ".openPgpKey", NO_OPENPGP_KEY);
+        mOpenPgpSupportSignOnly = storage.getBoolean(mUuid + ".openPgpSupportSignOnly", false);
+
+        String sMimeApp = storage.getString(mUuid + ".sMimeApp", NO_SMIME_PROVIDER);
+        setSMimeApp(sMimeApp);
+        mOpenPgpKey = storage.getLong(mUuid + ".sMimeCert", NO_SMIME_CERTIFICATE);
+        mSMimeSupportSignOnly = storage.getBoolean(mUuid + ".sMimeSupportSignOnly", false);
+
         mCryptoDefaultMethod = storage.getString(mUuid + ".cryptoDefaultMethod", RecipientPresenter.CryptoMethod.NO_CRYPTO.toString());
         mCryptoDefaultMode = storage.getString(mUuid + ".cryptoDefaultMode", RecipientPresenter.CryptoMode.OPPORTUNISTIC.toString());
-        mCryptoSupportSignOnly = storage.getBoolean(mUuid + ".cryptoSupportSignOnly", false);
+
         mAllowRemoteSearch = storage.getBoolean(mUuid + ".allowRemoteSearch", false);
         mRemoteSearchFullText = storage.getBoolean(mUuid + ".remoteSearchFullText", false);
         mRemoteSearchNumResults = storage.getInt(mUuid + ".remoteSearchNumResults", DEFAULT_REMOTE_SEARCH_NUM_RESULTS);
@@ -745,11 +759,14 @@ public class Account implements BaseAccount, StoreConfig {
         editor.putBoolean(mUuid + ".defaultQuotedTextShown", mDefaultQuotedTextShown);
         editor.putBoolean(mUuid + ".replyAfterQuote", mReplyAfterQuote);
         editor.putBoolean(mUuid + ".stripSignature", mStripSignature);
-        editor.putString(mUuid + ".cryptoApp", mCryptoApp);
-        editor.putLong(mUuid + ".cryptoKey", mCryptoKey);
+        editor.putString(mUuid + ".openPgpApp", mOpenPgpApp);
+        editor.putLong(mUuid + ".openPgpKey", mOpenPgpKey);
+        editor.putBoolean(mUuid + ".openPgpSupportSignOnly", mOpenPgpSupportSignOnly);
+        editor.putString(mUuid + ".sMimeApp", mSMimeApp);
+        editor.putLong(mUuid + ".sMimeCert", mSMimeCert);
+        editor.putBoolean(mUuid + ".sMimeSupportSignOnly", mSMimeSupportSignOnly);
         editor.putString(mUuid + ".cryptoDefaultMethod", mCryptoDefaultMethod);
         editor.putString(mUuid + ".cryptoDefaultMode", mCryptoDefaultMode);
-        editor.putBoolean(mUuid + ".cryptoSupportSignOnly", mCryptoSupportSignOnly);
         editor.putBoolean(mUuid + ".allowRemoteSearch", mAllowRemoteSearch);
         editor.putBoolean(mUuid + ".remoteSearchFullText", mRemoteSearchFullText);
         editor.putInt(mUuid + ".remoteSearchNumResults", mRemoteSearchNumResults);
@@ -1625,36 +1642,60 @@ public class Account implements BaseAccount, StoreConfig {
         return mCryptoDefaultMode;
     }
 
-    public String getCryptoApp() {
-        return mCryptoApp;
+    public String getOpenPgpApp() {
+        return mOpenPgpApp;
     }
 
-    public void setCryptoApp(String cryptoApp) {
-        if (cryptoApp == null || cryptoApp.equals("apg")) {
-            mCryptoApp = NO_OPENPGP_PROVIDER;
+    public void setOpenPgpApp(String openPgpApp) {
+        if (openPgpApp == null || openPgpApp.equals("apg")) {
+            mOpenPgpApp = NO_OPENPGP_PROVIDER;
         } else {
-            mCryptoApp = cryptoApp;
+            mOpenPgpApp = openPgpApp;
         }
     }
 
-    public long getCryptoKey() {
-        return mCryptoKey;
+    public long getOpenPgpKey() {
+        return mOpenPgpKey;
     }
 
-    public void setCryptoKey(long keyId) {
-        mCryptoKey = keyId;
+    public void setOpenPgpKey(long keyId) {
+        mOpenPgpKey = keyId;
     }
 
-    public String getSMimeCertificate() {
-        return mSMimeCertificate;
+    public String getSMimeApp() {
+        return mSMimeApp;
     }
 
-    public boolean getCryptoSupportSignOnly() {
-        return mCryptoSupportSignOnly;
+    public void setSMimeApp(String sMimeApp) {
+        if (sMimeApp == null) {
+            mSMimeApp = NO_SMIME_PROVIDER;
+        } else {
+            mSMimeApp = sMimeApp;
+        }
     }
 
-    public void setCryptoSupportSignOnly(boolean cryptoSupportSignOnly) {
-        mCryptoSupportSignOnly = cryptoSupportSignOnly;
+    public long getSMimeCertificate() {
+        return mSMimeCert;
+    }
+
+    public void setSMimeCert(long sMimeCert) {
+        mSMimeCert = sMimeCert;
+    }
+
+    public boolean getOpenPgpSupportSignOnly() {
+        return mOpenPgpSupportSignOnly;
+    }
+
+    public void setOpenPgpSupportSignOnly(boolean openPgpSupportSignOnly) {
+        mOpenPgpSupportSignOnly = openPgpSupportSignOnly;
+    }
+
+    public boolean getSMimeSupportSignOnly() {
+        return mSMimeSupportSignOnly;
+    }
+
+    public void setSMimeSupportSignOnly(boolean sMimeSupportSignOnly) {
+        mSMimeSupportSignOnly = sMimeSupportSignOnly;
     }
 
     public boolean allowRemoteSearch() {
@@ -1701,12 +1742,24 @@ public class Account implements BaseAccount, StoreConfig {
         if (!isOpenPgpProviderConfigured()) {
             return null;
         }
-        return getCryptoApp();
+        return getOpenPgpApp();
     }
 
     public synchronized boolean isOpenPgpProviderConfigured() {
-        return !NO_OPENPGP_PROVIDER.equals(getCryptoApp());
+        return !NO_OPENPGP_PROVIDER.equals(getOpenPgpApp());
     }
+
+    public synchronized String getSMimeProvider() {
+        if (!isSMimeProviderConfigured()) {
+            return null;
+        }
+        return getSMimeApp();
+    }
+
+    public synchronized boolean isSMimeProviderConfigured() {
+        return !NO_SMIME_PROVIDER.equals(getSMimeApp());
+    }
+
 
     public synchronized NotificationSetting getNotificationSetting() {
         return mNotificationSetting;

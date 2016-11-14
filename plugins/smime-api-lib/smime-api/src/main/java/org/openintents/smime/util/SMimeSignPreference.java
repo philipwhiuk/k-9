@@ -4,7 +4,7 @@ import android.content.Context;
 import android.preference.CheckBoxPreference;
 import android.util.AttributeSet;
 
-import org.openintents.openpgp.R;
+import org.openintents.smime.R;
 
 
 public class SMimeSignPreference extends CheckBoxPreference {
@@ -14,7 +14,7 @@ public class SMimeSignPreference extends CheckBoxPreference {
 
     @Override
     public CharSequence getSummary() {
-        return isChecked() ? getContext().getString(R.string.openpgp_signing_unencrypted_enabled)
-                : getContext().getString(R.string.openpgp_signing_unencrypted_disabled);
+        return isChecked() ? getContext().getString(R.string.smime_signing_unencrypted_enabled)
+                : getContext().getString(R.string.smime_signing_unencrypted_disabled);
     }
 }

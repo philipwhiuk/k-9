@@ -10,6 +10,9 @@ import com.fsck.k9.mail.internet.MimeBodyPart;
 import org.openintents.openpgp.OpenPgpDecryptionResult;
 import org.openintents.openpgp.OpenPgpError;
 import org.openintents.openpgp.OpenPgpSignatureResult;
+import org.openintents.smime.SMimeDecryptionResult;
+import org.openintents.smime.SMimeError;
+import org.openintents.smime.SMimeSignatureResult;
 
 
 public final class CryptoResultAnnotation {
@@ -20,13 +23,22 @@ public final class CryptoResultAnnotation {
     private final OpenPgpSignatureResult openPgpSignatureResult;
     private final OpenPgpError openPgpError;
     private final PendingIntent openPgpPendingIntent;
+    private final SMimeDecryptionResult sMimeDecryptionResult;
+    private final SMimeSignatureResult sMimeSignatureResult;
+    private final SMimeError sMimeError;
+    private final PendingIntent sMimePendingIntent;
 
     private final CryptoResultAnnotation encapsulatedResult;
 
-    private CryptoResultAnnotation(@NonNull CryptoError errorType, MimeBodyPart replacementData,
+    private CryptoResultAnnotation(
+            @NonNull CryptoError errorType, MimeBodyPart replacementData,
             OpenPgpDecryptionResult openPgpDecryptionResult,
             OpenPgpSignatureResult openPgpSignatureResult,
-            PendingIntent openPgpPendingIntent, OpenPgpError openPgpError) {
+            PendingIntent openPgpPendingIntent, OpenPgpError openPgpError,
+            SMimeDecryptionResult sMimeDecryptionResult,
+            SMimeSignatureResult sMimeSignatureResult,
+            PendingIntent sMimePendingIntent,
+            SMimeError sMimeError) {
         this.errorType = errorType;
         this.replacementData = replacementData;
 
@@ -34,6 +46,11 @@ public final class CryptoResultAnnotation {
         this.openPgpSignatureResult = openPgpSignatureResult;
         this.openPgpPendingIntent = openPgpPendingIntent;
         this.openPgpError = openPgpError;
+
+        this.sMimeDecryptionResult = sMimeDecryptionResult;
+        this.sMimeSignatureResult = sMimeSignatureResult;
+        this.sMimePendingIntent = sMimePendingIntent;
+        this.sMimeError = sMimeError;
 
         this.encapsulatedResult = null;
     }
@@ -51,35 +68,74 @@ public final class CryptoResultAnnotation {
         this.openPgpPendingIntent = annotation.openPgpPendingIntent;
         this.openPgpError = annotation.openPgpError;
 
+        this.sMimeDecryptionResult = annotation.sMimeDecryptionResult;
+        this.sMimeSignatureResult = annotation.sMimeSignatureResult;
+        this.sMimePendingIntent = annotation.sMimePendingIntent;
+        this.sMimeError = annotation.sMimeError;
+
         this.encapsulatedResult = encapsulatedResult;
+    }
+
+    public static CryptoResultAnnotation createErrorAnnotation(CryptoError error, MimeBodyPart replacementData) {
+        if (error == CryptoError.OPENPGP_OK || error == CryptoError.SMIME_OK) {
+            throw new AssertionError("CryptoError must be actual error state!");
+        }
+        return new CryptoResultAnnotation(error, replacementData, null, null, null, null, null, null, null, null);
     }
 
 
     public static CryptoResultAnnotation createOpenPgpResultAnnotation(OpenPgpDecryptionResult decryptionResult,
             OpenPgpSignatureResult signatureResult, PendingIntent pendingIntent, MimeBodyPart replacementPart) {
         return new CryptoResultAnnotation(CryptoError.OPENPGP_OK, replacementPart,
-                decryptionResult, signatureResult, pendingIntent, null);
+                decryptionResult, signatureResult, pendingIntent, null, null, null, null, null);
     }
 
-    public static CryptoResultAnnotation createErrorAnnotation(CryptoError error, MimeBodyPart replacementData) {
+    public static CryptoResultAnnotation createOpenPgpErrorAnnotation(CryptoError error, MimeBodyPart replacementData) {
         if (error == CryptoError.OPENPGP_OK) {
             throw new AssertionError("CryptoError must be actual error state!");
         }
-        return new CryptoResultAnnotation(error, replacementData, null, null, null, null);
+        return new CryptoResultAnnotation(error, replacementData, null, null, null, null, null, null, null, null);
     }
 
     public static CryptoResultAnnotation createOpenPgpCanceledAnnotation() {
-        return new CryptoResultAnnotation(CryptoError.OPENPGP_UI_CANCELED, null, null, null, null, null);
+        return new CryptoResultAnnotation(CryptoError.OPENPGP_UI_CANCELED, null, null, null, null, null, null, null, null, null);
     }
 
     public static CryptoResultAnnotation createOpenPgpSignatureErrorAnnotation(
             OpenPgpError error, MimeBodyPart replacementData) {
         return new CryptoResultAnnotation(
-                CryptoError.OPENPGP_SIGNED_API_ERROR, replacementData, null, null, null, error);
+                CryptoError.OPENPGP_SIGNED_API_ERROR, replacementData, null, null, null, error, null, null, null, null);
     }
 
     public static CryptoResultAnnotation createOpenPgpEncryptionErrorAnnotation(OpenPgpError error) {
-        return new CryptoResultAnnotation(CryptoError.OPENPGP_ENCRYPTED_API_ERROR, null, null, null, null, error);
+        return new CryptoResultAnnotation(CryptoError.OPENPGP_ENCRYPTED_API_ERROR, null, null, null, null, error, null, null, null, null);
+    }
+
+    public static CryptoResultAnnotation createSMimeResultAnnotation(SMimeDecryptionResult decryptionResult,
+                                                                     SMimeSignatureResult signatureResult, PendingIntent pendingIntent, MimeBodyPart replacementPart) {
+        return new CryptoResultAnnotation(CryptoError.SMIME_OK, replacementPart, null, null, null, null,
+                decryptionResult, signatureResult, pendingIntent, null);
+    }
+
+    public static CryptoResultAnnotation createSMimeErrorAnnotation(CryptoError error, MimeBodyPart replacementData) {
+        if (error == CryptoError.SMIME_OK) {
+            throw new AssertionError("CryptoError must be actual error state!");
+        }
+        return new CryptoResultAnnotation(error, replacementData, null, null, null, null, null, null, null, null);
+    }
+
+    public static CryptoResultAnnotation createSMimeCanceledAnnotation() {
+        return new CryptoResultAnnotation(CryptoError.SMIME_UI_CANCELED, null, null, null, null, null, null, null, null, null);
+    }
+
+    public static CryptoResultAnnotation createSMimeSignatureErrorAnnotation(
+            SMimeError error, MimeBodyPart replacementData) {
+        return new CryptoResultAnnotation(
+                CryptoError.SMIME_SIGNED_API_ERROR, replacementData, null, null, null, null, null, null, null, error);
+    }
+
+    public static CryptoResultAnnotation createSMimeEncryptionErrorAnnotation(SMimeError error) {
+        return new CryptoResultAnnotation(CryptoError.SMIME_ENCRYPTED_API_ERROR, null, null, null, null, null, null, null, null, error);
     }
 
     public boolean isOpenPgpResult() {
@@ -146,6 +202,12 @@ public final class CryptoResultAnnotation {
         OPENPGP_ENCRYPTED_API_ERROR,
         OPENPGP_SIGNED_BUT_INCOMPLETE,
         OPENPGP_ENCRYPTED_BUT_INCOMPLETE,
+        SMIME_OK,
+        SMIME_UI_CANCELED,
+        SMIME_SIGNED_API_ERROR,
+        SMIME_ENCRYPTED_API_ERROR,
+        SMIME_SIGNED_BUT_INCOMPLETE,
+        SMIME_ENCRYPTED_BUT_INCOMPLETE,
         SIGNED_BUT_UNSUPPORTED,
         ENCRYPTED_BUT_UNSUPPORTED,
     }

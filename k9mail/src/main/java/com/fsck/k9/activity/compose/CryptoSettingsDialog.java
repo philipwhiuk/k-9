@@ -43,6 +43,7 @@ public class CryptoSettingsDialog extends DialogFragment implements CryptoStatus
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         Bundle arguments = savedInstanceState != null ? savedInstanceState : getArguments();
+        //TODO: Mode selection
         currentMode = CryptoMode.valueOf(arguments.getString(ARG_CURRENT_MODE));
 
         @SuppressLint("InflateParams")

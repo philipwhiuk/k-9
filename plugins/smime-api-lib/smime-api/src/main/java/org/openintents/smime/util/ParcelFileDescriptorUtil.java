@@ -160,9 +160,9 @@ public class ParcelFileDescriptorUtil {
                 sinkResult = dataSink.processData(inputStream);
             } catch (IOException e) {
                 if (isIOExceptionCausedByEPIPE(e)) {
-                    Log.e(OpenPgpApi.TAG, "Stopped read due to broken pipe (other end closed pipe?)");
+                    Log.e(SMimeApi.TAG, "Stopped read due to broken pipe (other end closed pipe?)");
                 } else {
-                    Log.e(OpenPgpApi.TAG, "IOException while reading from in", e);
+                    Log.e(SMimeApi.TAG, "IOException while reading from in", e);
                 }
                 sinkResult = null;
             } finally {
