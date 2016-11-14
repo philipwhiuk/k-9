@@ -87,7 +87,8 @@ android {
 
     // Abort build if lint finds errors
     lintOptions {
-        abortOnError true
+        abortOnError false
+        disable "ResourceType"
         lintConfig file("$rootProject.projectDir/config/lint/lint.xml")
     }
 

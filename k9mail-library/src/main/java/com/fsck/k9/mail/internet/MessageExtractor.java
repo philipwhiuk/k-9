@@ -18,6 +18,7 @@ import com.fsck.k9.ical.ICalParser;
 import com.fsck.k9.ical.ICalPart;
 import com.fsck.k9.mail.Body;
 import com.fsck.k9.mail.BodyPart;
+import com.fsck.k9.mail.CryptoMimeTypes;
 import com.fsck.k9.mail.Message;
 import com.fsck.k9.mail.MessagingException;
 import com.fsck.k9.mail.Multipart;
@@ -202,13 +203,14 @@ public class MessageExtractor {
                 outputViewableParts.add(html);
             }
         } else if (isSameMimeType(part.getMimeType(), ICalParser.MIME_TYPE)) {
-            System.err.println("Adding ICAL PART");
             if (skipSavingViewableParts) {
                 return;
             }
             ICalPart iCalPart = new ICalPart(part);
             outputICalendarParts.add(iCalPart);
-        } else if (isSameMimeType(part.getMimeType(), "application/pgp-signature")) {
+        } else if (
+                isSameMimeType(part.getMimeType(), CryptoMimeTypes.APPLICATION_PGP_SIGNATURE) ||
+                isSameMimeType(part.getMimeType(), CryptoMimeTypes.APPLICATION_SMIME_SIGNATURE)) {
             // ignore this type explicitly
         } else {
             if (skipSavingNonViewableParts) {

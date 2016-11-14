@@ -12,6 +12,7 @@ import android.text.TextUtils;
 
 import com.fsck.k9.mail.Body;
 import com.fsck.k9.mail.BodyPart;
+import com.fsck.k9.mail.CryptoMimeTypes;
 import com.fsck.k9.mail.MessagingException;
 import com.fsck.k9.mail.Multipart;
 import com.fsck.k9.mail.Part;
@@ -25,16 +26,7 @@ import static com.fsck.k9.mail.internet.MimeUtility.isSameMimeType;
 
 
 public class MessageDecryptVerifier {
-    private static final String MULTIPART_ENCRYPTED = "multipart/encrypted";
-    private static final String MULTIPART_SIGNED = "multipart/signed";
-    private static final String PROTOCOL_PARAMETER = "protocol";
-    private static final String APPLICATION_PGP_ENCRYPTED = "application/pgp-encrypted";
-    private static final String APPLICATION_PGP_SIGNATURE = "application/pgp-signature";
-    private static final String APPLICATION_SMIME_ENCRYPTED = "application/pkcs7-mime";
-    private static final String APPLICATION_SMIME_SIGNATURE = "application/pkcs7-signature";
-    private static final String TEXT_PLAIN = "text/plain";
-    // APPLICATION/PGP is a special case which occurs from mutt. see http://www.mutt.org/doc/PGP-Notes.txt
-    private static final String APPLICATION_PGP = "application/pgp";
+
 
     public static final String PGP_INLINE_START_MARKER = "-----BEGIN PGP MESSAGE-----";
     public static final String PGP_INLINE_SIGNED_START_MARKER = "-----BEGIN PGP SIGNED MESSAGE-----";
@@ -154,7 +146,7 @@ public class MessageDecryptVerifier {
             if (body instanceof Multipart) {
                 Multipart multi = (Multipart) body;
                 BodyPart signatureBody = multi.getBodyPart(1);
-                if (isSameMimeType(signatureBody.getMimeType(), APPLICATION_PGP_SIGNATURE)) {
+                if (isSameMimeType(signatureBody.getMimeType(), CryptoMimeTypes.APPLICATION_PGP_SIGNATURE)) {
                     ByteArrayOutputStream bos = new ByteArrayOutputStream();
                     signatureBody.getBody().writeTo(bos);
                     return bos.toByteArray();
@@ -166,32 +158,37 @@ public class MessageDecryptVerifier {
     }
 
     private static boolean isPartEncryptedOrSigned(Part part) {
-        return isPartMultipartEncrypted(part) || isPartMultipartSigned(part) || isPartPgpInlineEncryptedOrSigned(part);
+        return isPartMultipartEncrypted(part) || isPartMultipartSigned(part)
+                || isPartPgpInlineEncryptedOrSigned(part) || isPartEncrypted(part);
+    }
+
+    private static boolean isPartEncrypted(Part part) {
+        return isSameMimeType(part.getMimeType(), CryptoMimeTypes.APPLICATION_SMIME_ENCRYPTED);
     }
 
     private static boolean isPartMultipartSigned(Part part) {
-        return isSameMimeType(part.getMimeType(), MULTIPART_SIGNED);
+        return isSameMimeType(part.getMimeType(), CryptoMimeTypes.MULTIPART_SIGNED);
     }
 
     private static boolean isPartMultipartEncrypted(Part part) {
-        return isSameMimeType(part.getMimeType(), MULTIPART_ENCRYPTED);
+        return isSameMimeType(part.getMimeType(), CryptoMimeTypes.MULTIPART_ENCRYPTED);
     }
 
     // TODO also guess by mime-type of contained part?
     public static boolean isPgpMimeEncryptedOrSignedPart(Part part) {
         String contentType = part.getContentType();
-        String protocolParameter = MimeUtility.getHeaderParameter(contentType, PROTOCOL_PARAMETER);
+        String protocolParameter = MimeUtility.getHeaderParameter(contentType, CryptoMimeTypes.PROTOCOL_PARAMETER);
 
-        boolean isPgpEncrypted = isSameMimeType(part.getMimeType(), MULTIPART_ENCRYPTED) &&
-                APPLICATION_PGP_ENCRYPTED.equalsIgnoreCase(protocolParameter);
-        boolean isPgpSigned = isSameMimeType(part.getMimeType(), MULTIPART_SIGNED) &&
-                APPLICATION_PGP_SIGNATURE.equalsIgnoreCase(protocolParameter);
+        boolean isPgpEncrypted = isSameMimeType(part.getMimeType(), CryptoMimeTypes.MULTIPART_ENCRYPTED) &&
+                CryptoMimeTypes.APPLICATION_PGP_ENCRYPTED.equalsIgnoreCase(protocolParameter);
+        boolean isPgpSigned = isSameMimeType(part.getMimeType(), CryptoMimeTypes.MULTIPART_SIGNED) &&
+                CryptoMimeTypes.APPLICATION_PGP_SIGNATURE.equalsIgnoreCase(protocolParameter);
 
         return isPgpEncrypted || isPgpSigned;
     }
 
     private static boolean isPartPgpInlineEncryptedOrSigned(Part part) {
-        if (!part.isMimeType(TEXT_PLAIN) && !part.isMimeType(APPLICATION_PGP)) {
+        if (!part.isMimeType(CryptoMimeTypes.TEXT_PLAIN) && !part.isMimeType(CryptoMimeTypes.APPLICATION_PGP)) {
             return false;
         }
         String text = MessageExtractor.getTextFromPart(part, TEXT_LENGTH_FOR_INLINE_CHECK);
@@ -203,7 +200,7 @@ public class MessageDecryptVerifier {
         if (part == null) {
             return false;
         }
-        if (!part.isMimeType(TEXT_PLAIN) && !part.isMimeType(APPLICATION_PGP)) {
+        if (!part.isMimeType(CryptoMimeTypes.TEXT_PLAIN) && !part.isMimeType(CryptoMimeTypes.APPLICATION_PGP)) {
             return false;
         }
         String text = MessageExtractor.getTextFromPart(part, TEXT_LENGTH_FOR_INLINE_CHECK);
@@ -213,12 +210,12 @@ public class MessageDecryptVerifier {
     // TODO also guess by mime-type of contained part?
     public static boolean isSMimeEncryptedOrSignedPart(Part part) {
         String contentType = part.getContentType();
-        String protocolParameter = MimeUtility.getHeaderParameter(contentType, PROTOCOL_PARAMETER);
+        String protocolParameter = MimeUtility.getHeaderParameter(contentType, CryptoMimeTypes.PROTOCOL_PARAMETER);
 
-        boolean isPgpEncrypted = isSameMimeType(part.getMimeType(), MULTIPART_ENCRYPTED) &&
-                APPLICATION_SMIME_ENCRYPTED.equalsIgnoreCase(protocolParameter);
-        boolean isPgpSigned = isSameMimeType(part.getMimeType(), MULTIPART_SIGNED) &&
-                APPLICATION_SMIME_SIGNATURE.equalsIgnoreCase(protocolParameter);
+        boolean isPgpEncrypted = isSameMimeType(part.getMimeType(), CryptoMimeTypes.MULTIPART_ENCRYPTED) &&
+                CryptoMimeTypes.APPLICATION_SMIME_ENCRYPTED.equalsIgnoreCase(protocolParameter);
+        boolean isPgpSigned = isSameMimeType(part.getMimeType(), CryptoMimeTypes.MULTIPART_SIGNED) &&
+                CryptoMimeTypes.APPLICATION_SMIME_SIGNATURE.equalsIgnoreCase(protocolParameter);
 
         return isPgpEncrypted || isPgpSigned;
     }

@@ -17,7 +17,8 @@ import org.openintents.openpgp.OpenPgpSignatureResult;
 public enum TransportCryptoDisplayStatus {
     UNKNOWN (
             R.attr.openpgp_blue,
-            R.drawable.status_lock
+            R.drawable.status_lock,
+            R.string.transport_crypto_msg_unknown
     ),
 
     ENCRYPTED (

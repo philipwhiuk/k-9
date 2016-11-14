@@ -101,6 +101,14 @@ public final class CryptoResultAnnotation {
         return new CryptoResultAnnotation(CryptoError.OPENPGP_UI_CANCELED, null, null, null, null, null, null, null, null, null);
     }
 
+    public static CryptoResultAnnotation createOpenPgpEncryptedUnavailableAnnotation() {
+        return new CryptoResultAnnotation(CryptoError.OPENPGP_ENCRYPTED_UNAVAILABLE, null, null, null, null, null, null, null, null, null);
+    }
+
+    public static CryptoResultAnnotation createOpenPgpSignedUnavailableAnnotation() {
+        return new CryptoResultAnnotation(CryptoError.OPENPGP_SIGNED_UNAVAILABLE, null, null, null, null, null, null, null, null, null);
+    }
+
     public static CryptoResultAnnotation createOpenPgpSignatureErrorAnnotation(
             OpenPgpError error, MimeBodyPart replacementData) {
         return new CryptoResultAnnotation(
@@ -128,6 +136,14 @@ public final class CryptoResultAnnotation {
         return new CryptoResultAnnotation(CryptoError.SMIME_UI_CANCELED, null, null, null, null, null, null, null, null, null);
     }
 
+    public static CryptoResultAnnotation createSMimeEncryptedUnavailableAnnotation() {
+        return new CryptoResultAnnotation(CryptoError.SMIME_ENCRYPTED_UNAVAILABLE, null, null, null, null, null, null, null, null, null);
+    }
+
+    public static CryptoResultAnnotation createSMimeSignedUnavailableAnnotation() {
+        return new CryptoResultAnnotation(CryptoError.SMIME_SIGNED_UNAVAILABLE, null, null, null, null, null, null, null, null, null);
+    }
+
     public static CryptoResultAnnotation createSMimeSignatureErrorAnnotation(
             SMimeError error, MimeBodyPart replacementData) {
         return new CryptoResultAnnotation(
@@ -142,9 +158,22 @@ public final class CryptoResultAnnotation {
         return openPgpDecryptionResult != null && openPgpSignatureResult != null;
     }
 
-    public boolean hasSignatureResult() {
+    public boolean isSMimeResult() {
+        return openPgpDecryptionResult != null && openPgpSignatureResult != null;
+    }
+
+    public boolean hasPgpSignatureResult() {
         return openPgpSignatureResult != null &&
                 openPgpSignatureResult.getResult() != OpenPgpSignatureResult.RESULT_NO_SIGNATURE;
+    }
+
+    public boolean hasSMimeSignatureResult() {
+        return sMimeSignatureResult != null &&
+                sMimeSignatureResult.getResult() != OpenPgpSignatureResult.RESULT_NO_SIGNATURE;
+    }
+
+    public boolean hasSignatureResult() {
+        return hasPgpSignatureResult() || hasSMimeSignatureResult();
     }
 
     @Nullable
@@ -155,6 +184,16 @@ public final class CryptoResultAnnotation {
     @Nullable
     public OpenPgpSignatureResult getOpenPgpSignatureResult() {
         return openPgpSignatureResult;
+    }
+
+    @Nullable
+    public SMimeDecryptionResult getSMimeDecryptionResult() {
+        return sMimeDecryptionResult;
+    }
+
+    @Nullable
+    public SMimeSignatureResult getSMimeSignatureResult() {
+        return sMimeSignatureResult;
     }
 
     @Nullable
@@ -201,13 +240,17 @@ public final class CryptoResultAnnotation {
         OPENPGP_SIGNED_API_ERROR,
         OPENPGP_ENCRYPTED_API_ERROR,
         OPENPGP_SIGNED_BUT_INCOMPLETE,
+        OPENPGP_SIGNED_UNAVAILABLE,
         OPENPGP_ENCRYPTED_BUT_INCOMPLETE,
+        OPENPGP_ENCRYPTED_UNAVAILABLE,
         SMIME_OK,
         SMIME_UI_CANCELED,
         SMIME_SIGNED_API_ERROR,
         SMIME_ENCRYPTED_API_ERROR,
         SMIME_SIGNED_BUT_INCOMPLETE,
         SMIME_ENCRYPTED_BUT_INCOMPLETE,
+        SMIME_SIGNED_UNAVAILABLE,
+        SMIME_ENCRYPTED_UNAVAILABLE,
         SIGNED_BUT_UNSUPPORTED,
         ENCRYPTED_BUT_UNSUPPORTED,
     }

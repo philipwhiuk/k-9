@@ -41,7 +41,7 @@ public class SMimeApi {
 
     public static final String TAG = "SMime API";
 
-    public static final String SERVICE_INTENT = "org.openintents.openpgp.ISMimeService";
+    public static final String SERVICE_INTENT = "org.openintents.smime.ISMimeService";
 
     /**
      * see CHANGELOG.md
@@ -57,11 +57,11 @@ public class SMimeApi {
      *
      * returned extras:
      * int           RESULT_CODE                 (RESULT_CODE_ERROR, RESULT_CODE_SUCCESS or RESULT_CODE_USER_INTERACTION_REQUIRED)
-     * OpenPgpError  RESULT_ERROR                (if RESULT_CODE == RESULT_CODE_ERROR)
+     * SMimeError  RESULT_ERROR                (if RESULT_CODE == RESULT_CODE_ERROR)
      * PendingIntent RESULT_INTENT               (if RESULT_CODE == RESULT_CODE_USER_INTERACTION_REQUIRED)
      */
 
-    public static final String ACTION_CHECK_PERMISSION = "org.openintents.openpgp.action.CHECK_PERMISSION";
+    public static final String ACTION_CHECK_PERMISSION = "org.openintents.smime.action.CHECK_PERMISSION";
 
     /**
      * DEPRECATED
@@ -71,7 +71,7 @@ public class SMimeApi {
      * boolean       EXTRA_REQUEST_ASCII_ARMOR   (DEPRECATED: this makes no sense here)
      * char[]        EXTRA_PASSPHRASE            (key passphrase)
      */
-    public static final String ACTION_SIGN = "org.openintents.openpgp.action.SIGN";
+    public static final String ACTION_SIGN = "org.openintents.smime.action.SIGN";
 
     /**
      * Sign text resulting in a cleartext signature
@@ -86,7 +86,7 @@ public class SMimeApi {
      * optional extras:
      * char[]        EXTRA_PASSPHRASE            (key passphrase)
      */
-    public static final String ACTION_CLEARTEXT_SIGN = "org.openintents.openpgp.action.CLEARTEXT_SIGN";
+    public static final String ACTION_CLEARTEXT_SIGN = "org.openintents.smime.action.CLEARTEXT_SIGN";
 
     /**
      * Sign text or binary data resulting in a detached signature.
@@ -103,7 +103,7 @@ public class SMimeApi {
      * returned extras:
      * byte[]        RESULT_DETACHED_SIGNATURE
      */
-    public static final String ACTION_DETACHED_SIGN = "org.openintents.openpgp.action.DETACHED_SIGN";
+    public static final String ACTION_DETACHED_SIGN = "org.openintents.smime.action.DETACHED_SIGN";
 
     /**
      * Encrypt
@@ -119,7 +119,7 @@ public class SMimeApi {
      * String        EXTRA_ORIGINAL_FILENAME     (original filename to be encrypted as metadata)
      * boolean       EXTRA_ENABLE_COMPRESSION    (enable ZLIB compression, default ist true)
      */
-    public static final String ACTION_ENCRYPT = "org.openintents.openpgp.action.ENCRYPT";
+    public static final String ACTION_ENCRYPT = "org.openintents.smime.action.ENCRYPT";
 
     /**
      * Sign and encrypt
@@ -136,14 +136,14 @@ public class SMimeApi {
      * String        EXTRA_ORIGINAL_FILENAME     (original filename to be encrypted as metadata)
      * boolean       EXTRA_ENABLE_COMPRESSION    (enable ZLIB compression, default ist true)
      */
-    public static final String ACTION_SIGN_AND_ENCRYPT = "org.openintents.openpgp.action.SIGN_AND_ENCRYPT";
+    public static final String ACTION_SIGN_AND_ENCRYPT = "org.openintents.smime.action.SIGN_AND_ENCRYPT";
 
     /**
      * Decrypts and verifies given input stream. This methods handles encrypted-only, signed-and-encrypted,
      * and also signed-only input.
      * OutputStream is optional, e.g., for verifying detached signatures!
      * <p/>
-     * If OpenPgpSignatureResult.getResult() == OpenPgpSignatureResult.RESULT_KEY_MISSING
+     * If SMimeSignatureResult.getResult() == SMimeSignatureResult.RESULT_KEY_MISSING
      * in addition a PendingIntent is returned via RESULT_INTENT to download missing keys.
      * On all other status, in addition a PendingIntent is returned via RESULT_INTENT to open
      * the key view in OpenKeychain.
@@ -152,12 +152,12 @@ public class SMimeApi {
      * byte[]        EXTRA_DETACHED_SIGNATURE    (detached signature)
      * <p/>
      * returned extras:
-     * OpenPgpSignatureResult   RESULT_SIGNATURE
-     * OpenPgpDecryptionResult  RESULT_DECRYPTION
-     * OpenPgpDecryptMetadata   RESULT_METADATA
+     * SMimeSignatureResult   RESULT_SIGNATURE
+     * SMimeDecryptionResult  RESULT_DECRYPTION
+     * SMimeDecryptMetadata   RESULT_METADATA
      * String                   RESULT_CHARSET   (charset which was specified in the headers of ascii armored input, if any)
      */
-    public static final String ACTION_DECRYPT_VERIFY = "org.openintents.openpgp.action.DECRYPT_VERIFY";
+    public static final String ACTION_DECRYPT_VERIFY = "org.openintents.smime.action.DECRYPT_VERIFY";
 
     /**
      * Decrypts the header of an encrypted file to retrieve metadata such as original filename.
@@ -165,10 +165,10 @@ public class SMimeApi {
      * This does not decrypt the actual content of the file.
      * <p/>
      * returned extras:
-     * OpenPgpDecryptMetadata   RESULT_METADATA
+     * SMimeDecryptMetadata   RESULT_METADATA
      * String                   RESULT_CHARSET   (charset which was specified in the headers of ascii armored input, if any)
      */
-    public static final String ACTION_DECRYPT_METADATA = "org.openintents.openpgp.action.DECRYPT_METADATA";
+    public static final String ACTION_DECRYPT_METADATA = "org.openintents.smime.action.DECRYPT_METADATA";
 
     /**
      * Select key id for signing
@@ -179,7 +179,7 @@ public class SMimeApi {
      * returned extras:
      * long        EXTRA_SIGN_KEY_ID
      */
-    public static final String ACTION_GET_SIGN_KEY_ID = "org.openintents.openpgp.action.GET_SIGN_KEY_ID";
+    public static final String ACTION_GET_SIGN_KEY_ID = "org.openintents.smime.action.GET_SIGN_KEY_ID";
 
     /**
      * Get key ids based on given user ids (=emails)
@@ -190,7 +190,7 @@ public class SMimeApi {
      * returned extras:
      * long[]        RESULT_KEY_IDS
      */
-    public static final String ACTION_GET_KEY_IDS = "org.openintents.openpgp.action.GET_KEY_IDS";
+    public static final String ACTION_GET_KEY_IDS = "org.openintents.smime.action.GET_KEY_IDS";
 
     /**
      * This action returns RESULT_CODE_SUCCESS if the OpenPGP Provider already has the key
@@ -207,7 +207,7 @@ public class SMimeApi {
      * String      EXTRA_REQUEST_ASCII_ARMOR (request that the returned key is encoded in ASCII Armor)
      *
      */
-    public static final String ACTION_GET_KEY = "org.openintents.openpgp.action.GET_KEY";
+    public static final String ACTION_GET_KEY = "org.openintents.smime.action.GET_KEY";
 
     /* Intent extras */
     public static final String EXTRA_API_VERSION = "api_version";

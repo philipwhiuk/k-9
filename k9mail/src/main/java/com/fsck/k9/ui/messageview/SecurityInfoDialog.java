@@ -139,14 +139,13 @@ public class SecurityInfoDialog extends DialogFragment {
     }
 
     private void setMessageForTransportDisplayStatus(TransportCryptoDisplayStatus displayStatus) {
-        if (displayStatus.textRes == null) {
-            throw new AssertionError("Crypto info dialog can only be displayed for items with text!");
-        } else {
-            @ColorInt int color = ThemeUtils.getStyledColor(getActivity(), displayStatus.colorAttr);
-            transportIcon.setImageResource(displayStatus.statusIconRes);
-            transportIcon.setColorFilter(color);
+        @ColorInt int color = ThemeUtils.getStyledColor(getActivity(), displayStatus.colorAttr);
+        transportIcon.setImageResource(displayStatus.statusIconRes);
+        transportIcon.setColorFilter(color);
+        if (displayStatus.textRes != null)
             transportText.setText(displayStatus.textRes);
-        }
+        else
+            transportText.setVisibility(View.GONE);
     }
 
     private void setMessageSingleLine(@AttrRes int colorAttr,

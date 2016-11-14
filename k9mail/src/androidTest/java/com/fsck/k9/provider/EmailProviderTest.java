@@ -32,7 +32,7 @@ public class EmailProviderTest extends ProviderTestCase2<EmailProvider> {
         super(EmailProvider.class, EmailProvider.AUTHORITY);
     }
 
-    private void buildMessages() throws MessagingException {
+    private void buildMessages() {
         message = new MimeMessage();
         message.setSubject("Test Subject");
         message.setSentDate(new GregorianCalendar(2016, 1, 2).getTime(), false);
@@ -99,7 +99,7 @@ public class EmailProviderTest extends ProviderTestCase2<EmailProvider> {
 
         Cursor cursor = this.getProvider().query(
                 Uri.parse("content://"+EmailProvider.AUTHORITY
-                        +"/account/"+account.getUuid()+"/messages"),
+                        + "/account/"+account.getUuid()+"/messages"),
                 new String[]{},
                 "",
                 new String[]{},
@@ -114,8 +114,8 @@ public class EmailProviderTest extends ProviderTestCase2<EmailProvider> {
         account.getUuid();
 
         Cursor cursor = this.getProvider().query(
-                Uri.parse("content://"+EmailProvider.AUTHORITY
-                        +"/account/"+account.getUuid()+"/messages"),
+                Uri.parse("content://" + EmailProvider.AUTHORITY
+                        + "/account/" + account.getUuid() + "/messages"),
                 new String[]{
                         EmailProvider.MessageColumns.ID,
                         EmailProvider.MessageColumns.FOLDER_ID,
@@ -135,7 +135,7 @@ public class EmailProviderTest extends ProviderTestCase2<EmailProvider> {
 
         Cursor cursor = this.getProvider().query(
                 Uri.parse("content://"+EmailProvider.AUTHORITY
-                        +"/account/"+account.getUuid()+"/messages"),
+                        + "/account/"+account.getUuid()+"/messages"),
                 new String[]{
                         EmailProvider.MessageColumns.ID,
                         EmailProvider.MessageColumns.FOLDER_ID,
@@ -159,8 +159,8 @@ public class EmailProviderTest extends ProviderTestCase2<EmailProvider> {
                 .appendMessages(Collections.singletonList(message));
 
         Cursor cursor = this.getProvider().query(
-                Uri.parse("content://"+EmailProvider.AUTHORITY
-                        +"/account/"+account.getUuid()+"/messages"),
+                Uri.parse("content://" + EmailProvider.AUTHORITY
+                        + "/account/" + account.getUuid() + "/messages"),
                 new String[]{
                         EmailProvider.MessageColumns.ID,
                         EmailProvider.MessageColumns.FOLDER_ID,
@@ -184,8 +184,8 @@ public class EmailProviderTest extends ProviderTestCase2<EmailProvider> {
                 .appendMessages(Arrays.asList(message, laterMessage));
 
         Cursor cursor = this.getProvider().query(
-                Uri.parse("content://"+EmailProvider.AUTHORITY
-                        +"/account/"+account.getUuid()+"/messages"),
+                Uri.parse("content://" + EmailProvider.AUTHORITY
+                        + "/account/" + account.getUuid()+"/messages"),
                 new String[]{
                         EmailProvider.MessageColumns.ID,
                         EmailProvider.MessageColumns.FOLDER_ID,
@@ -194,7 +194,7 @@ public class EmailProviderTest extends ProviderTestCase2<EmailProvider> {
                 },
                 "",
                 new String[]{},
-                EmailProvider.MessageColumns.DATE+" DESC");
+                EmailProvider.MessageColumns.DATE + " DESC");
         assertNotNull(cursor);
         assertTrue(cursor.moveToFirst());
         assertEquals(laterMessage.getSubject(), cursor.getString(3));
@@ -212,8 +212,8 @@ public class EmailProviderTest extends ProviderTestCase2<EmailProvider> {
                 .appendMessages(Arrays.asList(message, laterMessage));
 
         Cursor cursor = this.getProvider().query(
-                Uri.parse("content://"+EmailProvider.AUTHORITY
-                        +"/account/"+account.getUuid()+"/messages/threaded"),
+                Uri.parse("content://" + EmailProvider.AUTHORITY
+                        + "/account/" + account.getUuid() + "/messages/threaded"),
                 new String[]{
                         EmailProvider.MessageColumns.ID,
                         EmailProvider.MessageColumns.FOLDER_ID,
@@ -223,7 +223,7 @@ public class EmailProviderTest extends ProviderTestCase2<EmailProvider> {
                 },
                 "",
                 new String[]{},
-                EmailProvider.MessageColumns.DATE+" DESC");
+                EmailProvider.MessageColumns.DATE + " DESC");
         assertNotNull(cursor);
         assertTrue(cursor.moveToFirst());
         assertEquals(laterMessage.getSubject(), cursor.getString(3));
@@ -244,8 +244,8 @@ public class EmailProviderTest extends ProviderTestCase2<EmailProvider> {
                 .appendMessages(Collections.singletonList(reply));
 
         Cursor cursor = this.getProvider().query(
-                Uri.parse("content://"+EmailProvider.AUTHORITY
-                        +"/account/"+account.getUuid()+"/messages/threaded"),
+                Uri.parse("content://" + EmailProvider.AUTHORITY
+                        + "/account/" + account.getUuid() + "/messages/threaded"),
                 new String[]{
                         EmailProvider.MessageColumns.ID,
                         EmailProvider.MessageColumns.FOLDER_ID,
@@ -256,7 +256,7 @@ public class EmailProviderTest extends ProviderTestCase2<EmailProvider> {
                 },
                 "",
                 new String[]{},
-                EmailProvider.MessageColumns.DATE+" DESC");
+                EmailProvider.MessageColumns.DATE + " DESC");
         assertNotNull(cursor);
         assertTrue(cursor.moveToFirst());
         assertEquals(2, cursor.getInt(5));
@@ -276,8 +276,8 @@ public class EmailProviderTest extends ProviderTestCase2<EmailProvider> {
                 .appendMessages(Collections.singletonList(replyAtSameTime));
 
         Cursor cursor = this.getProvider().query(
-                Uri.parse("content://"+EmailProvider.AUTHORITY
-                        +"/account/"+account.getUuid()+"/messages/threaded"),
+                Uri.parse("content://" + EmailProvider.AUTHORITY
+                        + "/account/" + account.getUuid() + "/messages/threaded"),
                 new String[]{
                         EmailProvider.MessageColumns.ID,
                         EmailProvider.MessageColumns.FOLDER_ID,
@@ -288,7 +288,7 @@ public class EmailProviderTest extends ProviderTestCase2<EmailProvider> {
                 },
                 "",
                 new String[]{},
-                EmailProvider.MessageColumns.DATE+" DESC");
+                EmailProvider.MessageColumns.DATE + " DESC");
         assertNotNull(cursor);
         assertTrue(cursor.moveToFirst());
         assertEquals(2, cursor.getInt(5));
@@ -310,8 +310,8 @@ public class EmailProviderTest extends ProviderTestCase2<EmailProvider> {
 
         //Now get the thread id we just put in.
         Cursor cursor = this.getProvider().query(
-                Uri.parse("content://"+EmailProvider.AUTHORITY
-                        +"/account/"+account.getUuid()+"/messages"),
+                Uri.parse("content://" + EmailProvider.AUTHORITY
+                        + "/account/" + account.getUuid() + "/messages"),
                 new String[]{
                         EmailProvider.MessageColumns.ID,
                         EmailProvider.MessageColumns.FOLDER_ID,
@@ -328,8 +328,8 @@ public class EmailProviderTest extends ProviderTestCase2<EmailProvider> {
         //Now check the message is listed under that thread
 
         Cursor threadCursor = this.getProvider().query(
-                Uri.parse("content://"+EmailProvider.AUTHORITY
-                        +"/account/"+account.getUuid()+"/thread/"+threadId),
+                Uri.parse("content://" + EmailProvider.AUTHORITY +
+                        "/account/" + account.getUuid() + "/thread/" + threadId),
                 new String[]{
                         EmailProvider.MessageColumns.ID,
                         EmailProvider.MessageColumns.FOLDER_ID,

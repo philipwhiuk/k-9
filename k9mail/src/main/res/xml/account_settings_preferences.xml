@@ -133,7 +133,7 @@
 
         <CheckBoxPreference
             android:persistent="false"
-            android:key="account_sync_remote_deletetions"
+            android:key="account_sync_remote_deletions"
             android:title="@string/account_settings_sync_remote_deletetions_label"
             android:defaultValue="true"
             android:summary="@string/account_settings_sync_remote_deletetions_summary" />
@@ -490,21 +490,48 @@
             android:entryValues="@array/account_settings_crypto_mode_values"
             />
 
-        <OpenPgpAppPreference
-            android:persistent="false"
-            android:key="crypto_app"
-            android:title="@string/account_settings_crypto_app" />
+        <PreferenceScreen
+            android:title="@string/account_settings_openpgp"
+            android:key="openpgp">
 
-        <OpenPgpKeyPreference
-            android:persistent="false"
-            android:key="crypto_key"
-            android:title="@string/account_settings_crypto_key" />
+            <org.openintents.openpgp.util.OpenPgpAppPreference
+                android:persistent="false"
+                android:key="openpgp_app"
+                android:title="@string/account_settings_openpgp_app" />
 
-        <OpenPgpSignPreference
-            android:persistent="false"
-            android:key="crypto_support_sign_only"
-            android:title="@string/account_settings_crypto_support_sign_only"
-            />
+            <org.openintents.openpgp.util.OpenPgpKeyPreference
+                android:persistent="false"
+                android:key="openpgp_key"
+                android:title="@string/account_settings_openpgp_key" />
+
+            <org.openintents.openpgp.util.OpenPgpSignPreference
+                android:persistent="false"
+                android:key="openpgp_support_sign_only"
+                android:title="@string/account_settings_openpgp_support_sign_only"
+                />
+
+        </PreferenceScreen>
+
+        <PreferenceScreen
+            android:title="@string/account_settings_smime"
+            android:key="smime">
+
+            <org.openintents.smime.util.SMimeAppPreference
+                android:persistent="false"
+                android:key="smime_app"
+                android:title="@string/account_settings_smime_app" />
+
+            <org.openintents.smime.util.SMimeCertPreference
+                android:persistent="false"
+                android:key="smime_key"
+                android:title="@string/account_settings_smime_cert" />
+
+            <org.openintents.smime.util.SMimeSignPreference
+                android:persistent="false"
+                android:key="smime_support_sign_only"
+                android:title="@string/account_settings_smime_support_sign_only"
+                />
+        </PreferenceScreen>
 
 
     </PreferenceScreen>

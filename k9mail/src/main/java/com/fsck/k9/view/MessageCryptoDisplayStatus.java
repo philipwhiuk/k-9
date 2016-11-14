@@ -10,6 +10,8 @@ import com.fsck.k9.R;
 import com.fsck.k9.mailstore.CryptoResultAnnotation;
 import org.openintents.openpgp.OpenPgpDecryptionResult;
 import org.openintents.openpgp.OpenPgpSignatureResult;
+import org.openintents.smime.SMimeDecryptionResult;
+import org.openintents.smime.SMimeSignatureResult;
 
 
 public enum MessageCryptoDisplayStatus {
@@ -146,6 +148,30 @@ public enum MessageCryptoDisplayStatus {
             R.drawable.status_lock_disabled,
             R.string.crypto_msg_unsupported_signed
     ),
+
+    OPENPGP_UNAVAILABLE_SIGNED (
+            R.attr.openpgp_red,
+            R.drawable.status_lock_error,
+            R.string.crypto_msg_signed_openpgp_unavailable
+    ),
+
+    OPENPGP_UNAVAILABLE_ENCRYPTED (
+            R.attr.openpgp_red,
+            R.drawable.status_lock_error,
+            R.string.crypto_msg_encrypted_openpgp_unavailable
+    ),
+
+    SMIME_UNAVAILABLE_SIGNED (
+            R.attr.openpgp_red,
+            R.drawable.status_lock_error,
+            R.string.crypto_msg_signed_smime_unavailable
+    ),
+
+    SMIME_UNAVAILABLE_ENCRYPTED (
+            R.attr.openpgp_red,
+            R.drawable.status_lock_error,
+            R.string.crypto_msg_encrypted_smime_unavailable
+    ),
     ;
 
     @AttrRes public final int colorAttr;
@@ -200,12 +226,6 @@ public enum MessageCryptoDisplayStatus {
             case OPENPGP_SIGNED_BUT_INCOMPLETE:
                 return INCOMPLETE_SIGNED;
 
-            case ENCRYPTED_BUT_UNSUPPORTED:
-                return UNSUPPORTED_ENCRYPTED;
-
-            case SIGNED_BUT_UNSUPPORTED:
-                return UNSUPPORTED_SIGNED;
-
             case OPENPGP_UI_CANCELED:
                 return CANCELLED;
 
@@ -214,6 +234,42 @@ public enum MessageCryptoDisplayStatus {
 
             case OPENPGP_ENCRYPTED_API_ERROR:
                 return ENCRYPTED_ERROR;
+
+            case OPENPGP_ENCRYPTED_UNAVAILABLE:
+                return OPENPGP_UNAVAILABLE_ENCRYPTED;
+
+            case OPENPGP_SIGNED_UNAVAILABLE:
+                return OPENPGP_UNAVAILABLE_SIGNED;
+
+            case SMIME_OK:
+                return getDisplayStatusForSMimeResult(cryptoResult);
+
+            case SMIME_ENCRYPTED_BUT_INCOMPLETE:
+                return INCOMPLETE_ENCRYPTED;
+
+            case SMIME_SIGNED_BUT_INCOMPLETE:
+                return INCOMPLETE_SIGNED;
+
+            case SMIME_UI_CANCELED:
+                return CANCELLED;
+
+            case SMIME_SIGNED_API_ERROR:
+                return UNENCRYPTED_SIGN_ERROR;
+
+            case SMIME_ENCRYPTED_API_ERROR:
+                return ENCRYPTED_ERROR;
+
+            case SMIME_ENCRYPTED_UNAVAILABLE:
+                return SMIME_UNAVAILABLE_ENCRYPTED;
+
+            case SMIME_SIGNED_UNAVAILABLE:
+                return SMIME_UNAVAILABLE_SIGNED;
+
+            case ENCRYPTED_BUT_UNSUPPORTED:
+                return UNSUPPORTED_ENCRYPTED;
+
+            case SIGNED_BUT_UNSUPPORTED:
+                return UNSUPPORTED_SIGNED;
         }
         throw new IllegalStateException("Unhandled case!");
     }
@@ -251,6 +307,41 @@ public enum MessageCryptoDisplayStatus {
 
         throw new AssertionError("all cases must be handled, this is a bug!");
     }
+
+    @NonNull
+    private static MessageCryptoDisplayStatus getDisplayStatusForSMimeResult(CryptoResultAnnotation cryptoResult) {
+        SMimeSignatureResult signatureResult = cryptoResult.getSMimeSignatureResult();
+        SMimeDecryptionResult decryptionResult = cryptoResult.getSMimeDecryptionResult();
+        if (decryptionResult == null || signatureResult == null) {
+            throw new AssertionError("Both SMIME results must be non-null at this point!");
+        }
+
+        if (signatureResult.getResult() == SMimeSignatureResult.RESULT_NO_SIGNATURE &&
+                cryptoResult.hasEncapsulatedResult()) {
+            CryptoResultAnnotation encapsulatedResult = cryptoResult.getEncapsulatedResult();
+            if (encapsulatedResult.isSMimeResult()) {
+                signatureResult = encapsulatedResult.getSMimeSignatureResult();
+                if (signatureResult == null) {
+                    throw new AssertionError("SMIME must contain signature result at this point!");
+                }
+            }
+        }
+
+        switch (decryptionResult.getResult()) {
+            case SMimeDecryptionResult.RESULT_NOT_ENCRYPTED:
+                return getStatusForSMimeUnencryptedResult(signatureResult);
+
+            case SMimeDecryptionResult.RESULT_ENCRYPTED:
+                return getStatusForSMimeEncryptedResult(signatureResult);
+
+            case SMimeDecryptionResult.RESULT_INSECURE:
+                // TODO handle better?
+                return ENCRYPTED_ERROR;
+        }
+
+        throw new AssertionError("all cases must be handled, this is a bug!");
+    }
+
 
     @NonNull
     private static MessageCryptoDisplayStatus getStatusForPgpEncryptedResult(OpenPgpSignatureResult signatureResult) {
@@ -325,6 +416,85 @@ public enum MessageCryptoDisplayStatus {
                 return UNENCRYPTED_SIGN_REVOKED;
 
             case OpenPgpSignatureResult.RESULT_INVALID_KEY_INSECURE:
+                return UNENCRYPTED_SIGN_INSECURE;
+
+            default:
+                throw new IllegalStateException("unhandled encrypted result case!");
+        }
+    }
+
+    private static MessageCryptoDisplayStatus getStatusForSMimeEncryptedResult(SMimeSignatureResult signatureResult) {
+        switch (signatureResult.getResult()) {
+            case SMimeSignatureResult.RESULT_NO_SIGNATURE:
+                return ENCRYPTED_UNSIGNED;
+
+            case SMimeSignatureResult.RESULT_VALID_KEY_CONFIRMED:
+            case SMimeSignatureResult.RESULT_VALID_KEY_UNCONFIRMED:
+                switch (signatureResult.getSenderResult()) {
+                    case SMimeSignatureResult.SENDER_RESULT_UID_CONFIRMED:
+                        return ENCRYPTED_SIGN_VERIFIED;
+                    case SMimeSignatureResult.SENDER_RESULT_UID_UNCONFIRMED:
+                        return ENCRYPTED_SIGN_UNVERIFIED;
+                    case SMimeSignatureResult.SENDER_RESULT_UID_MISSING:
+                        return ENCRYPTED_SIGN_MISMATCH;
+                    case SMimeSignatureResult.SENDER_RESULT_NO_SENDER:
+                        return ENCRYPTED_SIGN_UNVERIFIED;
+                }
+                throw new IllegalStateException("unhandled encrypted result case!");
+
+            case SMimeSignatureResult.RESULT_KEY_MISSING:
+                return ENCRYPTED_SIGN_UNKNOWN;
+
+            case SMimeSignatureResult.RESULT_INVALID_SIGNATURE:
+                return ENCRYPTED_SIGN_ERROR;
+
+            case SMimeSignatureResult.RESULT_INVALID_KEY_EXPIRED:
+                return ENCRYPTED_SIGN_EXPIRED;
+
+            case SMimeSignatureResult.RESULT_INVALID_KEY_REVOKED:
+                return ENCRYPTED_SIGN_REVOKED;
+
+            case SMimeSignatureResult.RESULT_INVALID_KEY_INSECURE:
+                return ENCRYPTED_SIGN_INSECURE;
+
+            default:
+                throw new IllegalStateException("unhandled encrypted result case!");
+        }
+    }
+
+    @NonNull
+    private static MessageCryptoDisplayStatus getStatusForSMimeUnencryptedResult(SMimeSignatureResult signatureResult) {
+        switch (signatureResult.getResult()) {
+            case SMimeSignatureResult.RESULT_NO_SIGNATURE:
+                return DISABLED;
+
+            case SMimeSignatureResult.RESULT_VALID_KEY_CONFIRMED:
+            case SMimeSignatureResult.RESULT_VALID_KEY_UNCONFIRMED:
+                switch (signatureResult.getSenderResult()) {
+                    case SMimeSignatureResult.SENDER_RESULT_UID_CONFIRMED:
+                        return UNENCRYPTED_SIGN_VERIFIED;
+                    case SMimeSignatureResult.SENDER_RESULT_UID_UNCONFIRMED:
+                        return UNENCRYPTED_SIGN_UNVERIFIED;
+                    case SMimeSignatureResult.SENDER_RESULT_UID_MISSING:
+                        return UNENCRYPTED_SIGN_MISMATCH;
+                    case SMimeSignatureResult.SENDER_RESULT_NO_SENDER:
+                        return UNENCRYPTED_SIGN_UNVERIFIED;
+                }
+                throw new IllegalStateException("unhandled encrypted result case!");
+
+            case SMimeSignatureResult.RESULT_KEY_MISSING:
+                return UNENCRYPTED_SIGN_UNKNOWN;
+
+            case SMimeSignatureResult.RESULT_INVALID_SIGNATURE:
+                return UNENCRYPTED_SIGN_ERROR;
+
+            case SMimeSignatureResult.RESULT_INVALID_KEY_EXPIRED:
+                return UNENCRYPTED_SIGN_EXPIRED;
+
+            case SMimeSignatureResult.RESULT_INVALID_KEY_REVOKED:
+                return UNENCRYPTED_SIGN_REVOKED;
+
+            case SMimeSignatureResult.RESULT_INVALID_KEY_INSECURE:
                 return UNENCRYPTED_SIGN_INSECURE;
 
             default:

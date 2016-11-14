@@ -577,8 +577,16 @@ Please submit bug reports, contribute new features and ask questions at
     <string name="account_settings_folders">Folders</string>
     <string name="account_settings_quote_prefix_label">Quoted text prefix</string>
     <string name="account_settings_crypto">Cryptography</string>
-    <string name="account_settings_crypto_app">OpenPGP app</string>
-    <string name="account_settings_crypto_key">My Key</string>
+    <string name="account_settings_openpgp">OpenPGP</string>
+    <string name="account_settings_openpgp_app">App</string>
+    <string name="account_settings_openpgp_key">My Key</string>
+    <string name="account_settings_openpgp_support_sign_only">Signing of unencrypted messages</string>
+
+    <string name="account_settings_smime">S/MIME</string>
+    <string name="account_settings_smime_app">App</string>
+    <string name="account_settings_smime_cert">My Certificate</string>
+    <string name="account_settings_smime_support_sign_only">Signing of unencrypted messages</string>
+
     <string name="account_settings_no_crypto_provider_installed">No supported encryption app installed</string>
 
     <string name="account_settings_mail_check_frequency_label">Folder poll frequency</string>
@@ -1207,10 +1215,12 @@ Please submit bug reports, contribute new features and ask questions at
     <string name="crypto_msg_unsupported_signed">Message is signed, but in an unsupported format.</string>
     <string name="crypto_msg_incomplete_encrypted">Message is encrypted, but must be fully downloaded for decryption.</string>
     <string name="crypto_msg_cancelled">Message is encrypted, but decryption was cancelled.</string>
-
     <string name="crypto_msg_signed_unencrypted">Message is signed, but not encrypted.</string>
     <string name="crypto_msg_encrypted_unsigned">Message was encrypted, but not signed.</string>
-
+    <string name="crypto_msg_encrypted_openpgp_unavailable">Message is encrypted using OpenPGP, but no decryption app is available.</string>
+    <string name="crypto_msg_signed_openpgp_unavailable">Message is signed using OpenPGP, but no verification app is available.</string>
+    <string name="crypto_msg_encrypted_smime_unavailable">Message is encrypted using S/MIME, but no decryption app is available.</string>
+    <string name="crypto_msg_signed_smime_unavailable">Message is signed using S/MIME, but no verification app is available.</string>
 
     <string name="crypto_msg_sign_unknown">Signature made by unknown key.</string>
     <string name="crypto_msg_sign_verified">Signature made by trusted key.</string>

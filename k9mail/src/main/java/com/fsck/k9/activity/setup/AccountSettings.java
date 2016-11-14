@@ -41,6 +41,7 @@ import com.fsck.k9.activity.ColorPickerDialog;
 import com.fsck.k9.activity.K9PreferenceActivity;
 import com.fsck.k9.activity.ManageIdentities;
 import com.fsck.k9.activity.compose.RecipientPresenter;
+import com.fsck.k9.crypto.CryptoMethod;
 import com.fsck.k9.crypto.OpenPgpApiHelper;
 import com.fsck.k9.mail.Folder;
 import com.fsck.k9.mail.Store;
@@ -717,10 +718,10 @@ public class AccountSettings extends K9PreferenceActivity {
 
 
         mCryptoDefaultMethod = (ListPreference) findPreference(PREFERENCE_CRYPTO_DEFAULT_METHOD);
-        if (mAccount.getCryptoDefaultMethod().equals(RecipientPresenter.CryptoMethod.PGP_MIME)
+        if (mAccount.getCryptoDefaultMethod().equals(CryptoMethod.PGP_MIME)
                 && !mHasOpenPgp) {
-            mCryptoDefaultMethod.setValue(RecipientPresenter.CryptoMethod.NO_CRYPTO.toString());
-            mAccount.setCryptoDefaultMethod(RecipientPresenter.CryptoMethod.NO_CRYPTO.toString());
+            mCryptoDefaultMethod.setValue(CryptoMethod.NO_CRYPTO.toString());
+            mAccount.setCryptoDefaultMethod(CryptoMethod.NO_CRYPTO.toString());
         } else {
             mCryptoDefaultMethod.setValue(mAccount.getCryptoDefaultMethod());
         }
@@ -729,11 +730,11 @@ public class AccountSettings extends K9PreferenceActivity {
         mCryptoDefaultMethod.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             public boolean onPreferenceChange(Preference preference, Object newValue) {
                 String value = newValue.toString();
-                if (RecipientPresenter.CryptoMethod.PGP_MIME.toString().equals(value) && !mHasOpenPgp) {
+                if (CryptoMethod.PGP_MIME.toString().equals(value) && !mHasOpenPgp) {
                     Toast.makeText(AccountSettings.this,
                             getString(R.string.account_settings_crypto_mode_pgpmime_unavailable),
                             Toast.LENGTH_SHORT);
-                    value = RecipientPresenter.CryptoMethod.NO_CRYPTO.toString();
+                    value = CryptoMethod.NO_CRYPTO.toString();
                 }
 
                 int index = mCryptoDefaultMethod.findIndexOfValue(value);

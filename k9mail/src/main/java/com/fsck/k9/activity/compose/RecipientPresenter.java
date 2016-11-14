@@ -25,6 +25,7 @@ import com.fsck.k9.R;
 import com.fsck.k9.activity.compose.ComposeCryptoStatus.AttachErrorState;
 import com.fsck.k9.activity.compose.ComposeCryptoStatus.ComposeCryptoStatusBuilder;
 import com.fsck.k9.activity.compose.ComposeCryptoStatus.SendErrorState;
+import com.fsck.k9.crypto.CryptoMethod;
 import com.fsck.k9.helper.Contacts;
 import com.fsck.k9.helper.MailTo;
 import com.fsck.k9.helper.ReplyToParser;
@@ -811,11 +812,6 @@ public class RecipientPresenter implements PermissionPingCallback {
         }
     }
 
-    public enum CryptoMethod {
-        NO_CRYPTO,
-        SMIME,
-        PGP_MIME,
-    }
 
     public enum CryptoProviderState {
         UNCONFIGURED,

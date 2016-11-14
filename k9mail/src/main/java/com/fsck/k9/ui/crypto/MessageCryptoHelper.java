@@ -18,8 +18,8 @@ import android.support.annotation.Nullable;
 import android.support.annotation.WorkerThread;
 import android.util.Log;
 
-import com.fsck.k9.Account;
 import com.fsck.k9.K9;
+import com.fsck.k9.crypto.CryptoMethod;
 import com.fsck.k9.crypto.MessageDecryptVerifier;
 import com.fsck.k9.mail.Address;
 import com.fsck.k9.mail.Body;
@@ -172,6 +172,7 @@ public class MessageCryptoHelper {
             if (MessageDecryptVerifier.isSMimeEncryptedOrSignedPart(part)) {
                 CryptoPart cryptoPart = new CryptoPart(CryptoPartType.SMIME_SIGNED, part);
                 partsToDecryptOrVerify.add(cryptoPart);
+                continue;
             }
 
             MimeBodyPart replacementPart = getMultipartSignedContentPartIfAvailable(part);
@@ -186,7 +187,7 @@ public class MessageCryptoHelper {
     }
 
     private void addSMimeErrorAnnotation(Part part, CryptoError error, MimeBodyPart replacementPart) {
-        CryptoResultAnnotation annotation = CryptoResultAnnotation.createOpenPgpErrorAnnotation(
+        CryptoResultAnnotation annotation = CryptoResultAnnotation.createSMimeErrorAnnotation(
                 error, replacementPart);
         messageAnnotations.put(part, annotation);
     }
@@ -229,18 +230,51 @@ public class MessageCryptoHelper {
     }
 
     private void startDecryptingOrVerifyingPart(CryptoPart cryptoPart) {
-        if (!isBoundToCryptoProviderService()) {
-            connectToCryptoProviderService();
+        if (CryptoMethod.PGP_MIME.equals(cryptoPart.type.method)) {
+            if(!isBoundToPgpProviderService()
+                    && canBindToPgpProviderService()) {
+                connectToPgpProviderService();
+            } else if(isBoundToPgpProviderService()) {
+                decryptOrVerifyPart(cryptoPart);
+            } else {
+                currentCryptoPart = cryptoPart;
+                CryptoResultAnnotation errorPart;
+                if(cryptoPart.type.isEncrypted())
+                    errorPart = CryptoResultAnnotation.createOpenPgpEncryptedUnavailableAnnotation();
+                else
+                    errorPart = CryptoResultAnnotation.createOpenPgpSignedUnavailableAnnotation();
+                addCryptoResultAnnotationToMessage(errorPart);
+                onCryptoFinished();
+            }
+        } else if (CryptoMethod.SMIME.equals(cryptoPart.type.method)) {
+            if (!isBoundToSMimeProviderService()
+                    && canBindToSMimeProviderService()) {
+                connectToSMimeProviderService();
+            } else if (isBoundToSMimeProviderService()) {
+                decryptOrVerifyPart(cryptoPart);
+            } else {
+                currentCryptoPart = cryptoPart;
+                CryptoResultAnnotation errorPart;
+                if(cryptoPart.type.isEncrypted())
+                    errorPart = CryptoResultAnnotation.createSMimeEncryptedUnavailableAnnotation();
+                else
+                    errorPart = CryptoResultAnnotation.createSMimeSignedUnavailableAnnotation();
+                addCryptoResultAnnotationToMessage(errorPart);
+                onCryptoFinished();
+            }
         } else {
-            decryptOrVerifyPart(cryptoPart);
+            throw new IllegalArgumentException(
+                    "Unhandled crypto method: " + cryptoPart.type.method);
         }
     }
 
-    private boolean isBoundToCryptoProviderService() {
+    private boolean isBoundToPgpProviderService() {
         return openPgpApi != null;
     }
 
-    private void connectToCryptoProviderService() {
+    private boolean canBindToPgpProviderService() { return openPgpProviderPackage != null; }
+
+    private void connectToPgpProviderService() {
         openPgpServiceConnection = new OpenPgpServiceConnection(context, openPgpProviderPackage,
                 new OpenPgpServiceConnection.OnBound() {
                     @Override
@@ -259,18 +293,46 @@ public class MessageCryptoHelper {
         openPgpServiceConnection.bindToService();
     }
 
+    private boolean isBoundToSMimeProviderService() {
+        return sMimeApi != null;
+    }
+
+    private boolean canBindToSMimeProviderService() { return sMimeProviderPackage != null; }
+
+    private void connectToSMimeProviderService() {
+        sMimeServiceConnection = new SMimeServiceConnection(context, sMimeProviderPackage,
+                new SMimeServiceConnection.OnBound() {
+                    @Override
+                    public void onBound(ISMimeService service) {
+                        sMimeApi = new SMimeApi(context, service);
+
+                        decryptOrVerifyNextPart();
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                        // TODO actually handle (hand to ui, offer retry?)
+                        Log.e(K9.LOG_TAG, "Couldn't connect to SMimeService", e);
+                    }
+                });
+        sMimeServiceConnection.bindToService();
+    }
+
     private void decryptOrVerifyPart(CryptoPart cryptoPart) {
         currentCryptoPart = cryptoPart;
         Intent decryptIntent = userInteractionResultIntent;
         userInteractionResultIntent = null;
-        if (decryptIntent == null) {
-            decryptIntent = getDecryptionIntent();
+        if (decryptIntent == null && cryptoPart.type.method.equals(CryptoMethod.PGP_MIME)) {
+            decryptIntent = getPgpDecryptionIntent();
+        }
+        if (decryptIntent == null && cryptoPart.type.method.equals(CryptoMethod.SMIME)) {
+            decryptIntent = getSMimeDecryptionIntent();
         }
         decryptVerify(decryptIntent);
     }
 
     @NonNull
-    private Intent getDecryptionIntent() {
+    private Intent getPgpDecryptionIntent() {
         Intent decryptIntent = new Intent(OpenPgpApi.ACTION_DECRYPT_VERIFY);
 
         Address[] from = currentMessage.getFrom();
@@ -279,6 +341,20 @@ public class MessageCryptoHelper {
         }
 
         decryptIntent.putExtra(OpenPgpApi.EXTRA_DECRYPTION_RESULT, cachedDecryptionResult);
+
+        return decryptIntent;
+    }
+
+    @NonNull
+    private Intent getSMimeDecryptionIntent() {
+        Intent decryptIntent = new Intent(SMimeApi.ACTION_DECRYPT_VERIFY);
+
+        Address[] from = currentMessage.getFrom();
+        if (from.length > 0) {
+            decryptIntent.putExtra(SMimeApi.EXTRA_SENDER_ADDRESS, from[0].getAddress());
+        }
+
+        decryptIntent.putExtra(SMimeApi.EXTRA_DECRYPTION_RESULT, cachedDecryptionResult);
 
         return decryptIntent;
     }
@@ -934,11 +1010,23 @@ public class MessageCryptoHelper {
     }
 
     private enum CryptoPartType {
-        PGP_INLINE,
-        PGP_ENCRYPTED,
-        PGP_SIGNED,
-        SMIME_SIGNED,
-        SMIME_ENCRYPTED
+        PGP_INLINE(CryptoMethod.PGP_MIME, true),
+        PGP_ENCRYPTED(CryptoMethod.PGP_MIME, true),
+        PGP_SIGNED(CryptoMethod.PGP_MIME, false),
+        SMIME_SIGNED(CryptoMethod.SMIME, false),
+        SMIME_ENCRYPTED(CryptoMethod.SMIME, true);
+
+        private final CryptoMethod method;
+        private final boolean encrypted;
+
+        CryptoPartType(CryptoMethod method, boolean encrypted) {
+            this.method = method;
+            this.encrypted = encrypted;
+        }
+
+        boolean isEncrypted() {
+            return encrypted;
+        }
     }
 
     @Nullable

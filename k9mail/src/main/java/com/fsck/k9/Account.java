@@ -23,6 +23,7 @@ import android.util.Log;
 
 import com.fsck.k9.activity.compose.RecipientPresenter;
 import com.fsck.k9.activity.setup.AccountSetupCheckSettings.CheckDirection;
+import com.fsck.k9.crypto.CryptoMethod;
 import com.fsck.k9.helper.Utility;
 import com.fsck.k9.mail.Address;
 import com.fsck.k9.mail.MessagingException;
@@ -332,7 +333,7 @@ public class Account implements BaseAccount, StoreConfig {
         mSMimeApp = NO_SMIME_PROVIDER;
         mSMimeCert = NO_SMIME_CERTIFICATE;
         mSMimeSupportSignOnly = false;
-        mCryptoDefaultMethod = RecipientPresenter.CryptoMethod.NO_CRYPTO.toString();
+        mCryptoDefaultMethod = CryptoMethod.NO_CRYPTO.toString();
         mCryptoDefaultMode = RecipientPresenter.CryptoMode.OPPORTUNISTIC.toString();
         mAllowRemoteSearch = false;
         mRemoteSearchFullText = false;
@@ -491,7 +492,7 @@ public class Account implements BaseAccount, StoreConfig {
         mOpenPgpKey = storage.getLong(mUuid + ".sMimeCert", NO_SMIME_CERTIFICATE);
         mSMimeSupportSignOnly = storage.getBoolean(mUuid + ".sMimeSupportSignOnly", false);
 
-        mCryptoDefaultMethod = storage.getString(mUuid + ".cryptoDefaultMethod", RecipientPresenter.CryptoMethod.NO_CRYPTO.toString());
+        mCryptoDefaultMethod = storage.getString(mUuid + ".cryptoDefaultMethod", CryptoMethod.NO_CRYPTO.toString());
         mCryptoDefaultMode = storage.getString(mUuid + ".cryptoDefaultMode", RecipientPresenter.CryptoMode.OPPORTUNISTIC.toString());
 
         mAllowRemoteSearch = storage.getBoolean(mUuid + ".allowRemoteSearch", false);

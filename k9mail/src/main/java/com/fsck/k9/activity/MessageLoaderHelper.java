@@ -202,7 +202,7 @@ public class MessageLoaderHelper {
             return;
         }
 
-        if (account.isOpenPgpProviderConfigured()) {
+        if (account.isOpenPgpProviderConfigured() || account.isSMimeProviderConfigured()) {
             startOrResumeCryptoOperation();
             return;
         }

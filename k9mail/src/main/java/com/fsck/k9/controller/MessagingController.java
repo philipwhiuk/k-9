@@ -3642,9 +3642,9 @@ public class MessagingController {
                     @Override
                     public void run() {
 
-                        if (K9.DEBUG)
+                        if (K9.DEBUG) {
                             Log.i(K9.LOG_TAG, "Finished mail sync");
-
+                        }
                         if (wakeLock != null) {
                             wakeLock.release();
                         }
@@ -3672,13 +3672,15 @@ public class MessagingController {
         }
         final long accountInterval = account.getAutomaticCheckIntervalMinutes() * 60 * 1000;
         if (!ignoreLastCheckedTime && accountInterval <= 0) {
-            if (K9.DEBUG)
+            if (K9.DEBUG) {
                 Log.i(K9.LOG_TAG, "Skipping synchronizing account " + account.getDescription());
+            }
             return;
         }
 
-        if (K9.DEBUG)
+        if (K9.DEBUG) {
             Log.i(K9.LOG_TAG, "Synchronizing account " + account.getDescription());
+        }
 
         account.setRingNotified(false);
 
