@@ -721,9 +721,13 @@ public class AccountSettings extends K9PreferenceActivity {
         if (mAccount.getCryptoDefaultMethod().equals(CryptoMethod.PGP_MIME)
                 && !mHasOpenPgp) {
             mCryptoDefaultMethod.setValue(CryptoMethod.NO_CRYPTO.toString());
-            mAccount.setCryptoDefaultMethod(CryptoMethod.NO_CRYPTO.toString());
+            mAccount.setCryptoDefaultMethod(CryptoMethod.NO_CRYPTO);
+        } else if (mAccount.getCryptoDefaultMethod().equals(CryptoMethod.SMIME)
+                && !mHasSMime) {
+            mCryptoDefaultMethod.setValue(CryptoMethod.NO_CRYPTO.toString());
+            mAccount.setCryptoDefaultMethod(CryptoMethod.NO_CRYPTO);
         } else {
-            mCryptoDefaultMethod.setValue(mAccount.getCryptoDefaultMethod());
+            mCryptoDefaultMethod.setValue(mAccount.getCryptoDefaultMethod().toString());
         }
         mCryptoDefaultMethod.setSummary(mCryptoDefaultMethod.getEntry());
 

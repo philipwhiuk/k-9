@@ -17,6 +17,7 @@ import com.fsck.k9.FontSizes;
 import com.fsck.k9.R;
 import com.fsck.k9.activity.MessageCompose;
 import com.fsck.k9.activity.compose.RecipientPresenter.CryptoMode;
+import com.fsck.k9.crypto.CryptoMethod;
 import com.fsck.k9.mail.Address;
 import com.fsck.k9.mail.Message.RecipientType;
 import com.fsck.k9.view.RecipientSelectView;
@@ -154,10 +155,10 @@ public class RecipientMvpView implements OnFocusChangeListener, OnClickListener 
         bccView.addTextChangedListener(textWatcher);
     }
 
-    public void setCryptoProvider(String openPgpProvider) {
-        toView.setCryptoProvider(openPgpProvider);
-        ccView.setCryptoProvider(openPgpProvider);
-        bccView.setCryptoProvider(openPgpProvider);
+    public void setCryptoProvider(String cryptoProvider) {
+        toView.setCryptoProvider(cryptoProvider);
+        ccView.setCryptoProvider(cryptoProvider);
+        bccView.setCryptoProvider(cryptoProvider);
     }
 
     public void requestFocusOnToField() {
@@ -324,6 +325,14 @@ public class RecipientMvpView implements OnFocusChangeListener, OnClickListener 
     }
 
     public void showErrorOpenPgpUserInteractionRequired() {
+        Toast.makeText(activity, R.string.error_crypto_provider_ui_required, Toast.LENGTH_LONG).show();
+    }
+
+    public void showErrorSMimeConnection() {
+        Toast.makeText(activity, R.string.error_crypto_provider_connect, Toast.LENGTH_LONG).show();
+    }
+
+    public void showErrorSMimeUserInteractionRequired() {
         Toast.makeText(activity, R.string.error_crypto_provider_ui_required, Toast.LENGTH_LONG).show();
     }
 

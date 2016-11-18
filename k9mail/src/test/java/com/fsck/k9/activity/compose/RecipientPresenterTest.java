@@ -8,6 +8,7 @@ import android.app.LoaderManager;
 import android.content.Context;
 
 import com.fsck.k9.Account;
+import com.fsck.k9.crypto.CryptoMethod;
 import com.fsck.k9.helper.ReplyToParser;
 import com.fsck.k9.helper.ReplyToParser.ReplyToAddresses;
 import com.fsck.k9.mail.Address;
@@ -51,6 +52,8 @@ public class RecipientPresenterTest {
 
         recipientMvpView = mock(RecipientMvpView.class);
         account = mock(Account.class);
+        when(account.getCryptoDefaultMethod()).thenReturn(CryptoMethod.NO_CRYPTO);
+        when(account.getCryptoDefaultMode()).thenReturn(RecipientPresenter.CryptoMode.OPPORTUNISTIC);
         composePgpInlineDecider = mock(ComposePgpInlineDecider.class);
         replyToParser = mock(ReplyToParser.class);
         loaderManager = mock(LoaderManager.class);

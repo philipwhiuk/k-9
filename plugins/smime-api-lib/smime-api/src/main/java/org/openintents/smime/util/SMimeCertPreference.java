@@ -134,8 +134,11 @@ public class SMimeCertPreference extends Preference {
                 }
                 case SMimeApi.RESULT_CODE_ERROR: {
                     SMimeError error = result.getParcelableExtra(SMimeApi.RESULT_ERROR);
-                    Log.e(SMimeApi.TAG, "RESULT_CODE_ERROR: " + error.getMessage());
-
+                    if (error != null) {
+                        Log.e(SMimeApi.TAG, "RESULT_CODE_ERROR: " + error.getMessage());
+                    } else {
+                        Log.e(SMimeApi.TAG, "RESULT_CODE_ERROR with no error message");
+                    }
                     break;
                 }
             }

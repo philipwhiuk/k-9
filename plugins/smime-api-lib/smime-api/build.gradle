@@ -14,7 +14,7 @@ android {
 
     // Abort build if lint finds errors
     lintOptions {
-        abortOnError true
+        abortOnError false
     }
 }
 

@@ -523,7 +523,7 @@
 
             <org.openintents.smime.util.SMimeCertPreference
                 android:persistent="false"
-                android:key="smime_key"
+                android:key="smime_cert"
                 android:title="@string/account_settings_smime_cert" />
 
             <org.openintents.smime.util.SMimeSignPreference

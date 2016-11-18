@@ -37,14 +37,16 @@ import com.fsck.k9.mail.Message.RecipientType;
 import com.fsck.k9.message.ComposePgpInlineDecider;
 import com.fsck.k9.message.PgpMessageBuilder;
 import com.fsck.k9.view.RecipientSelectView.Recipient;
+
 import org.openintents.openpgp.IOpenPgpService2;
 import org.openintents.openpgp.util.OpenPgpApi;
-import org.openintents.openpgp.util.OpenPgpApi.PermissionPingCallback;
 import org.openintents.openpgp.util.OpenPgpServiceConnection;
-import org.openintents.openpgp.util.OpenPgpServiceConnection.OnBound;
+import org.openintents.smime.ISMimeService;
+import org.openintents.smime.util.SMimeApi;
+import org.openintents.smime.util.SMimeServiceConnection;
 
 
-public class RecipientPresenter implements PermissionPingCallback {
+public class RecipientPresenter implements OpenPgpApi.PermissionPingCallback, SMimeApi.PermissionPingCallback {
     private static final String STATE_KEY_CC_SHOWN = "state:ccShown";
     private static final String STATE_KEY_BCC_SHOWN = "state:bccShown";
     private static final String STATE_KEY_LAST_FOCUSED_TYPE = "state:lastFocusedType";
@@ -59,18 +61,19 @@ public class RecipientPresenter implements PermissionPingCallback {
 
     private static final int PGP_DIALOG_DISPLAY_THRESHOLD = 2;
 
-
+    //TODO: SMIME
     // transient state, which is either obtained during construction and initialization, or cached
     private final Context context;
     private final RecipientMvpView recipientMvpView;
     private final ComposePgpInlineDecider composePgpInlineDecider;
     private ReplyToParser replyToParser;
     private Account account;
-    private String cryptoProvider;
+    private String currentCryptoProvider;
     private Boolean hasContactPicker;
     private ComposeCryptoStatus cachedCryptoStatus;
     private PendingIntent pendingUserInteractionIntent;
     private CryptoProviderState cryptoProviderState = CryptoProviderState.UNCONFIGURED;
+    private SMimeServiceConnection sMimeServiceConnection;
     private OpenPgpServiceConnection openPgpServiceConnection;
 
 
@@ -87,10 +90,9 @@ public class RecipientPresenter implements PermissionPingCallback {
         this.context = context;
         this.composePgpInlineDecider = composePgpInlineDecider;
         this.replyToParser = replyToParser;
-        // TODO initialize cryptoMode to other values under some circumstances, e.g. if we reply to an encrypted e-mail
-        // TODO set to default cryptoMode
-        this.currentCryptoMethod = CryptoMethod.valueOf(account.getCryptoDefaultMethod());
-        this.currentCryptoMode = CryptoMode.valueOf(account.getCryptoDefaultMode());
+        // TODO initialize cryptoMode and method to other values under some circumstances, e.g. if we reply to an encrypted e-mail
+        this.currentCryptoMethod = account.getCryptoDefaultMethod();
+        this.currentCryptoMode = account.getCryptoDefaultMode();
 
         recipientMvpView.setPresenter(this);
         recipientMvpView.setLoaderManager(loaderManager);
@@ -276,8 +278,16 @@ public class RecipientPresenter implements PermissionPingCallback {
             updateRecipientExpanderVisibility();
         }
 
-        String cryptoProvider = account.getOpenPgpProvider();
-        setCryptoProvider(cryptoProvider);
+        CryptoMethod cryptoMethod = account.getCryptoDefaultMethod();
+        String cryptoProvider;
+        switch (cryptoMethod) {
+            case PGP_MIME: cryptoProvider = account.getOpenPgpProvider(); break;
+            case SMIME: cryptoProvider = account.getSMimeProvider(); break;
+            case NO_CRYPTO: cryptoProvider = null; break;
+            default: throw new IllegalArgumentException("Unsupported crypto method: " + currentCryptoMethod);
+        }
+
+        setCryptoProvider(cryptoMethod, cryptoProvider);
     }
 
     @SuppressWarnings("UnusedParameters")
@@ -350,15 +360,25 @@ public class RecipientPresenter implements PermissionPingCallback {
     public void updateCryptoStatus() {
         cachedCryptoStatus = null;
 
-        boolean isOkStateButLostConnection = cryptoProviderState == CryptoProviderState.OK &&
-                (openPgpServiceConnection == null || !openPgpServiceConnection.isBound());
-        if (isOkStateButLostConnection) {
+        if (isOkStateButLostConnection()) {
             cryptoProviderState = CryptoProviderState.LOST_CONNECTION;
             pendingUserInteractionIntent = null;
         }
 
         recipientMvpView.showCryptoStatus(getCurrentCryptoStatus().getCryptoStatusDisplayType());
         recipientMvpView.showCryptoSpecialMode(getCurrentCryptoStatus().getCryptoSpecialModeDisplayType());
+    }
+
+    private boolean isOkStateButLostConnection() {
+        switch (currentCryptoMethod) {
+            case NO_CRYPTO:
+                return false;
+            case PGP_MIME:
+                return CryptoProviderState.OK.equals(cryptoProviderState) && (openPgpServiceConnection == null || !openPgpServiceConnection.isBound());
+            case SMIME:
+                return CryptoProviderState.OK.equals(cryptoProviderState) && (sMimeServiceConnection == null || !sMimeServiceConnection.isBound());
+        }
+        throw new IllegalArgumentException("All crypto methods should be handled");
     }
 
     public ComposeCryptoStatus getCurrentCryptoStatus() {
@@ -462,7 +482,7 @@ public class RecipientPresenter implements PermissionPingCallback {
     }
 
     private void addRecipientsFromAddresses(final RecipientType recipientType, final Address... addresses) {
-        new RecipientLoader(context, cryptoProvider, addresses) {
+        new RecipientLoader(context, currentCryptoProvider, addresses) {
             @Override
             public void deliverResult(List<Recipient> result) {
                 Recipient[] recipientArray = result.toArray(new Recipient[result.size()]);
@@ -475,7 +495,7 @@ public class RecipientPresenter implements PermissionPingCallback {
     }
 
     private void addRecipientFromContactUri(final RecipientType recipientType, final Uri uri) {
-        new RecipientLoader(context, cryptoProvider, uri, false) {
+        new RecipientLoader(context, currentCryptoProvider, uri, false) {
             @Override
             public void deliverResult(List<Recipient> result) {
                 // TODO handle multiple available mail addresses for a contact?
@@ -567,15 +587,11 @@ public class RecipientPresenter implements PermissionPingCallback {
                 Log.e(K9.LOG_TAG, "click on crypto status while unconfigured - this should not really happen?!");
                 return;
             case OK:
-<<<<<<< 029dc9bf071def36897bd334c45001b7184496c7
                 if (cachedCryptoStatus.isSignOnly()) {
                     recipientMvpView.showErrorIsSignOnly();
                 } else {
                     recipientMvpView.showCryptoDialog(currentCryptoMode);
                 }
-=======
-                recipientMvpView.showCryptoDialog(currentCryptoMode, account.getOpenPgpSupportSignOnly(), account.getSMimeSupportSignOnly());
->>>>>>> SMIME Further Work
                 return;
 
             case LOST_CONNECTION:
@@ -630,13 +646,36 @@ public class RecipientPresenter implements PermissionPingCallback {
         }
     }
 
-    private void setCryptoProvider(String cryptoProvider) {
+    private void setCryptoProvider(CryptoMethod cryptoMethod, String cryptoProvider) {
+        this.currentCryptoMethod = cryptoMethod;
+        switch (cryptoMethod) {
+            case PGP_MIME:
+                setPgpProvider(cryptoProvider);
+                break;
+            case SMIME:
+                setSMimeProvider(cryptoProvider);
+                break;
+            case NO_CRYPTO:
+                clearCryptoProvider();
+                break;
+        }
+    }
 
+    private void setPgpProvider(String cryptoProvider) {
         boolean providerIsBound = openPgpServiceConnection != null && openPgpServiceConnection.isBound();
-        boolean isSameProvider = cryptoProvider != null && cryptoProvider.equals(this.cryptoProvider);
+        boolean isSameProvider = cryptoProvider != null
+                && cryptoProvider.equals(this.currentCryptoProvider) || sMimeServiceConnection != null;
         if (isSameProvider && providerIsBound) {
             cryptoProviderBindOrCheckPermission();
             return;
+        }
+
+        if (sMimeServiceConnection != null) {
+            cryptoProviderState = null;
+            if (sMimeServiceConnection.isBound()) {
+                sMimeServiceConnection.unbindFromService();
+            }
+            sMimeServiceConnection = null;
         }
 
         if (providerIsBound) {
@@ -644,15 +683,8 @@ public class RecipientPresenter implements PermissionPingCallback {
             openPgpServiceConnection = null;
         }
 
-        this.cryptoProvider = cryptoProvider;
-
-        if (cryptoProvider == null) {
-            cryptoProviderState = CryptoProviderState.UNCONFIGURED;
-            return;
-        }
-
         cryptoProviderState = CryptoProviderState.UNINITIALIZED;
-        openPgpServiceConnection = new OpenPgpServiceConnection(context, cryptoProvider, new OnBound() {
+        openPgpServiceConnection = new OpenPgpServiceConnection(context, cryptoProvider, new OpenPgpServiceConnection.OnBound() {
             @Override
             public void onBound(IOpenPgpService2 service) {
                 cryptoProviderBindOrCheckPermission();
@@ -666,6 +698,68 @@ public class RecipientPresenter implements PermissionPingCallback {
         cryptoProviderBindOrCheckPermission();
 
         recipientMvpView.setCryptoProvider(cryptoProvider);
+    }
+
+    private void setSMimeProvider(String cryptoProvider) {
+        boolean providerIsBound = sMimeServiceConnection != null && sMimeServiceConnection.isBound();
+        boolean isSameProvider = cryptoProvider != null
+                && cryptoProvider.equals(this.currentCryptoProvider) || openPgpServiceConnection != null;
+        if (isSameProvider && providerIsBound) {
+            cryptoProviderBindOrCheckPermission();
+            return;
+        }
+
+        if (openPgpServiceConnection != null) {
+            cryptoProviderState = null;
+            if (openPgpServiceConnection.isBound()) {
+                openPgpServiceConnection.unbindFromService();
+            }
+            openPgpServiceConnection = null;
+        }
+
+        if (providerIsBound) {
+            sMimeServiceConnection.unbindFromService();
+            sMimeServiceConnection = null;
+        }
+
+        if (cryptoProvider == null) {
+            cryptoProviderState = CryptoProviderState.UNCONFIGURED;
+            return;
+        }
+
+        cryptoProviderState = CryptoProviderState.UNINITIALIZED;
+        sMimeServiceConnection = new SMimeServiceConnection(context, cryptoProvider,
+                new SMimeServiceConnection.OnBound() {
+            @Override
+            public void onBound(ISMimeService service) {
+                cryptoProviderBindOrCheckPermission();
+            }
+
+            @Override
+            public void onError(Exception e) {
+                onCryptoProviderError(e);
+            }
+        });
+        cryptoProviderBindOrCheckPermission();
+
+        recipientMvpView.setCryptoProvider(cryptoProvider);
+    }
+
+    private void clearCryptoProvider() {
+        cryptoProviderState = CryptoProviderState.UNCONFIGURED;
+        if (openPgpServiceConnection != null) {
+            if (openPgpServiceConnection.isBound()) {
+                openPgpServiceConnection.unbindFromService();
+            }
+            openPgpServiceConnection = null;
+        }
+        if (sMimeServiceConnection != null) {
+            if (sMimeServiceConnection.isBound()) {
+                sMimeServiceConnection.unbindFromService();
+            }
+            sMimeServiceConnection = null;
+        }
+        recipientMvpView.setCryptoProvider(null);
     }
 
     private void cryptoProviderBindOrCheckPermission() {
@@ -810,6 +904,29 @@ public class RecipientPresenter implements PermissionPingCallback {
         } else {
             throw new IllegalStateException("This icon should not be clickable while no special mode is active!");
         }
+    }
+
+    @Override
+    public void onSMimePermissionCheckResult(Intent result) {
+        int resultCode = result.getIntExtra(SMimeApi.RESULT_CODE, SMimeApi.RESULT_CODE_ERROR);
+        switch (resultCode) {
+            case SMimeApi.RESULT_CODE_SUCCESS:
+                cryptoProviderState = CryptoProviderState.OK;
+                break;
+
+            case SMimeApi.RESULT_CODE_USER_INTERACTION_REQUIRED:
+                recipientMvpView.showErrorSMimeUserInteractionRequired();
+                pendingUserInteractionIntent = result.getParcelableExtra(SMimeApi.RESULT_INTENT);
+                cryptoProviderState = CryptoProviderState.ERROR;
+                break;
+
+            case SMimeApi.RESULT_CODE_ERROR:
+            default:
+                recipientMvpView.showErrorSMimeConnection();
+                cryptoProviderState = CryptoProviderState.ERROR;
+                break;
+        }
+        updateCryptoStatus();
     }
 
 

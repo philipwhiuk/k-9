@@ -231,8 +231,8 @@ public class Account implements BaseAccount, StoreConfig {
     private String mSMimeApp;
     private long mSMimeCert;
     private boolean mSMimeSupportSignOnly;
-    private String mCryptoDefaultMethod;
-    private String mCryptoDefaultMode;
+    private CryptoMethod mCryptoDefaultMethod;
+    private RecipientPresenter.CryptoMode mCryptoDefaultMode;
     private boolean mMarkMessageAsReadOnView;
     private boolean mAlwaysShowCcBcc;
     private boolean mAllowRemoteSearch;
@@ -333,8 +333,8 @@ public class Account implements BaseAccount, StoreConfig {
         mSMimeApp = NO_SMIME_PROVIDER;
         mSMimeCert = NO_SMIME_CERTIFICATE;
         mSMimeSupportSignOnly = false;
-        mCryptoDefaultMethod = CryptoMethod.NO_CRYPTO.toString();
-        mCryptoDefaultMode = RecipientPresenter.CryptoMode.OPPORTUNISTIC.toString();
+        mCryptoDefaultMethod = CryptoMethod.NO_CRYPTO;
+        mCryptoDefaultMode = RecipientPresenter.CryptoMode.OPPORTUNISTIC;
         mAllowRemoteSearch = false;
         mRemoteSearchFullText = false;
         mRemoteSearchNumResults = DEFAULT_REMOTE_SEARCH_NUM_RESULTS;
@@ -416,14 +416,16 @@ public class Account implements BaseAccount, StoreConfig {
         mNotifySelfNewMail = storage.getBoolean(mUuid + ".notifySelfNewMail", true);
         mNotifyContactsMailOnly = storage.getBoolean(mUuid + ".notifyContactsMailOnly", false);
         mNotifySync = storage.getBoolean(mUuid + ".notifyMailCheck", false);
-        mDeletePolicy =  DeletePolicy.fromInt(storage.getInt(mUuid + ".deletePolicy", DeletePolicy.NEVER.setting));
+        mDeletePolicy =  DeletePolicy.fromInt(storage.getInt(
+                mUuid + ".deletePolicy", DeletePolicy.NEVER.setting));
         mInboxFolderName = storage.getString(mUuid  + ".inboxFolderName", INBOX);
         mDraftsFolderName = storage.getString(mUuid  + ".draftsFolderName", "Drafts");
         mSentFolderName = storage.getString(mUuid  + ".sentFolderName", "Sent");
         mTrashFolderName = storage.getString(mUuid  + ".trashFolderName", "Trash");
         mArchiveFolderName = storage.getString(mUuid  + ".archiveFolderName", "Archive");
         mSpamFolderName = storage.getString(mUuid  + ".spamFolderName", "Spam");
-        mExpungePolicy = getEnumStringPref(storage, mUuid + ".expungePolicy", Expunge.EXPUNGE_IMMEDIATELY);
+        mExpungePolicy = getEnumStringPref(storage,
+                mUuid + ".expungePolicy", Expunge.EXPUNGE_IMMEDIATELY);
         mSyncRemoteDeletions = storage.getBoolean(mUuid  + ".syncRemoteDeletions", true);
 
         mMaxPushFolders = storage.getInt(mUuid + ".maxPushFolders", 10);
@@ -431,12 +433,15 @@ public class Account implements BaseAccount, StoreConfig {
         subscribedFoldersOnly = storage.getBoolean(mUuid + ".subscribedFoldersOnly", false);
         maximumPolledMessageAge = storage.getInt(mUuid + ".maximumPolledMessageAge", -1);
         maximumAutoDownloadMessageSize = storage.getInt(mUuid + ".maximumAutoDownloadMessageSize", 32768);
-        mMessageFormat =  getEnumStringPref(storage, mUuid + ".messageFormat", DEFAULT_MESSAGE_FORMAT);
-        mMessageFormatAuto = storage.getBoolean(mUuid + ".messageFormatAuto", DEFAULT_MESSAGE_FORMAT_AUTO);
+        mMessageFormat =  getEnumStringPref(storage,
+                mUuid + ".messageFormat", DEFAULT_MESSAGE_FORMAT);
+        mMessageFormatAuto = storage.getBoolean(
+                mUuid + ".messageFormatAuto", DEFAULT_MESSAGE_FORMAT_AUTO);
         if (mMessageFormatAuto && mMessageFormat == MessageFormat.TEXT) {
             mMessageFormat = MessageFormat.AUTO;
         }
-        mMessageReadReceipt = storage.getBoolean(mUuid + ".messageReadReceipt", DEFAULT_MESSAGE_READ_RECEIPT);
+        mMessageReadReceipt = storage.getBoolean(
+                mUuid + ".messageReadReceipt", DEFAULT_MESSAGE_READ_RECEIPT);
         mQuoteStyle = getEnumStringPref(storage, mUuid + ".quoteStyle", DEFAULT_QUOTE_STYLE);
         mQuotePrefix = storage.getString(mUuid + ".quotePrefix", DEFAULT_QUOTE_PREFIX);
         mDefaultQuotedTextShown = storage.getBoolean(mUuid + ".defaultQuotedTextShown", DEFAULT_QUOTED_TEXT_SHOWN);
@@ -469,17 +474,23 @@ public class Account implements BaseAccount, StoreConfig {
         mNotificationSetting.setLed(storage.getBoolean(mUuid + ".led", true));
         mNotificationSetting.setLedColor(storage.getInt(mUuid + ".ledColor", mChipColor));
 
-        mFolderDisplayMode = getEnumStringPref(storage, mUuid  + ".folderDisplayMode", FolderMode.NOT_SECOND_CLASS);
+        mFolderDisplayMode = getEnumStringPref(storage,
+                mUuid  + ".folderDisplayMode", FolderMode.NOT_SECOND_CLASS);
 
-        mFolderSyncMode = getEnumStringPref(storage, mUuid  + ".folderSyncMode", FolderMode.FIRST_CLASS);
+        mFolderSyncMode = getEnumStringPref(storage,
+                mUuid  + ".folderSyncMode", FolderMode.FIRST_CLASS);
 
-        mFolderPushMode = getEnumStringPref(storage, mUuid  + ".folderPushMode", FolderMode.FIRST_CLASS);
+        mFolderPushMode = getEnumStringPref(storage,
+                mUuid  + ".folderPushMode", FolderMode.FIRST_CLASS);
 
-        mFolderTargetMode = getEnumStringPref(storage, mUuid  + ".folderTargetMode", FolderMode.NOT_SECOND_CLASS);
+        mFolderTargetMode = getEnumStringPref(storage,
+                mUuid  + ".folderTargetMode", FolderMode.NOT_SECOND_CLASS);
 
-        searchableFolders = getEnumStringPref(storage, mUuid  + ".searchableFolders", Searchable.ALL);
+        searchableFolders = getEnumStringPref(storage,
+                mUuid  + ".searchableFolders", Searchable.ALL);
 
-        mIsSignatureBeforeQuotedText = storage.getBoolean(mUuid  + ".signatureBeforeQuotedText", false);
+        mIsSignatureBeforeQuotedText = storage.getBoolean(
+                mUuid  + ".signatureBeforeQuotedText", false);
         identities = loadIdentities(storage);
 
         String openPgpApp = storage.getString(mUuid + ".openPgpApp", NO_OPENPGP_PROVIDER);
@@ -492,12 +503,17 @@ public class Account implements BaseAccount, StoreConfig {
         mOpenPgpKey = storage.getLong(mUuid + ".sMimeCert", NO_SMIME_CERTIFICATE);
         mSMimeSupportSignOnly = storage.getBoolean(mUuid + ".sMimeSupportSignOnly", false);
 
-        mCryptoDefaultMethod = storage.getString(mUuid + ".cryptoDefaultMethod", CryptoMethod.NO_CRYPTO.toString());
-        mCryptoDefaultMode = storage.getString(mUuid + ".cryptoDefaultMode", RecipientPresenter.CryptoMode.OPPORTUNISTIC.toString());
+        mCryptoDefaultMethod = CryptoMethod.valueOf(storage.getString(
+                mUuid + ".cryptoDefaultMethod",
+                CryptoMethod.NO_CRYPTO.toString()));
+        mCryptoDefaultMode = RecipientPresenter.CryptoMode.valueOf(storage.getString(
+                mUuid + ".cryptoDefaultMode",
+                RecipientPresenter.CryptoMode.OPPORTUNISTIC.toString()));
 
         mAllowRemoteSearch = storage.getBoolean(mUuid + ".allowRemoteSearch", false);
         mRemoteSearchFullText = storage.getBoolean(mUuid + ".remoteSearchFullText", false);
-        mRemoteSearchNumResults = storage.getInt(mUuid + ".remoteSearchNumResults", DEFAULT_REMOTE_SEARCH_NUM_RESULTS);
+        mRemoteSearchNumResults = storage.getInt(mUuid + ".remoteSearchNumResults",
+                DEFAULT_REMOTE_SEARCH_NUM_RESULTS);
 
         mEnabled = storage.getBoolean(mUuid + ".enabled", true);
         mMarkMessageAsReadOnView = storage.getBoolean(mUuid + ".markMessageAsReadOnView", true);
@@ -766,8 +782,14 @@ public class Account implements BaseAccount, StoreConfig {
         editor.putString(mUuid + ".sMimeApp", mSMimeApp);
         editor.putLong(mUuid + ".sMimeCert", mSMimeCert);
         editor.putBoolean(mUuid + ".sMimeSupportSignOnly", mSMimeSupportSignOnly);
-        editor.putString(mUuid + ".cryptoDefaultMethod", mCryptoDefaultMethod);
-        editor.putString(mUuid + ".cryptoDefaultMode", mCryptoDefaultMode);
+        editor.putString(mUuid + ".cryptoDefaultMethod",
+                mCryptoDefaultMethod == null ?
+                        CryptoMethod.NO_CRYPTO.toString() :
+                        mCryptoDefaultMethod.toString());
+        editor.putString(mUuid + ".cryptoDefaultMode",
+                mCryptoDefaultMode == null ?
+                        RecipientPresenter.CryptoMode.OPPORTUNISTIC.toString() :
+                        mCryptoDefaultMode.toString());
         editor.putBoolean(mUuid + ".allowRemoteSearch", mAllowRemoteSearch);
         editor.putBoolean(mUuid + ".remoteSearchFullText", mRemoteSearchFullText);
         editor.putInt(mUuid + ".remoteSearchNumResults", mRemoteSearchNumResults);
@@ -1631,15 +1653,15 @@ public class Account implements BaseAccount, StoreConfig {
         mStripSignature = stripSignature;
     }
 
-    public String getCryptoDefaultMethod() {
+    public CryptoMethod getCryptoDefaultMethod() {
         return mCryptoDefaultMethod;
     }
 
-    public void setCryptoDefaultMethod(String cryptoMethod) {
+    public void setCryptoDefaultMethod(CryptoMethod cryptoMethod) {
         mCryptoDefaultMethod = cryptoMethod;
     }
 
-    public String getCryptoDefaultMode() {
+    public RecipientPresenter.CryptoMode getCryptoDefaultMode() {
         return mCryptoDefaultMode;
     }
 
