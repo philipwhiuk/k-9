@@ -16,6 +16,19 @@ import de.cketti.library.changelog.ChangeLog;
 
 public class K9AboutDialogBuilder {
 
+    static String[][] USED_LIBRARIES = new String[][] {
+            new String[] {"jutf7", "http://jutf7.sourceforge.net/"},
+            new String[] {"JZlib", "http://www.jcraft.com/jzlib/"},
+            new String[] {"Commons IO", "http://commons.apache.org/io/"},
+            new String[] {"Mime4j", "http://james.apache.org/mime4j/"},
+            new String[] {"HtmlCleaner", "http://htmlcleaner.sourceforge.net/"},
+            new String[] {"Android-PullToRefresh", "https://github.com/chrisbanes/Android-PullToRefresh"},
+            new String[] {"ckChangeLog", "https://github.com/cketti/ckChangeLog"},
+            new String[] {"HoloColorPicker", "https://github.com/LarsWerkman/HoloColorPicker"},
+            new String[] {"Glide", "https://github.com/bumptech/glide"},
+            new String[] {"TokenAutoComplete", "https://github.com/splitwise/TokenAutoComplete/"},
+    };
+
     public static AlertDialog.Builder create(final Accounts accounts) {
 
         String appName = accounts.getString(R.string.app_name);
@@ -46,7 +59,7 @@ public class K9AboutDialogBuilder {
                 .append("</p><hr/><p>");
 
         StringBuilder libs = new StringBuilder().append("<ul>");
-        for (String[] library : Accounts.USED_LIBRARIES) {
+        for (String[] library : USED_LIBRARIES) {
             libs.append("<li><a href=\"").append(library[1]).append("\">").append(library[0]).append("</a></li>");
         }
         libs.append("</ul>");

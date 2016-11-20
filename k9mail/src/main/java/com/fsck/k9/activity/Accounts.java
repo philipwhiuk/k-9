@@ -546,21 +546,7 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
         accounts.clear();
         accounts.addAll(Preferences.getPreferences(this).getAccounts());
 
-        List<BaseAccount> newAccounts;
-        if (!K9.isHideSpecialAccounts() && accounts.size() > 0) {
-            if (mUnifiedInboxAccount == null || mAllMessagesAccount == null) {
-                createSpecialAccounts();
-            }
-
-            newAccounts = new ArrayList<BaseAccount>(accounts.size() +
-                    SPECIAL_ACCOUNTS_COUNT);
-            newAccounts.add(mUnifiedInboxAccount);
-            newAccounts.add(mAllMessagesAccount);
-        } else {
-            newAccounts = new ArrayList<BaseAccount>(accounts.size());
-        }
-
-        newAccounts.addAll(accounts);
+        List<BaseAccount> newAccounts = createListOfAccounts();
 
         mAdapter = new AccountsAdapter(newAccounts);
         getListView().setAdapter(mAdapter);
@@ -585,6 +571,26 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
         }
     }
 
+    private List<BaseAccount> createListOfAccounts() {
+        List<BaseAccount> newAccounts;
+        if (!K9.isHideSpecialAccounts() && accounts.size() > 0) {
+            if (mUnifiedInboxAccount == null || mAllMessagesAccount == null) {
+                createSpecialAccounts();
+            }
+
+            newAccounts = new ArrayList<BaseAccount>(accounts.size() +
+                    SPECIAL_ACCOUNTS_COUNT);
+            newAccounts.add(mUnifiedInboxAccount);
+            newAccounts.add(mAllMessagesAccount);
+        } else {
+            newAccounts = new ArrayList<BaseAccount>(accounts.size());
+        }
+
+        newAccounts.addAll(accounts);
+
+        return newAccounts;
+    }
+
     private void onAddNewAccount() {
         AccountSetupBasics.actionNewAccount(this);
     }
@@ -592,7 +598,6 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
     private void onEditPrefs() {
         Prefs.actionPrefs(this);
     }
-
 
     /*
      * This method is called with 'null' for the argument 'account' if
@@ -918,20 +923,6 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
         }
         return true;
     }
-
-    //TODO: This doesn't belong here
-    static String[][] USED_LIBRARIES = new String[][] {
-        new String[] {"jutf7", "http://jutf7.sourceforge.net/"},
-        new String[] {"JZlib", "http://www.jcraft.com/jzlib/"},
-        new String[] {"Commons IO", "http://commons.apache.org/io/"},
-        new String[] {"Mime4j", "http://james.apache.org/mime4j/"},
-        new String[] {"HtmlCleaner", "http://htmlcleaner.sourceforge.net/"},
-        new String[] {"Android-PullToRefresh", "https://github.com/chrisbanes/Android-PullToRefresh"},
-        new String[] {"ckChangeLog", "https://github.com/cketti/ckChangeLog"},
-        new String[] {"HoloColorPicker", "https://github.com/LarsWerkman/HoloColorPicker"},
-        new String[] {"Glide", "https://github.com/bumptech/glide"},
-        new String[] {"TokenAutoComplete", "https://github.com/splitwise/TokenAutoComplete/"},
-    };
 
     private void onAbout() {
         K9AboutDialogBuilder.create(this).show();
