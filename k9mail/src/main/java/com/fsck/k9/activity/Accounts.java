@@ -542,15 +542,9 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
     }
 
 
-    private void refresh() {
+    void refresh() {
         accounts.clear();
         accounts.addAll(Preferences.getPreferences(this).getAccounts());
-
-        // see if we should show the welcome message
-//        if (accounts.length < 1) {
-//            WelcomeMessage.showWelcomeMessage(this);
-//            finish();
-//        }
 
         List<BaseAccount> newAccounts;
         if (!K9.isHideSpecialAccounts() && accounts.size() > 0) {
@@ -681,340 +675,11 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
      *         {@code null}.
      *         <p><strong>Note:</strong> Calling this method will modify the supplied list.</p>
      */
-    private void promptForServerPasswords(final List<Account> disabledAccounts) {
+    void promptForServerPasswords(final List<Account> disabledAccounts) {
         Account account = disabledAccounts.remove(0);
         PasswordPromptDialog dialog = new PasswordPromptDialog(account, disabledAccounts);
         setNonConfigurationInstance(dialog);
         dialog.show(this);
-    }
-
-    /**
-     * Ask the user for the incoming/outgoing server passwords.
-     */
-    private static class PasswordPromptDialog implements NonConfigurationInstance, TextWatcher {
-        private AlertDialog mDialog;
-        private EditText mIncomingPasswordView;
-        private EditText mOutgoingPasswordView;
-        private CheckBox mUseIncomingView;
-
-        private Account mAccount;
-        private List<Account> mRemainingAccounts;
-        private String mIncomingPassword;
-        private String mOutgoingPassword;
-        private boolean mUseIncoming;
-
-        /**
-         * Constructor
-         *
-         * @param account
-         *         The {@link Account} to ask the server passwords for. Never {@code null}.
-         * @param accounts
-         *         The (possibly empty) list of remaining accounts to ask passwords for. Never
-         *         {@code null}.
-         */
-        PasswordPromptDialog(Account account, List<Account> accounts) {
-            mAccount = account;
-            mRemainingAccounts = accounts;
-        }
-
-        @Override
-        public void restore(Activity activity) {
-            show((Accounts) activity, true);
-        }
-
-        @Override
-        public boolean retain() {
-            if (mDialog != null) {
-                // Retain entered passwords and checkbox state
-                if (mIncomingPasswordView != null) {
-                    mIncomingPassword = mIncomingPasswordView.getText().toString();
-                }
-                if (mOutgoingPasswordView != null) {
-                    mOutgoingPassword = mOutgoingPasswordView.getText().toString();
-                    mUseIncoming = mUseIncomingView.isChecked();
-                }
-
-                // Dismiss dialog
-                mDialog.dismiss();
-
-                // Clear all references to UI objects
-                mDialog = null;
-                mIncomingPasswordView = null;
-                mOutgoingPasswordView = null;
-                mUseIncomingView = null;
-                return true;
-            }
-            return false;
-        }
-
-        public void show(Accounts activity) {
-            show(activity, false);
-        }
-
-        private void show(final Accounts activity, boolean restore) {
-            ServerSettings incoming = RemoteStore.decodeStoreUri(mAccount.getStoreUri());
-            ServerSettings outgoing = Transport.decodeTransportUri(mAccount.getTransportUri());
-
-            /*
-             * Don't ask for the password to the outgoing server for WebDAV
-             * accounts, because incoming and outgoing servers are identical for
-             * this account type. Also don't ask when the username is missing.
-             * Also don't ask when the AuthType is EXTERNAL.
-             */
-            boolean configureOutgoingServer = AuthType.EXTERNAL != outgoing.authenticationType
-                    && !(ServerSettings.Type.WebDAV == outgoing.type)
-                    && outgoing.username != null
-                    && !outgoing.username.isEmpty()
-                    && (outgoing.password == null || outgoing.password
-                            .isEmpty());
-
-            boolean configureIncomingServer = AuthType.EXTERNAL != incoming.authenticationType
-                    && (incoming.password == null || incoming.password
-                            .isEmpty());
-
-            // Create a ScrollView that will be used as container for the whole layout
-            final ScrollView scrollView = new ScrollView(activity);
-
-            // Create the dialog
-            final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-            builder.setTitle(activity.getString(R.string.settings_import_activate_account_header));
-            builder.setView(scrollView);
-            builder.setPositiveButton(activity.getString(R.string.okay_action),
-            new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    String incomingPassword = null;
-                    if (mIncomingPasswordView != null) {
-                        incomingPassword = mIncomingPasswordView.getText().toString();
-                    }
-                    String outgoingPassword = null;
-                    if (mOutgoingPasswordView != null) {
-                        outgoingPassword = (mUseIncomingView.isChecked()) ?
-                                           incomingPassword : mOutgoingPasswordView.getText().toString();
-                    }
-
-                    dialog.dismiss();
-
-                    // Set the server passwords in the background
-                    SetPasswordsAsyncTask asyncTask = new SetPasswordsAsyncTask(activity, mAccount,
-                            incomingPassword, outgoingPassword, mRemainingAccounts);
-                    activity.setNonConfigurationInstance(asyncTask);
-                    asyncTask.execute();
-                }
-            });
-            builder.setNegativeButton(activity.getString(R.string.cancel_action),
-            new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.dismiss();
-                    activity.setNonConfigurationInstance(null);
-                }
-            });
-            mDialog = builder.create();
-
-            // Use the dialog's layout inflater so its theme is used (and not the activity's theme).
-            View layout = mDialog.getLayoutInflater().inflate(R.layout.accounts_password_prompt, scrollView);
-
-            // Set the intro text that tells the user what to do
-            TextView intro = (TextView) layout.findViewById(R.id.password_prompt_intro);
-            String serverPasswords = activity.getResources().getQuantityString(
-                    R.plurals.settings_import_server_passwords,
-                    (configureIncomingServer && configureOutgoingServer) ? 2 : 1);
-            intro.setText(activity.getString(R.string.settings_import_activate_account_intro,
-                                             mAccount.getDescription(), serverPasswords));
-
-            if (configureIncomingServer) {
-                // Display the hostname of the incoming server
-                TextView incomingText = (TextView) layout.findViewById(
-                                            R.id.password_prompt_incoming_server);
-                incomingText.setText(activity.getString(R.string.settings_import_incoming_server,
-                                                        incoming.host));
-
-                mIncomingPasswordView = (EditText) layout.findViewById(R.id.incoming_server_password);
-                mIncomingPasswordView.addTextChangedListener(this);
-            } else {
-                layout.findViewById(R.id.incoming_server_prompt).setVisibility(View.GONE);
-            }
-
-            if (configureOutgoingServer) {
-                // Display the hostname of the outgoing server
-                TextView outgoingText = (TextView) layout.findViewById(
-                                            R.id.password_prompt_outgoing_server);
-                outgoingText.setText(activity.getString(R.string.settings_import_outgoing_server,
-                                                        outgoing.host));
-
-                mOutgoingPasswordView = (EditText) layout.findViewById(
-                                            R.id.outgoing_server_password);
-                mOutgoingPasswordView.addTextChangedListener(this);
-
-                mUseIncomingView = (CheckBox) layout.findViewById(
-                        R.id.use_incoming_server_password);
-
-                if (configureIncomingServer) {
-                    mUseIncomingView.setChecked(true);
-                    mUseIncomingView.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-                        @Override
-                        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                            if (isChecked) {
-                                mOutgoingPasswordView.setText(null);
-                                mOutgoingPasswordView.setEnabled(false);
-                            } else {
-                                mOutgoingPasswordView.setText(mIncomingPasswordView.getText());
-                                mOutgoingPasswordView.setEnabled(true);
-                            }
-                        }
-                    });
-                } else {
-                    mUseIncomingView.setChecked(false);
-                    mUseIncomingView.setVisibility(View.GONE);
-                    mOutgoingPasswordView.setEnabled(true);
-                }
-            } else {
-                layout.findViewById(R.id.outgoing_server_prompt).setVisibility(View.GONE);
-            }
-
-            // Show the dialog
-            mDialog.show();
-
-            // Restore the contents of the password boxes and the checkbox (if the dialog was
-            // retained during a configuration change).
-            if (restore) {
-                if (configureIncomingServer) {
-                    mIncomingPasswordView.setText(mIncomingPassword);
-                }
-                if (configureOutgoingServer) {
-                    mOutgoingPasswordView.setText(mOutgoingPassword);
-                    mUseIncomingView.setChecked(mUseIncoming);
-                }
-            } else {
-                if (configureIncomingServer) {
-                    // Trigger afterTextChanged() being called
-                    // Work around this bug: https://code.google.com/p/android/issues/detail?id=6360
-                    mIncomingPasswordView.setText(mIncomingPasswordView.getText());
-                } else {
-                    mOutgoingPasswordView.setText(mOutgoingPasswordView.getText());
-                }
-            }
-        }
-
-        @Override
-        public void afterTextChanged(Editable arg0) {
-            boolean enable = false;
-            // Is the password box for the incoming server password empty?
-            if (mIncomingPasswordView != null) {
-                if (mIncomingPasswordView.getText().length() > 0) {
-                    // Do we need to check the outgoing server password box?
-                    if (mOutgoingPasswordView == null) {
-                        enable = true;
-                    }
-                    // If the checkbox to use the incoming server password is checked we need to make
-                    // sure that the password box for the outgoing server isn't empty.
-                    else if (mUseIncomingView.isChecked() ||
-                             mOutgoingPasswordView.getText().length() > 0) {
-                        enable = true;
-                    }
-                }
-            } else {
-                enable = mOutgoingPasswordView.getText().length() > 0;
-            }
-
-            // Disable "OK" button if the user hasn't specified all necessary passwords.
-            mDialog.getButton(DialogInterface.BUTTON_POSITIVE).setEnabled(enable);
-        }
-
-        @Override
-        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            // Not used
-        }
-
-        @Override
-        public void onTextChanged(CharSequence s, int start, int before, int count) {
-            // Not used
-        }
-    }
-
-    /**
-     * Set the incoming/outgoing server password in the background.
-     */
-    private static class SetPasswordsAsyncTask extends ExtendedAsyncTask<Void, Void, Void> {
-        private Account mAccount;
-        private String mIncomingPassword;
-        private String mOutgoingPassword;
-        private List<Account> mRemainingAccounts;
-        private Application mApplication;
-
-        protected SetPasswordsAsyncTask(Activity activity, Account account,
-                                        String incomingPassword, String outgoingPassword,
-                                        List<Account> remainingAccounts) {
-            super(activity);
-            mAccount = account;
-            mIncomingPassword = incomingPassword;
-            mOutgoingPassword = outgoingPassword;
-            mRemainingAccounts = remainingAccounts;
-            mApplication = mActivity.getApplication();
-        }
-
-        @Override
-        protected void showProgressDialog() {
-            String title = mActivity.getString(R.string.settings_import_activate_account_header);
-            int passwordCount = (mOutgoingPassword == null) ? 1 : 2;
-            String message = mActivity.getResources().getQuantityString(
-                                 R.plurals.settings_import_setting_passwords, passwordCount);
-            mProgressDialog = ProgressDialog.show(mActivity, title, message, true);
-        }
-
-        @Override
-        protected Void doInBackground(Void... params) {
-            try {
-                if (mIncomingPassword != null) {
-                    // Set incoming server password
-                    String storeUri = mAccount.getStoreUri();
-                    ServerSettings incoming = RemoteStore.decodeStoreUri(storeUri);
-                    ServerSettings newIncoming = incoming.newPassword(mIncomingPassword);
-                    String newStoreUri = RemoteStore.createStoreUri(newIncoming);
-                    mAccount.setStoreUri(newStoreUri);
-                }
-
-                if (mOutgoingPassword != null) {
-                    // Set outgoing server password
-                    String transportUri = mAccount.getTransportUri();
-                    ServerSettings outgoing = Transport.decodeTransportUri(transportUri);
-                    ServerSettings newOutgoing = outgoing.newPassword(mOutgoingPassword);
-                    String newTransportUri = Transport.createTransportUri(newOutgoing);
-                    mAccount.setTransportUri(newTransportUri);
-                }
-
-                // Mark account as enabled
-                mAccount.setEnabled(true);
-
-                // Save the account settings
-                mAccount.save(Preferences.getPreferences(mContext));
-
-                // Start services if necessary
-                K9.setServicesEnabled(mContext);
-
-                // Get list of folders from remote server
-                MessagingController.getInstance(mApplication).listFolders(mAccount, true, null);
-            } catch (Exception e) {
-                Log.e(K9.LOG_TAG, "Something went while setting account passwords", e);
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void result) {
-            Accounts activity = (Accounts) mActivity;
-
-            // Let the activity know that the background task is complete
-            activity.setNonConfigurationInstance(null);
-
-            activity.refresh();
-            removeProgressDialog();
-
-            if (mRemainingAccounts.size() > 0) {
-                activity.promptForServerPasswords(mRemainingAccounts);
-            }
-        }
     }
 
     private void onDeleteAccount(Account account) {
@@ -1254,7 +919,8 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
         return true;
     }
 
-    private static String[][] USED_LIBRARIES = new String[][] {
+    //TODO: This doesn't belong here
+    static String[][] USED_LIBRARIES = new String[][] {
         new String[] {"jutf7", "http://jutf7.sourceforge.net/"},
         new String[] {"JZlib", "http://www.jcraft.com/jzlib/"},
         new String[] {"Commons IO", "http://commons.apache.org/io/"},
@@ -1268,80 +934,7 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
     };
 
     private void onAbout() {
-        String appName = getString(R.string.app_name);
-        String webpageUrlLink = "<a href=\"" + getString(R.string.app_webpage_url) + "\">"+appName+"</a>";
-        int year = Calendar.getInstance().get(Calendar.YEAR);
-        WebView wv = new WebView(this);
-        StringBuilder html = new StringBuilder()
-        .append("<meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\" />")
-        .append("<img src=\"file:///android_asset/icon.png\" alt=\"").append(appName).append("\"/>")
-        .append("<h1>")
-        .append(String.format(getString(R.string.about_title_fmt), webpageUrlLink))
-        .append("</h1><p>")
-        .append(appName)
-        .append(" ")
-        .append(String.format(getString(R.string.debug_version_fmt), getVersionNumber()))
-        .append("</p><p>")
-        .append(String.format(getString(R.string.app_authors_fmt),
-                              getString(R.string.app_authors)))
-        .append("</p><p>")
-        .append(String.format(getString(R.string.app_revision_fmt),
-                              "<a href=\"" + getString(R.string.app_revision_url) + "\">" +
-                              getString(R.string.app_revision_url) +
-                              "</a>"))
-        .append("</p><hr/><p>")
-        .append(String.format(getString(R.string.app_copyright_fmt), year, year))
-        .append("</p><hr/><p>")
-        .append(getString(R.string.app_license))
-        .append("</p><hr/><p>");
-
-        StringBuilder libs = new StringBuilder().append("<ul>");
-        for (String[] library : USED_LIBRARIES) {
-            libs.append("<li><a href=\"").append(library[1]).append("\">").append(library[0]).append("</a></li>");
-        }
-        libs.append("</ul>");
-
-        html.append(String.format(getString(R.string.app_libraries), libs.toString()))
-        .append("</p><hr/><p>")
-        .append(String.format(getString(R.string.app_emoji_icons),
-                              "<div>TypePad \u7d75\u6587\u5b57\u30a2\u30a4\u30b3\u30f3\u753b\u50cf " +
-                              "(<a href=\"http://typepad.jp/\">Six Apart Ltd</a>) / " +
-                              "<a href=\"http://creativecommons.org/licenses/by/2.1/jp/\">CC BY 2.1</a></div>"))
-        .append("</p><hr/><p>")
-        .append(getString(R.string.app_htmlcleaner_license));
-
-
-        wv.loadDataWithBaseURL("file:///android_res/drawable/", html.toString(), "text/html", "utf-8", null);
-        new AlertDialog.Builder(this)
-        .setView(wv)
-        .setCancelable(true)
-        .setPositiveButton(R.string.okay_action, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface d, int c) {
-                d.dismiss();
-            }
-        })
-        .setNeutralButton(R.string.changelog_full_title, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface d, int c) {
-                new ChangeLog(Accounts.this).getFullLogDialog().show();
-            }
-        })
-        .show();
-    }
-
-    /**
-     * Get current version number.
-     *
-     * @return String version
-     */
-    private String getVersionNumber() {
-        String version = "?";
-        try {
-            PackageInfo pi = getPackageManager().getPackageInfo(getPackageName(), 0);
-            version = pi.versionName;
-        } catch (PackageManager.NameNotFoundException e) {
-            //Log.e(TAG, "Package name not found", e);
-        }
-        return version;
+        K9AboutDialogBuilder.create(this).show();
     }
 
     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
@@ -1411,7 +1004,8 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Log.i(K9.LOG_TAG, "onActivityResult requestCode = " + requestCode + ", resultCode = " + resultCode + ", data = " + data);
+        Log.i(K9.LOG_TAG, "onActivityResult requestCode = " + requestCode + ", resultCode = "
+                + resultCode + ", data = " + data);
         if (resultCode != RESULT_OK)
             return;
         if (data == null) {
@@ -1430,82 +1024,10 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
         asyncTask.execute();
     }
 
-
     private void showSimpleDialog(int headerRes, int messageRes, Object... args) {
         SimpleDialog dialog = new SimpleDialog(headerRes, messageRes, args);
         dialog.show(this);
         setNonConfigurationInstance(dialog);
-    }
-
-    /**
-     * A simple dialog.
-     */
-    private static class SimpleDialog implements NonConfigurationInstance {
-        private final int mHeaderRes;
-        private final int mMessageRes;
-        private Object[] mArguments;
-        private Dialog mDialog;
-
-        SimpleDialog(int headerRes, int messageRes, Object... args) {
-            this.mHeaderRes = headerRes;
-            this.mMessageRes = messageRes;
-            this.mArguments = args;
-        }
-
-        @Override
-        public void restore(Activity activity) {
-            show((Accounts) activity);
-        }
-
-        @Override
-        public boolean retain() {
-            if (mDialog != null) {
-                mDialog.dismiss();
-                mDialog = null;
-                return true;
-            }
-            return false;
-        }
-
-        public void show(final Accounts activity) {
-            final String message = generateMessage(activity);
-
-            final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-            builder.setTitle(mHeaderRes);
-            builder.setMessage(message);
-            builder.setPositiveButton(R.string.okay_action,
-            new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.dismiss();
-                    activity.setNonConfigurationInstance(null);
-                    okayAction(activity);
-                }
-            });
-            mDialog = builder.show();
-        }
-
-        /**
-         * Returns the message the dialog should display.
-         *
-         * @param activity
-         *         The {@code Activity} this dialog belongs to.
-         *
-         * @return The message the dialog should display
-         */
-        protected String generateMessage(Accounts activity) {
-            return activity.getString(mMessageRes, mArguments);
-        }
-
-        /**
-         * This method is called after the "OK" button was pressed.
-         *
-         * @param activity
-         *         The {@code Activity} this dialog belongs to.
-         */
-        protected void okayAction(Accounts activity) {
-            // Do nothing
-        }
     }
 
     /**
@@ -1520,48 +1042,6 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
         AccountsImportedDialog dialog = new AccountsImportedDialog(importResults, filename);
         dialog.show(this);
         setNonConfigurationInstance(dialog);
-    }
-
-    /**
-     * A dialog that displays how many accounts were successfully imported.
-     */
-    private static class AccountsImportedDialog extends SimpleDialog {
-        private ImportResults mImportResults;
-        private String mFilename;
-
-        AccountsImportedDialog(ImportResults importResults, String filename) {
-            super(R.string.settings_import_success_header, R.string.settings_import_success);
-            mImportResults = importResults;
-            mFilename = filename;
-        }
-
-        @Override
-        protected String generateMessage(Accounts activity) {
-            //TODO: display names of imported accounts (name from file *and* possibly new name)
-
-            int imported = mImportResults.importedAccounts.size();
-            String accounts = activity.getResources().getQuantityString(
-                                  R.plurals.settings_import_accounts, imported, imported);
-            return activity.getString(R.string.settings_import_success, accounts, mFilename);
-        }
-
-        @Override
-        protected void okayAction(Accounts activity) {
-            Context context = activity.getApplicationContext();
-            Preferences preferences = Preferences.getPreferences(context);
-            List<Account> disabledAccounts = new ArrayList<Account>();
-            for (AccountDescriptionPair accountPair : mImportResults.importedAccounts) {
-                Account account = preferences.getAccount(accountPair.imported.uuid);
-                if (account != null && !account.isEnabled()) {
-                    disabledAccounts.add(account);
-                }
-            }
-            if (disabledAccounts.size() > 0) {
-                activity.promptForServerPasswords(disabledAccounts);
-            } else {
-                activity.setNonConfigurationInstance(null);
-            }
-        }
     }
 
     /**
@@ -1580,126 +1060,6 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
     }
 
     /**
-     * A dialog that lets the user select which accounts to import from the settings file.
-     */
-    private static class ImportSelectionDialog implements NonConfigurationInstance {
-        private ImportContents mImportContents;
-        private Uri mUri;
-        private AlertDialog mDialog;
-        private SparseBooleanArray mSelection;
-
-
-        ImportSelectionDialog(ImportContents importContents, Uri uri) {
-            mImportContents = importContents;
-            mUri = uri;
-        }
-
-        @Override
-        public void restore(Activity activity) {
-            show((Accounts) activity, mSelection);
-        }
-
-        @Override
-        public boolean retain() {
-            if (mDialog != null) {
-                // Save the selection state of each list item
-                mSelection = mDialog.getListView().getCheckedItemPositions();
-
-                mDialog.dismiss();
-                mDialog = null;
-                return true;
-            }
-            return false;
-        }
-
-        public void show(Accounts activity) {
-            show(activity, null);
-        }
-
-        public void show(final Accounts activity, SparseBooleanArray selection) {
-            List<String> contents = new ArrayList<String>();
-
-            if (mImportContents.globalSettings) {
-                contents.add(activity.getString(R.string.settings_import_global_settings));
-            }
-
-            for (AccountDescription account : mImportContents.accounts) {
-                contents.add(account.name);
-            }
-
-            int count = contents.size();
-            boolean[] checkedItems = new boolean[count];
-            if (selection != null) {
-                for (int i = 0; i < count; i++) {
-                    checkedItems[i] = selection.get(i);
-                }
-            } else {
-                for (int i = 0; i < count; i++) {
-                    checkedItems[i] = true;
-                }
-            }
-
-            //TODO: listview header: "Please select the settings you wish to import"
-            //TODO: listview footer: "Select all" / "Select none" buttons?
-            //TODO: listview footer: "Overwrite existing accounts?" checkbox
-
-            OnMultiChoiceClickListener listener = new OnMultiChoiceClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which, boolean isChecked) {
-                    ((AlertDialog) dialog).getListView().setItemChecked(which, isChecked);
-                }
-            };
-
-            final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-            builder.setMultiChoiceItems(contents.toArray(new String[0]), checkedItems, listener);
-            builder.setTitle(activity.getString(R.string.settings_import_selection));
-            builder.setInverseBackgroundForced(true);
-            builder.setPositiveButton(R.string.okay_action,
-            new DialogInterface.OnClickListener() {
-
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    ListView listView = ((AlertDialog) dialog).getListView();
-                    SparseBooleanArray pos = listView.getCheckedItemPositions();
-
-                    boolean includeGlobals = mImportContents.globalSettings ? pos.get(0) : false;
-                    List<String> accountUuids = new ArrayList<String>();
-                    int start = mImportContents.globalSettings ? 1 : 0;
-                    for (int i = start, end = listView.getCount(); i < end; i++) {
-                        if (pos.get(i)) {
-                            accountUuids.add(mImportContents.accounts.get(i - start).uuid);
-                        }
-                    }
-
-                    /*
-                     * TODO: Think some more about this. Overwriting could change the store
-                     * type. This requires some additional code in order to work smoothly
-                     * while the app is running.
-                     */
-                    boolean overwrite = false;
-
-                    dialog.dismiss();
-                    activity.setNonConfigurationInstance(null);
-
-                    ImportAsyncTask importAsyncTask = new ImportAsyncTask(activity,
-                            includeGlobals, accountUuids, overwrite, mUri);
-                    activity.setNonConfigurationInstance(importAsyncTask);
-                    importAsyncTask.execute();
-                }
-            });
-            builder.setNegativeButton(R.string.cancel_action,
-            new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.dismiss();
-                    activity.setNonConfigurationInstance(null);
-                }
-            });
-            mDialog = builder.show();
-        }
-    }
-
-    /**
      * Set the {@code NonConfigurationInstance} this activity should retain on configuration
      * changes.
      *
@@ -1707,7 +1067,7 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
      *         The {@link NonConfigurationInstance} that should be retained when
      *         {@link Accounts#onRetainNonConfigurationInstance()} is called.
      */
-    private void setNonConfigurationInstance(NonConfigurationInstance inst) {
+    void setNonConfigurationInstance(NonConfigurationInstance inst) {
         mNonConfigurationInstance = inst;
     }
 
@@ -1955,15 +1315,15 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
     /**
      * Handles importing of global settings and/or accounts in a background thread.
      */
-    private static class ImportAsyncTask extends ExtendedAsyncTask<Void, Void, Boolean> {
+    static class ImportAsyncTask extends ExtendedAsyncTask<Void, Void, Boolean> {
         private boolean mIncludeGlobals;
         private List<String> mAccountUuids;
         private boolean mOverwrite;
         private Uri mUri;
         private ImportResults mImportResults;
 
-        private ImportAsyncTask(Accounts activity, boolean includeGlobals,
-                                List<String> accountUuids, boolean overwrite, Uri uri) {
+        ImportAsyncTask(Accounts activity, boolean includeGlobals,
+                        List<String> accountUuids, boolean overwrite, Uri uri) {
             super(activity);
             mIncludeGlobals = includeGlobals;
             mAccountUuids = accountUuids;

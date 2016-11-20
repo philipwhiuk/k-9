@@ -16,6 +16,8 @@
         android:title="@string/recreate_action" />
     <item android:id="@+id/clear_pending"
         android:title="@string/clear_pending_action" />
+    <item android:id="@+id/connection_info"
+        android:title="@string/view_connection_info" />
     <item android:id="@+id/export"
         android:title="@string/settings_export_account" />
 </menu>
