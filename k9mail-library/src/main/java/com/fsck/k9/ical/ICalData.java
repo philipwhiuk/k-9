@@ -1,5 +1,9 @@
 package com.fsck.k9.ical;
 
+import android.util.Log;
+
+import com.fsck.k9.mail.K9MailLib;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -39,14 +43,17 @@ public class ICalData {
         if (iCal.getEvents().size() > 0) {
             updateContentsFromEvent(iCal.getEvents().get(0));
         } else {
-            System.err.println("No events in iCal file");
+            Log.w(K9MailLib.LOG_TAG, "No events in iCal file");
         }
     }
 
     private void updateContentsFromEvent(VEvent event) {
-        summary = event.getSummary().getValue();
+        if (event.getSummary() != null)
+            summary = event.getSummary().getValue();
         organizer = event.getOrganizer();
-        location = event.getLocation().getValue();
+
+        if (event.getLocation() != null)
+            location = event.getLocation().getValue();
 
         if(event.getDateStart() != null) {
             date = event.getDateStart().getValue().getTime();

@@ -27,7 +27,7 @@ import biweekly.property.RecurrenceRule;
 public class ICalPart {
     private final Part underlyingPart;
 
-    public ICalPart(Part part) throws MessagingException {
+    public ICalPart(Part part) {
         this.underlyingPart = part;
     }
 
