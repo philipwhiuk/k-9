@@ -34,6 +34,7 @@ import com.fsck.k9.account.AccountCreator;
 import com.fsck.k9.service.MailService;
 import com.fsck.k9.view.ClientCertificateSpinner;
 import com.fsck.k9.view.ClientCertificateSpinner.OnClientCertificateChangedListener;
+import com.fsck.k9.view.ToolableViewAnimator;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -56,6 +57,7 @@ public class AccountSetupIncoming extends K9Activity implements OnClickListener 
     private EditText mPortView;
     private String mCurrentPortViewSetting;
     private Spinner mSecurityTypeView;
+    private ToolableViewAnimator mSecurityStatusView;
     private int mCurrentSecurityTypeViewPosition;
     private Spinner mAuthTypeView;
     private int mCurrentAuthTypeViewPosition;
@@ -106,6 +108,7 @@ public class AccountSetupIncoming extends K9Activity implements OnClickListener 
         mServerView = (EditText)findViewById(R.id.account_server);
         mPortView = (EditText)findViewById(R.id.account_port);
         mSecurityTypeView = (Spinner)findViewById(R.id.account_security_type);
+        mSecurityStatusView = (ToolableViewAnimator) findViewById(R.id.account_security_status);
         mAuthTypeView = (Spinner)findViewById(R.id.account_auth_type);
         mImapAutoDetectNamespaceView = (CheckBox)findViewById(R.id.imap_autodetect_namespace);
         mImapPathPrefixView = (EditText)findViewById(R.id.imap_path_prefix);
@@ -264,6 +267,7 @@ public class AccountSetupIncoming extends K9Activity implements OnClickListener 
                 mCurrentSecurityTypeViewPosition = savedInstanceState.getInt(STATE_SECURITY_TYPE_POSITION);
             }
             mSecurityTypeView.setSelection(mCurrentSecurityTypeViewPosition, false);
+            updateSelectedSecurityStatus(false);
 
             updateAuthPlainTextFromSecurityType(settings.connectionSecurity);
 
@@ -285,6 +289,16 @@ public class AccountSetupIncoming extends K9Activity implements OnClickListener 
             mSubscribedFoldersOnly.setChecked(mAccount.subscribedFoldersOnly());
         } catch (Exception e) {
             failure(e);
+        }
+    }
+
+    private void updateSelectedSecurityStatus(boolean animate) {
+        ConnectionSecurity security = getSelectedSecurity();
+        switch (security) {
+            case NONE: mSecurityStatusView.setDisplayedChild(0, animate); break;
+            case STARTTLS_REQUIRED: mSecurityStatusView.setDisplayedChild(1, animate); break;
+            case SSL_TLS_REQUIRED: mSecurityStatusView.setDisplayedChild(2, animate); break;
+            default: mSecurityStatusView.setDisplayedChild(0, animate); break;
         }
     }
 
@@ -318,6 +332,7 @@ public class AccountSetupIncoming extends K9Activity implements OnClickListener 
                     updatePortFromSecurityType();
                     validateFields();
                 }
+                updateSelectedSecurityStatus(true);
             }
 
             @Override
