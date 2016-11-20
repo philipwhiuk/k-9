@@ -203,8 +203,11 @@ class ImapFolderPusher extends ImapFolder {
         }
 
         private void handleExceptionWhileIdling(Exception e) {
-            pushReceiver.pushError("Push error for " + getName(), e);
-            Log.e(LOG_TAG, "Got exception while idling for " + getLogId(), e);
+            boolean errorWithActiveNetworkConnection = hasActiveNetworkConnection();
+            //TODO: Exclude other reasons
+            boolean userNotificationRequired = errorWithActiveNetworkConnection;
+            pushReceiver.pushError("Push error for " + getName(), e, userNotificationRequired);
+            Log.w(LOG_TAG, "Got exception while idling for " + getLogId(), e);
 
 
             pushReceiver.sleep(wakeLock, delayTime);
@@ -213,13 +216,13 @@ class ImapFolderPusher extends ImapFolder {
             if (delayTime > MAX_DELAY_TIME) {
                 delayTime = MAX_DELAY_TIME;
             }
-            if (hasActiveNetworkConnection()) {
+            if (errorWithActiveNetworkConnection) {
                 idleFailureCount++;
                 if (idleFailureCount > IDLE_FAILURE_COUNT_LIMIT) {
                     Log.e(LOG_TAG, "Disabling pusher for " + getLogId() + " after " + idleFailureCount +
                             " consecutive errors");
                     pushReceiver.pushError("Push disabled for " + getName() + " after " + idleFailureCount +
-                            " consecutive errors", e);
+                            " consecutive errors", e, true);
                     stop = true;
                 }
             }
@@ -350,7 +353,7 @@ class ImapFolderPusher extends ImapFolder {
         private void checkConnectionNotNull(ImapConnection conn) throws MessagingException {
             if (conn == null) {
                 String message = "Could not establish connection for IDLE";
-                pushReceiver.pushError(message, null);
+                pushReceiver.pushError(message, null, true);
 
                 throw new MessagingException(message);
             }
@@ -361,7 +364,7 @@ class ImapFolderPusher extends ImapFolder {
                 stop = true;
 
                 String message = "IMAP server is not IDLE capable: " + conn.toString();
-                pushReceiver.pushError(message, null);
+                pushReceiver.pushError(message, null, true);
 
                 throw new MessagingException(message);
             }
@@ -616,7 +619,8 @@ class ImapFolderPusher extends ImapFolder {
                 messages.addAll(messageList);
                 pushReceiver.messagesFlagsChanged(ImapFolderPusher.this, messages);
             } catch (Exception e) {
-                pushReceiver.pushError("Exception while processing Push untagged responses", e);
+                //TODO: What is this handling?
+                pushReceiver.pushError("Exception while processing Push untagged responses", e, true);
             }
         }
 

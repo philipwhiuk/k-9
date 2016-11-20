@@ -73,14 +73,18 @@ public class MessagingControllerPushReceiver implements PushReceiver {
         SleepService.sleep(context, millis, wakeLock, K9.PUSH_WAKE_LOCK_TIMEOUT);
     }
 
-    public void pushError(String errorMessage, Exception e) {
+    @Override
+    public void pushError(String errorMessage, Exception e, boolean userNotificationRequired) {
         String errMess = errorMessage;
 
         controller.notifyUserIfCertificateProblem(account, e, true);
-        if (errMess == null && e != null) {
-            errMess = e.getMessage();
+
+        if (userNotificationRequired) {
+            if (errMess == null && e != null) {
+                errMess = e.getMessage();
+            }
+            controller.addErrorMessage(account, errMess, e);
         }
-        controller.addErrorMessage(account, errMess, e);
     }
 
     @Override

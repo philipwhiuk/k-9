@@ -729,6 +729,7 @@ Please submit bug reports, contribute new features and ask questions at
     <string name="account_settings_crypto_method_private">Always Sign and Encrypt</string>
 
     <string name="account_settings_crypto_mode_pgpmime_unavailable">No PGP/MIME app installed.</string>
+    <string name="account_settings_crypto_mode_smime_unavailable">No S/MIME app installed.</string>
 
     <string name="manage_identities_title">Manage identities</string>
 

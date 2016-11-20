@@ -448,7 +448,6 @@ public class AccountSettings extends K9PreferenceActivity {
         });
 
 
-
         mMessageAge = (ListPreference) findPreference(PREFERENCE_MESSAGE_AGE);
 
         if (!mAccount.isSearchByDateCapable()) {
@@ -483,7 +482,7 @@ public class AccountSettings extends K9PreferenceActivity {
 
         mAccountDefault = (CheckBoxPreference) findPreference(PREFERENCE_DEFAULT);
         mAccountDefault.setChecked(
-            mAccount.equals(Preferences.getPreferences(this).getDefaultAccount()));
+                mAccount.equals(Preferences.getPreferences(this).getDefaultAccount()));
 
         mAccountShowPictures = (ListPreference) findPreference(PREFERENCE_SHOW_PICTURES);
         mAccountShowPictures.setValue("" + mAccount.getShowPictures());
@@ -531,12 +530,12 @@ public class AccountSettings extends K9PreferenceActivity {
         mCloudSearchEnabled = (CheckBoxPreference) findPreference(PREFERENCE_CLOUD_SEARCH_ENABLED);
         mRemoteSearchNumResults = (ListPreference) findPreference(PREFERENCE_REMOTE_SEARCH_NUM_RESULTS);
         mRemoteSearchNumResults.setOnPreferenceChangeListener(
-            new OnPreferenceChangeListener() {
-                public boolean onPreferenceChange(Preference pref, Object newVal) {
-                    updateRemoteSearchLimit((String)newVal);
-                    return true;
+                new OnPreferenceChangeListener() {
+                    public boolean onPreferenceChange(Preference pref, Object newVal) {
+                        updateRemoteSearchLimit((String) newVal);
+                        return true;
+                    }
                 }
-            }
         );
         //mRemoteSearchFullText = (CheckBoxPreference) findPreference(PREFERENCE_REMOTE_SEARCH_FULL_TEXT);
 
@@ -661,7 +660,7 @@ public class AccountSettings extends K9PreferenceActivity {
         mAccountLed = (CheckBoxPreference) findPreference(PREFERENCE_NOTIFICATION_LED);
         mAccountLed.setChecked(mAccount.getNotificationSetting().isLed());
 
-        mNotificationOpensUnread = (CheckBoxPreference)findPreference(PREFERENCE_NOTIFICATION_OPENS_UNREAD);
+        mNotificationOpensUnread = (CheckBoxPreference) findPreference(PREFERENCE_NOTIFICATION_OPENS_UNREAD);
         mNotificationOpensUnread.setChecked(mAccount.goToUnreadMessageSearch());
 
         new PopulateFolderPrefsTask().execute();
@@ -683,49 +682,63 @@ public class AccountSettings extends K9PreferenceActivity {
         });
 
         findPreference(PREFERENCE_COMPOSITION).setOnPreferenceClickListener(
-        new Preference.OnPreferenceClickListener() {
-            public boolean onPreferenceClick(Preference preference) {
-                onCompositionSettings();
-                return true;
-            }
-        });
+                new Preference.OnPreferenceClickListener() {
+                    public boolean onPreferenceClick(Preference preference) {
+                        onCompositionSettings();
+                        return true;
+                    }
+                });
 
         findPreference(PREFERENCE_MANAGE_IDENTITIES).setOnPreferenceClickListener(
-        new Preference.OnPreferenceClickListener() {
-            public boolean onPreferenceClick(Preference preference) {
-                onManageIdentities();
-                return true;
-            }
-        });
+                new Preference.OnPreferenceClickListener() {
+                    public boolean onPreferenceClick(Preference preference) {
+                        onManageIdentities();
+                        return true;
+                    }
+                });
 
         findPreference(PREFERENCE_INCOMING).setOnPreferenceClickListener(
-        new Preference.OnPreferenceClickListener() {
-            public boolean onPreferenceClick(Preference preference) {
-                mIncomingChanged = true;
-                onIncomingSettings();
-                return true;
-            }
-        });
+                new Preference.OnPreferenceClickListener() {
+                    public boolean onPreferenceClick(Preference preference) {
+                        mIncomingChanged = true;
+                        onIncomingSettings();
+                        return true;
+                    }
+                });
 
         findPreference(PREFERENCE_OUTGOING).setOnPreferenceClickListener(
-        new Preference.OnPreferenceClickListener() {
-            public boolean onPreferenceClick(Preference preference) {
-                onOutgoingSettings();
-                return true;
-            }
-        });
+                new Preference.OnPreferenceClickListener() {
+                    public boolean onPreferenceClick(Preference preference) {
+                        onOutgoingSettings();
+                        return true;
+                    }
+                });
 
+        buildCryptoPreferences();
+    }
 
+    private void buildCryptoPreferences() {
+        buildSMimePreferences();
+        buildOpenPgpPreferences();
+
+        if (!mHasOpenPgp && !mHasSMime) {
+            final Preference mCryptoMenu = findPreference(PREFERENCE_CRYPTO);
+            mCryptoMenu.setEnabled(false);
+            mCryptoMenu.setSummary(R.string.account_settings_no_crypto_provider_installed);
+        }
+
+        buildCryptoDefaultPreferences();
+    }
+
+    private void buildCryptoDefaultPreferences() {
 
         mCryptoDefaultMethod = (ListPreference) findPreference(PREFERENCE_CRYPTO_DEFAULT_METHOD);
         if (mAccount.getCryptoDefaultMethod().equals(CryptoMethod.PGP_MIME)
                 && !mHasOpenPgp) {
-            mCryptoDefaultMethod.setValue(CryptoMethod.NO_CRYPTO.toString());
-            mAccount.setCryptoDefaultMethod(CryptoMethod.NO_CRYPTO);
+            updateCryptoDefaultMethod(CryptoMethod.NO_CRYPTO);
         } else if (mAccount.getCryptoDefaultMethod().equals(CryptoMethod.SMIME)
                 && !mHasSMime) {
-            mCryptoDefaultMethod.setValue(CryptoMethod.NO_CRYPTO.toString());
-            mAccount.setCryptoDefaultMethod(CryptoMethod.NO_CRYPTO);
+            updateCryptoDefaultMethod(CryptoMethod.NO_CRYPTO);
         } else {
             mCryptoDefaultMethod.setValue(mAccount.getCryptoDefaultMethod().toString());
         }
@@ -738,19 +751,26 @@ public class AccountSettings extends K9PreferenceActivity {
                     Toast.makeText(AccountSettings.this,
                             getString(R.string.account_settings_crypto_mode_pgpmime_unavailable),
                             Toast.LENGTH_SHORT);
-                    value = CryptoMethod.NO_CRYPTO.toString();
+                    updateCryptoDefaultMethod(CryptoMethod.NO_CRYPTO);
                 }
 
-                int index = mCryptoDefaultMethod.findIndexOfValue(value);
-                mCryptoDefaultMethod.setSummary(mCryptoDefaultMethod.getEntries()[index]);
-                mCryptoDefaultMethod.setValue(value);
+                if (CryptoMethod.SMIME.toString().equals(value) && !mHasSMime) {
+                    Toast.makeText(AccountSettings.this,
+                            getString(R.string.account_settings_crypto_mode_smime_unavailable),
+                            Toast.LENGTH_SHORT);
+                    updateCryptoDefaultMethod(CryptoMethod.NO_CRYPTO);
+                }
+
+                updateCryptoDefaultMethod(CryptoMethod.valueOf(value));
                 return false;
             }
         });
 
         mCryptoDefaultMode = (ListPreference) findPreference(PREFERENCE_CRYPTO_DEFAULT_MODE);
+    }
+
+    private void buildOpenPgpPreferences() {
         mOpenPgpSupportSignOnly = (OpenPgpSignPreference) findPreference(PREFERENCE_OPENPGP_SUPPORT_SIGN_ONLY);
-        mSMimeSupportSignOnly = (SMimeSignPreference) findPreference(PREFERENCE_SMIME_SUPPORT_SIGN_ONLY);
 
         mHasOpenPgp = OpenPgpUtils.isAvailable(this);
         if (mHasOpenPgp) {
@@ -783,6 +803,10 @@ public class AccountSettings extends K9PreferenceActivity {
 
             mOpenPgpSupportSignOnly.setChecked(mAccount.getOpenPgpSupportSignOnly());
         }
+    }
+
+    private void buildSMimePreferences() {
+        mSMimeSupportSignOnly = (SMimeSignPreference) findPreference(PREFERENCE_SMIME_SUPPORT_SIGN_ONLY);
 
         mHasSMime = SMimeUtils.isAvailable(this);
         if (mHasSMime) {
@@ -815,12 +839,13 @@ public class AccountSettings extends K9PreferenceActivity {
 
             mSMimeSupportSignOnly.setChecked(mAccount.getSMimeSupportSignOnly());
         }
+    }
 
-        if(!mHasOpenPgp && !mHasSMime) {
-            final Preference mCryptoMenu = findPreference(PREFERENCE_CRYPTO);
-            mCryptoMenu.setEnabled(false);
-            mCryptoMenu.setSummary(R.string.account_settings_no_crypto_provider_installed);
-        }
+    private void updateCryptoDefaultMethod(CryptoMethod method) {
+        int index = mCryptoDefaultMethod.findIndexOfValue(method.toString());
+        mCryptoDefaultMethod.setSummary(mCryptoDefaultMethod.getEntries()[index]);
+        mCryptoDefaultMethod.setValue(method.toString());
+        mAccount.setCryptoDefaultMethod(method);
     }
 
     private void removeListEntry(ListPreference listPreference, String remove) {
