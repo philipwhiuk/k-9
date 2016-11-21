@@ -14,6 +14,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import android.annotation.SuppressLint;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -197,15 +198,21 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
             });
         }
 
+
+        @SuppressLint("StringFormatInvalid")
         public void accountSizeChanged(final Account account, final long oldSize, final long newSize) {
             runOnUiThread(new Runnable() {
+                @Override
                 public void run() {
                     AccountStats stats = accountStats.get(account.getUuid());
                     if (newSize != -1 && stats != null && K9.measureAccounts()) {
                         stats.size = newSize;
                     }
+                    String oldSizeFormatted = SizeFormatter.formatSize(getApplication(), oldSize);
+
                     String toastText = getString(R.string.account_size_changed, account.getDescription(),
-                                                 SizeFormatter.formatSize(getApplication(), oldSize), SizeFormatter.formatSize(getApplication(), newSize));
+                            oldSizeFormatted,
+                            SizeFormatter.formatSize(getApplication(), newSize));
 
                     Toast toast = Toast.makeText(getApplication(), toastText, Toast.LENGTH_LONG);
                     toast.show();
@@ -349,6 +356,7 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
         context.startActivity(intent);
     }
 
+    @SuppressLint("StringFormatInvalid")
     public static LocalSearch createUnreadSearch(Context context, BaseAccount account) {
         String searchTitle = context.getString(R.string.search_title, account.getDescription(),
                 context.getString(R.string.unread_modifier));
@@ -638,6 +646,7 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
      * @param account the account to open ({@link SearchAccount} or {@link Account})
      * @return false if unsuccessfull
      */
+    @SuppressLint("StringFormatInvalid")
     private boolean onOpenAccount(BaseAccount account) {
         if (account instanceof SearchAccount) {
             SearchAccount searchAccount = (SearchAccount)account;
@@ -696,6 +705,7 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
         AccountSettings.actionSettings(this, account);
     }
 
+    @SuppressLint("StringFormatInvalid")
     @Override
     public Dialog onCreateDialog(int id) {
         // Android recreates our dialogs on configuration changes even when they have been
