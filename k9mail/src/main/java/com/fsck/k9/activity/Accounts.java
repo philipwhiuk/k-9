@@ -101,12 +101,6 @@ import de.cketti.library.changelog.ChangeLog;
 public class Accounts extends K9ListActivity implements OnItemClickListener {
 
     /**
-     * URL used to open Android Market application
-     */
-    private static final String ANDROID_MARKET_URL =
-            "https://play.google.com/store/apps/details?id=org.openintents.filemanager";
-
-    /**
      * Number of special accounts ('Unified Inbox' and 'All Messages')
      */
     private static final int SPECIAL_ACCOUNTS_COUNT = 2;
@@ -711,125 +705,52 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
         // Android recreates our dialogs on configuration changes even when they have been
         // dismissed. Make sure we have all information necessary before creating a new dialog.
         switch (id) {
-        case DIALOG_REMOVE_ACCOUNT: {
-            if (mSelectedContextAccount == null) {
-                return null;
+            case DIALOG_REMOVE_ACCOUNT: {
+                if (mSelectedContextAccount == null) {
+                    return null;
+                }
+                return AccountsDialogCreator.createRemoveAccountDialog(this, id, mSelectedContextAccount);
             }
-
-            return ConfirmationDialog.create(this, id,
-                                             R.string.account_delete_dlg_title,
-                                             getString(R.string.account_delete_dlg_instructions_fmt,
-                                                     mSelectedContextAccount.getDescription()),
-                                             R.string.okay_action,
-                                             R.string.cancel_action,
-            new Runnable() {
-                @Override
-                public void run() {
-                    if (mSelectedContextAccount instanceof Account) {
-                        Account realAccount = (Account) mSelectedContextAccount;
-                        try {
-                            realAccount.getLocalStore().delete();
-                        } catch (Exception e) {
-                            // Ignore, this may lead to localStores on sd-cards that
-                            // are currently not inserted to be left
-                        }
-                        MessagingController.getInstance(getApplication())
-                        .deleteAccount(realAccount);
-                        Preferences.getPreferences(Accounts.this)
-                        .deleteAccount(realAccount);
-                        K9.setServicesEnabled(Accounts.this);
-                        refresh();
-                    }
+            case DIALOG_CLEAR_ACCOUNT: {
+                if (mSelectedContextAccount == null) {
+                    return null;
                 }
-            });
-        }
-        case DIALOG_CLEAR_ACCOUNT: {
-            if (mSelectedContextAccount == null) {
-                return null;
+                return AccountsDialogCreator.createClearAccountDialog(this, id, mSelectedContextAccount, mHandler);
             }
-
-            return ConfirmationDialog.create(this, id,
-                                             R.string.account_clear_dlg_title,
-                                             getString(R.string.account_clear_dlg_instructions_fmt,
-                                                     mSelectedContextAccount.getDescription()),
-                                             R.string.okay_action,
-                                             R.string.cancel_action,
-            new Runnable() {
-                @Override
-                public void run() {
-                    if (mSelectedContextAccount instanceof Account) {
-                        Account realAccount = (Account) mSelectedContextAccount;
-                        mHandler.workingAccount(realAccount,
-                                                R.string.clearing_account);
-                        MessagingController.getInstance(getApplication())
-                        .clear(realAccount, null);
-                    }
+            case DIALOG_RECREATE_ACCOUNT: {
+                if (mSelectedContextAccount == null) {
+                    return null;
                 }
-            });
-        }
-        case DIALOG_RECREATE_ACCOUNT: {
-            if (mSelectedContextAccount == null) {
-                return null;
+                return AccountsDialogCreator.createRecreateAccountDialog(this, id, mSelectedContextAccount, mHandler);
             }
-
-            return ConfirmationDialog.create(this, id,
-                                             R.string.account_recreate_dlg_title,
-                                             getString(R.string.account_recreate_dlg_instructions_fmt,
-                                                     mSelectedContextAccount.getDescription()),
-                                             R.string.okay_action,
-                                             R.string.cancel_action,
-            new Runnable() {
-                @Override
-                public void run() {
-                    if (mSelectedContextAccount instanceof Account) {
-                        Account realAccount = (Account) mSelectedContextAccount;
-                        mHandler.workingAccount(realAccount,
-                                                R.string.recreating_account);
-                        MessagingController.getInstance(getApplication())
-                        .recreate(realAccount, null);
-                    }
-                }
-            });
-        }
-        case DIALOG_NO_FILE_MANAGER: {
-            return ConfirmationDialog.create(this, id,
-                                             R.string.import_dialog_error_title,
-                                             getString(R.string.import_dialog_error_message),
-                                             R.string.open_market,
-                                             R.string.close,
-            new Runnable() {
-                @Override
-                public void run() {
-                    Uri uri = Uri.parse(ANDROID_MARKET_URL);
-                    Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-                    startActivity(intent);
-                }
-            });
-        }
+            case DIALOG_NO_FILE_MANAGER: {
+                return AccountsDialogCreator.createNoFileManagerDialog(this, id);
+            }
         }
 
         return super.onCreateDialog(id);
     }
 
+    @SuppressLint("StringFormatInvalid")
     @Override
     public void onPrepareDialog(int id, Dialog d) {
         AlertDialog alert = (AlertDialog) d;
         switch (id) {
-        case DIALOG_REMOVE_ACCOUNT: {
-            alert.setMessage(getString(R.string.account_delete_dlg_instructions_fmt,
-                                       mSelectedContextAccount.getDescription()));
-            break;
-        }
-        case DIALOG_CLEAR_ACCOUNT: {
-            alert.setMessage(getString(R.string.account_clear_dlg_instructions_fmt,
-                                       mSelectedContextAccount.getDescription()));
-            break;
-        }
-        case DIALOG_RECREATE_ACCOUNT: {
-            alert.setMessage(getString(R.string.account_recreate_dlg_instructions_fmt,
-                                       mSelectedContextAccount.getDescription()));
-            break;
-        }
+            case DIALOG_REMOVE_ACCOUNT: {
+                alert.setMessage(getString(R.string.account_delete_dlg_instructions_fmt,
+                                           mSelectedContextAccount.getDescription()));
+                break;
+            }
+            case DIALOG_CLEAR_ACCOUNT: {
+                alert.setMessage(getString(R.string.account_clear_dlg_instructions_fmt,
+                                           mSelectedContextAccount.getDescription()));
+                break;
+            }
+            case DIALOG_RECREATE_ACCOUNT: {
+                alert.setMessage(getString(R.string.account_recreate_dlg_instructions_fmt,
+                                           mSelectedContextAccount.getDescription()));
+                break;
+            }
         }
 
         super.onPrepareDialog(id, d);
