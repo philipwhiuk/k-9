@@ -110,6 +110,16 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
     private static final int DIALOG_RECREATE_ACCOUNT = 3;
     private static final int DIALOG_NO_FILE_MANAGER = 4;
 
+
+    private static final int ACTIVITY_REQUEST_PICK_SETTINGS_FILE = 1;
+
+    private static String ACCOUNT_STATS = "accountStats";
+    private static String STATE_UNREAD_COUNT = "unreadCount";
+    private static String SELECTED_CONTEXT_ACCOUNT = "selectedContextAccount";
+
+    public static final String EXTRA_STARTUP = "startup";
+    public static final String ACTION_IMPORT_SETTINGS = "importSettings";
+
     /*
      * Must be serializable hence implementation class used for declaration.
      */
@@ -140,8 +150,6 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
      */
     private NonConfigurationInstance mNonConfigurationInstance;
 
-
-    private static final int ACTIVITY_REQUEST_PICK_SETTINGS_FILE = 1;
 
     class AccountsHandler extends Handler {
         private void setViewTitle() {
@@ -326,14 +334,6 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
         }
 
     };
-
-    private static String ACCOUNT_STATS = "accountStats";
-    private static String STATE_UNREAD_COUNT = "unreadCount";
-    private static String SELECTED_CONTEXT_ACCOUNT = "selectedContextAccount";
-
-    public static final String EXTRA_STARTUP = "startup";
-
-    public static final String ACTION_IMPORT_SETTINGS = "importSettings";
 
 
     public static void listAccounts(Context context) {
