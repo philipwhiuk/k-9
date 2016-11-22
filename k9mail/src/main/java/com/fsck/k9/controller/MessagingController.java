@@ -3559,7 +3559,11 @@ public class MessagingController {
             part = MimeUtility.findFirstPartByMimeType(message, "text/html");
         }
         if (part != null) {
-            quotedText = MessageExtractor.getTextFromPart(part);
+            try {
+                quotedText = MessageExtractor.getTextFromPart(part);
+            } catch (Exception e) {
+                Log.w(K9.LOG_TAG, "Unable to extract quoted text", e);
+            }
         }
         if (quotedText != null) {
             msg.putExtra(Intent.EXTRA_TEXT, quotedText);

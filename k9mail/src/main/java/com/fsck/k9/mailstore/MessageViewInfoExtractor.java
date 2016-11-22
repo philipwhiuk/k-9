@@ -1,6 +1,7 @@
 package com.fsck.k9.mailstore;
 
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -9,8 +10,10 @@ import java.util.List;
 import android.content.Context;
 import android.support.annotation.VisibleForTesting;
 import android.support.annotation.WorkerThread;
+import android.util.Log;
 
 import com.fsck.k9.Globals;
+import com.fsck.k9.K9;
 import com.fsck.k9.R;
 import com.fsck.k9.helper.HtmlConverter;
 import com.fsck.k9.helper.HtmlSanitizer;
@@ -21,6 +24,7 @@ import com.fsck.k9.mail.Message;
 import com.fsck.k9.mail.MessagingException;
 import com.fsck.k9.mail.Part;
 import com.fsck.k9.mail.internet.MessageExtractor;
+import com.fsck.k9.mail.internet.UnsupportedContentTransferEncodingException;
 import com.fsck.k9.mail.internet.Viewable;
 import com.fsck.k9.message.extractors.AttachmentInfoExtractor;
 import com.fsck.k9.message.extractors.ICalendarInfoExtractor;
@@ -237,7 +241,12 @@ public class MessageViewInfoExtractor {
             Part part = ((Textual) viewable).getPart();
             addHtmlDivider(html, part, prependDivider);
 
-            String t = MessageExtractor.getTextFromPart(part);
+            String t = null;
+            try {
+                t = MessageExtractor.getTextFromPart(part);
+            } catch (Exception e) {
+                Log.w(K9.LOG_TAG, "Unable to get text from part", e);
+            }
             if (t == null) {
                 t = "";
             } else if (viewable instanceof Text) {
@@ -268,7 +277,12 @@ public class MessageViewInfoExtractor {
             Part part = ((Textual)viewable).getPart();
             addTextDivider(text, part, prependDivider);
 
-            String t = MessageExtractor.getTextFromPart(part);
+            String t = null;
+            try {
+                t = MessageExtractor.getTextFromPart(part);
+            } catch (Exception e) {
+                Log.w(K9.LOG_TAG, "Unable to get text from part", e);
+            }
             if (t == null) {
                 t = "";
             } else if (viewable instanceof Html) {

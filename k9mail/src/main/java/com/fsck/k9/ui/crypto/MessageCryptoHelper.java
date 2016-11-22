@@ -584,7 +584,12 @@ public class MessageCryptoHelper {
                         Body encryptionPayloadBody = encryptionPayloadPart.getBody();
                         encryptionPayloadBody.writeTo(os);
                     } else if (cryptoPartType == CryptoPartType.PGP_INLINE) {
-                        String text = MessageExtractor.getTextFromPart(part);
+                        String text;
+                        try {
+                            text = MessageExtractor.getTextFromPart(part);
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
                         os.write(text.getBytes());
                     } else {
                         throw new IllegalStateException("part to stream must be encrypted or inline!");
@@ -659,14 +664,11 @@ public class MessageCryptoHelper {
                 try {
                     Part part = currentCryptoPart.part;
                     CryptoPartType cryptoPartType = currentCryptoPart.type;
-                    if (cryptoPartType == CryptoPartType.PGP_ENCRYPTED) {
+                    if (cryptoPartType == CryptoPartType.SMIME_ENCRYPTED) {
                         Multipart multipartEncryptedMultipart = (Multipart) part.getBody();
                         BodyPart encryptionPayloadPart = multipartEncryptedMultipart.getBodyPart(1);
                         Body encryptionPayloadBody = encryptionPayloadPart.getBody();
                         encryptionPayloadBody.writeTo(os);
-                    } else if (cryptoPartType == CryptoPartType.PGP_INLINE) {
-                        String text = MessageExtractor.getTextFromPart(part);
-                        os.write(text.getBytes());
                     } else {
                         throw new IllegalStateException("part to stream must be encrypted or inline!");
                     }
@@ -1051,7 +1053,7 @@ public class MessageCryptoHelper {
                 return NO_REPLACEMENT_PART;
             }
             return new MimeBodyPart(new TextBody(replacementText), "text/plain");
-        } catch (MessagingException e) {
+        } catch (Exception e) {
             Log.e(K9.LOG_TAG, "failed to create clearsigned text replacement part", e);
             return NO_REPLACEMENT_PART;
         }

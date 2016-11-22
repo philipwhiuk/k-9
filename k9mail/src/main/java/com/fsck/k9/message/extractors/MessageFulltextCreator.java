@@ -5,9 +5,13 @@ import android.support.annotation.NonNull;
 
 import com.fsck.k9.helper.HtmlConverter;
 import com.fsck.k9.mail.Message;
+import com.fsck.k9.mail.MessagingException;
 import com.fsck.k9.mail.Part;
 import com.fsck.k9.mail.internet.MessageExtractor;
 import com.fsck.k9.mail.internet.MimeUtility;
+import com.fsck.k9.mail.internet.UnsupportedContentTransferEncodingException;
+
+import java.io.IOException;
 
 
 public class MessageFulltextCreator {
@@ -29,7 +33,8 @@ public class MessageFulltextCreator {
         return new MessageFulltextCreator(textPartFinder, encryptionDetector);
     }
 
-    public String createFulltext(@NonNull Message message) {
+    public String createFulltext(@NonNull Message message)
+            throws MessagingException, IOException, UnsupportedContentTransferEncodingException {
         if (encryptionDetector.isEncrypted(message)) {
             return null;
         }
@@ -37,7 +42,8 @@ public class MessageFulltextCreator {
         return extractText(message);
     }
 
-    private String extractText(Message message) {
+    private String extractText(Message message)
+            throws MessagingException, IOException, UnsupportedContentTransferEncodingException {
         Part textPart = textPartFinder.findFirstTextPart(message);
         if (textPart == null || hasEmptyBody(textPart)) {
             return null;

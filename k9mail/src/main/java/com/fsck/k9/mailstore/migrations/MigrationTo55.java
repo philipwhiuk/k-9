@@ -40,7 +40,12 @@ public class MigrationTo55 {
                     localMessages.remove();
 
                     folder.fetch(Collections.singletonList(localMessage), fp, null);
-                    String fulltext = fulltextCreator.createFulltext(localMessage);
+                    String fulltext = null;
+                    try {
+                        fulltext = fulltextCreator.createFulltext(localMessage);
+                    } catch (Exception e) {
+                        Log.e(K9.LOG_TAG, "Error fetching full text from message", e);
+                    }
                     if (!TextUtils.isEmpty(fulltext)) {
                         Log.d(K9.LOG_TAG, "fulltext for msg id " + localMessage.getId() + " is " + fulltext.length() + " chars long");
                         cv.clear();

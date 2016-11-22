@@ -29,13 +29,11 @@ public class MessageExtractorTest {
         part = new MimeBodyPart();
     }
 
-    @Test
-    public void getTextFromPart_withNoBody_shouldReturnNull() throws Exception {
+    @Test(expected = MessagingException.class)
+    public void getTextFromPart_withNoBody_shouldThrowException() throws Exception {
         part.setBody(null);
 
-        String result = MessageExtractor.getTextFromPart(part);
-
-        assertNull(result);
+        MessageExtractor.getTextFromPart(part);
     }
 
     @Test
@@ -49,36 +47,32 @@ public class MessageExtractorTest {
         assertEquals("Sample text body", result);
     }
 
-    @Test
-    public void getTextFromPart_withRawDataBodyWithNonText_shouldReturnNull() throws Exception {
+    @Test(expected = MessagingException.class)
+    public void getTextFromPart_withRawDataBodyWithNonText_shouldThrowException() throws Exception {
         part.setHeader(MimeHeader.HEADER_CONTENT_TYPE, "image/jpeg");
         BinaryMemoryBody body = new BinaryMemoryBody("Sample text body".getBytes(), MimeUtil.ENC_8BIT);
         part.setBody(body);
 
-        String result = MessageExtractor.getTextFromPart(part);
-
-        assertNull(result);
+        MessageExtractor.getTextFromPart(part);
     }
 
-    @Test
-    public void getTextFromPart_withExceptionThrownGettingInputStream_shouldReturnNull() throws Exception {
+    @Test(expected = MessagingException.class)
+    public void getTextFromPart_withExceptionThrownGettingInputStream_shouldThrowException() throws Exception {
         part.setHeader(MimeHeader.HEADER_CONTENT_TYPE, "text/html");
         Body body = mock(Body.class);
         when(body.getInputStream()).thenThrow(new MessagingException("Test"));
         part.setBody(body);
 
-        String result = MessageExtractor.getTextFromPart(part);
-
-        assertNull(result);
+        MessageExtractor.getTextFromPart(part);
     }
 
-    @Test
-    public void getTextFromPart_withUnknownEncoding_shouldReturnNull() throws Exception {
+    @Test(expected = UnsupportedContentTransferEncodingException.class)
+    public void getTextFromPart_withUnknownEncoding_shouldThrowException() throws Exception {
         part.setHeader(MimeHeader.HEADER_CONTENT_TYPE, "text/plain");
         BinaryMemoryBody body = new BinaryMemoryBody("Sample text body".getBytes(), "unknown encoding");
         part.setBody(body);
 
-        assertNull(MessageExtractor.getTextFromPart(part));
+        MessageExtractor.getTextFromPart(part);
     }
 
     @Test

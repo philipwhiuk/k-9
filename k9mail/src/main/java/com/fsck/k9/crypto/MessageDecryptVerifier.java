@@ -19,6 +19,7 @@ import com.fsck.k9.mail.Part;
 import com.fsck.k9.mail.internet.MessageExtractor;
 import com.fsck.k9.mail.internet.MimeBodyPart;
 import com.fsck.k9.mail.internet.MimeUtility;
+import com.fsck.k9.mail.internet.UnsupportedContentTransferEncodingException;
 import com.fsck.k9.mailstore.CryptoResultAnnotation;
 import com.fsck.k9.ui.crypto.MessageCryptoAnnotations;
 
@@ -191,7 +192,12 @@ public class MessageDecryptVerifier {
         if (!part.isMimeType(CryptoMimeTypes.TEXT_PLAIN) && !part.isMimeType(CryptoMimeTypes.APPLICATION_PGP)) {
             return false;
         }
-        String text = MessageExtractor.getTextFromPart(part, TEXT_LENGTH_FOR_INLINE_CHECK);
+        String text = null;
+        try {
+            text = MessageExtractor.getTextFromPart(part, TEXT_LENGTH_FOR_INLINE_CHECK);
+        } catch (MessagingException | IOException | UnsupportedContentTransferEncodingException e) {
+            return false;
+        }
         return !TextUtils.isEmpty(text) &&
                 (text.startsWith(PGP_INLINE_START_MARKER) || text.startsWith(PGP_INLINE_SIGNED_START_MARKER));
     }
@@ -203,8 +209,12 @@ public class MessageDecryptVerifier {
         if (!part.isMimeType(CryptoMimeTypes.TEXT_PLAIN) && !part.isMimeType(CryptoMimeTypes.APPLICATION_PGP)) {
             return false;
         }
-        String text = MessageExtractor.getTextFromPart(part, TEXT_LENGTH_FOR_INLINE_CHECK);
-        return !TextUtils.isEmpty(text) && text.startsWith(PGP_INLINE_START_MARKER);
+        try {
+            String text = MessageExtractor.getTextFromPart(part, TEXT_LENGTH_FOR_INLINE_CHECK);
+            return !TextUtils.isEmpty(text) && text.startsWith(PGP_INLINE_START_MARKER);
+        } catch (MessagingException | IOException | UnsupportedContentTransferEncodingException e) {
+            return false;
+        }
     }
 
     // TODO also guess by mime-type of contained part?

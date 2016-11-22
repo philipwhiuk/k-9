@@ -342,7 +342,11 @@ public class QuotedMessageHelper {
                 if (K9.DEBUG) {
                     Log.d(K9.LOG_TAG, "getBodyTextFromMessage: HTML requested, HTML found.");
                 }
-                return MessageExtractor.getTextFromPart(part);
+                try {
+                    return MessageExtractor.getTextFromPart(part);
+                } catch (Exception e) {
+                    Log.w(K9.LOG_TAG, "getBodyTextFromMessage: Unable to get text from HTML part.", e);
+                }
             }
 
             part = MimeUtility.findFirstPartByMimeType(messagePart, "text/plain");
@@ -350,8 +354,12 @@ public class QuotedMessageHelper {
                 if (K9.DEBUG) {
                     Log.d(K9.LOG_TAG, "getBodyTextFromMessage: HTML requested, text found.");
                 }
-                String text = MessageExtractor.getTextFromPart(part);
-                return HtmlConverter.textToHtml(text);
+                try {
+                    String text =  MessageExtractor.getTextFromPart(part);
+                    return HtmlConverter.textToHtml(text);
+                } catch (Exception e) {
+                    Log.w(K9.LOG_TAG, "getBodyTextFromMessage: Unable to get text from HTML part.", e);
+                }
             }
         } else if (format == SimpleMessageFormat.TEXT) {
             // Text takes precedence, then html.
@@ -360,7 +368,11 @@ public class QuotedMessageHelper {
                 if (K9.DEBUG) {
                     Log.d(K9.LOG_TAG, "getBodyTextFromMessage: Text requested, text found.");
                 }
-                return MessageExtractor.getTextFromPart(part);
+                try {
+                    return MessageExtractor.getTextFromPart(part);
+                } catch (Exception e) {
+                    Log.w(K9.LOG_TAG, "getBodyTextFromMessage: Unable to get text from plain-text part.", e);
+                }
             }
 
             part = MimeUtility.findFirstPartByMimeType(messagePart, "text/html");
@@ -368,8 +380,12 @@ public class QuotedMessageHelper {
                 if (K9.DEBUG) {
                     Log.d(K9.LOG_TAG, "getBodyTextFromMessage: Text requested, HTML found.");
                 }
-                String text = MessageExtractor.getTextFromPart(part);
-                return HtmlConverter.htmlToText(text);
+                try {
+                    String text =  MessageExtractor.getTextFromPart(part);
+                    return HtmlConverter.htmlToText(text);
+                } catch (Exception e) {
+                    Log.w(K9.LOG_TAG, "getBodyTextFromMessage: Unable to get text from HTML part.", e);
+                }
             }
         }
 

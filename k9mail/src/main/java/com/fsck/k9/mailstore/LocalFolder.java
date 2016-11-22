@@ -8,6 +8,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -54,6 +55,7 @@ import com.fsck.k9.mail.internet.MimeMessage;
 import com.fsck.k9.mail.internet.MimeMultipart;
 import com.fsck.k9.mail.internet.MimeUtility;
 import com.fsck.k9.mail.internet.SizeAware;
+import com.fsck.k9.mail.internet.UnsupportedContentTransferEncodingException;
 import com.fsck.k9.mail.message.MessageHeaderParser;
 import com.fsck.k9.mailstore.LockableDatabase.DbCallback;
 import com.fsck.k9.mailstore.LockableDatabase.WrappedException;
@@ -1253,7 +1255,17 @@ public class LocalFolder extends Folder<LocalMessage> implements Serializable {
             DatabasePreviewType databasePreviewType = DatabasePreviewType.fromPreviewType(previewType);
 
             MessageFulltextCreator fulltextCreator = localStore.getMessageFulltextCreator();
-            String fulltext = fulltextCreator.createFulltext(message);
+            String fulltext = null;
+            String error = null;
+            try {
+                fulltext = fulltextCreator.createFulltext(message);
+            } catch (MessagingException | IOException | UnsupportedContentTransferEncodingException e) {
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                ObjectOutputStream oos = new ObjectOutputStream(baos);
+                oos.writeObject(e);
+                oos.flush();
+                error = baos.toString();
+            }
 
             AttachmentCounter attachmentCounter = localStore.getAttachmentCounter();
             int attachmentCount = attachmentCounter.getAttachmentCount(message);
@@ -1322,6 +1334,14 @@ public class LocalFolder extends Folder<LocalMessage> implements Serializable {
                 cv.put("fulltext", fulltext);
                 db.replace("messages_fulltext", null, cv);
             }
+
+            if (error != null) {
+                cv.clear();
+                cv.put("docid", msgId);
+                cv.put("error", error);
+                db.replace("messages_error", null, cv);
+            }
+
         } catch (Exception e) {
             throw new MessagingException("Error appending message: " + message.getSubject(), e);
         }

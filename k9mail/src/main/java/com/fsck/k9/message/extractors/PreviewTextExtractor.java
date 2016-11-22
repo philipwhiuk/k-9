@@ -4,8 +4,12 @@ package com.fsck.k9.message.extractors;
 import android.support.annotation.NonNull;
 
 import com.fsck.k9.helper.HtmlConverter;
+import com.fsck.k9.mail.MessagingException;
 import com.fsck.k9.mail.Part;
 import com.fsck.k9.mail.internet.MessageExtractor;
+import com.fsck.k9.mail.internet.UnsupportedContentTransferEncodingException;
+
+import java.io.IOException;
 
 import static com.fsck.k9.mail.internet.MimeUtility.isSameMimeType;
 
@@ -17,14 +21,15 @@ class PreviewTextExtractor {
 
     @NonNull
     public String extractPreview(@NonNull Part textPart) throws PreviewExtractionException {
-        String text = MessageExtractor.getTextFromPart(textPart, MAX_CHARACTERS_CHECKED_FOR_PREVIEW);
-        if (text == null) {
-            throw new PreviewExtractionException("Couldn't get text from part");
+        try {
+            String text = MessageExtractor.getTextFromPart(textPart, MAX_CHARACTERS_CHECKED_FOR_PREVIEW);
+
+            String plainText = convertFromHtmlIfNecessary(textPart, text);
+
+            return stripTextForPreview(plainText);
+        } catch (MessagingException | IOException | UnsupportedContentTransferEncodingException e) {
+            throw new PreviewExtractionException("Couldn't get text from part", e);
         }
-
-        String plainText = convertFromHtmlIfNecessary(textPart, text);
-
-        return stripTextForPreview(plainText);
     }
 
     private String convertFromHtmlIfNecessary(Part textPart, String text) {

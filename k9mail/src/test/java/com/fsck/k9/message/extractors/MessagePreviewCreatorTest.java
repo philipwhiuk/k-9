@@ -4,6 +4,7 @@ package com.fsck.k9.message.extractors;
 import com.fsck.k9.mail.Message;
 import com.fsck.k9.mail.Part;
 import com.fsck.k9.mail.internet.MimeMessage;
+import com.fsck.k9.mail.internet.UnsupportedContentTransferEncodingException;
 import com.fsck.k9.message.extractors.PreviewResult.PreviewType;
 import org.junit.Before;
 import org.junit.Test;
@@ -94,7 +95,9 @@ public class MessagePreviewCreatorTest {
         Part textPart = createTextPart("text/plain");
         when(encryptionDetector.isEncrypted(message)).thenReturn(false);
         when(textPartFinder.findFirstTextPart(message)).thenReturn(textPart);
-        when(previewTextExtractor.extractPreview(textPart)).thenThrow(new PreviewExtractionException(""));
+        when(previewTextExtractor.extractPreview(textPart)).thenThrow(
+                new PreviewExtractionException("",
+                        new UnsupportedContentTransferEncodingException("utf-8")));
 
         PreviewResult result = previewCreator.createPreview(message);
 

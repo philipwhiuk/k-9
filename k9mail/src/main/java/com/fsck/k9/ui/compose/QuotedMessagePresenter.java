@@ -245,7 +245,15 @@ public class QuotedMessagePresenter {
             Part part = MimeUtility.findFirstPartByMimeType(messageViewInfo.message, "text/html");
             if (part != null) { // Shouldn't happen if we were the one who saved it.
                 quotedTextFormat = SimpleMessageFormat.HTML;
-                String text = MessageExtractor.getTextFromPart(part);
+                String text;
+                try {
+                    text = MessageExtractor.getTextFromPart(part);
+                } catch (Exception e) {
+                    if (e instanceof RuntimeException) {
+                        throw (RuntimeException) e;
+                    }
+                    throw new RuntimeException(e);
+                }
                 if (K9.DEBUG) {
                     Log.d(K9.LOG_TAG, "Loading message with offset " + bodyOffset + ", length " + bodyLength +
                             ". Text length is " + text.length() + ".");
@@ -313,8 +321,13 @@ public class QuotedMessagePresenter {
         if (textPart == null) {
             return;
         }
+        String messageText;
 
-        String messageText = MessageExtractor.getTextFromPart(textPart);
+        try {
+            messageText = MessageExtractor.getTextFromPart(textPart);
+        } catch (Exception e) {
+            return;
+        }
         if (K9.DEBUG) {
             Log.d(K9.LOG_TAG, "Loading message with offset " + bodyOffset + ", length " + bodyLength +
                     ". Text length is " + messageText.length() + ".");
