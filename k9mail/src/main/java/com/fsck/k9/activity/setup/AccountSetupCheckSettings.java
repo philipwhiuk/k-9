@@ -133,21 +133,8 @@ public class AccountSetupCheckSettings extends K9Activity implements OnClickList
                 if (mDestroyed) {
                     return;
                 }
-                String exMessage = "Unknown Error";
 
-                if (ex != null) {
-                    if (ex.getCause() != null) {
-                        if (ex.getCause().getCause() != null) {
-                            exMessage = ex.getCause().getCause().getMessage();
-
-                        } else {
-                            exMessage = ex.getCause().getMessage();
-                        }
-                    } else {
-                        exMessage = ex.getMessage();
-                    }
-                }
-
+                String exMessage = buildExceptionMessage(ex);
                 mProgressBar.setIndeterminate(false);
                 StringBuilder chainInfo = new StringBuilder(100);
                 MessageDigest sha1 = null;
@@ -272,6 +259,24 @@ public class AccountSetupCheckSettings extends K9Activity implements OnClickList
                 .show();
             }
         });
+    }
+
+    private String buildExceptionMessage(CertificateValidationException ex) {
+        String exMessage = "Unknown Error";
+
+        if (ex != null) {
+            if (ex.getCause() != null) {
+                if (ex.getCause().getCause() != null) {
+                    exMessage = ex.getCause().getCause().getMessage();
+
+                } else {
+                    exMessage = ex.getCause().getMessage();
+                }
+            } else {
+                exMessage = ex.getMessage();
+            }
+        }
+        return exMessage;
     }
 
     /**
