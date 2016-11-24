@@ -44,6 +44,14 @@ public class ActivityListener extends MessagingListener {
                 return context.getString(R.string.status_next_poll,
                         DateUtils.getRelativeTimeSpanString(nextPollTime, System.currentTimeMillis(),
                                 DateUtils.MINUTE_IN_MILLIS, 0));
+            } else if (MailService.hasNoConnectivity()) {
+                return context.getString(R.string.status_no_network);
+            } else if (MailService.isSyncNoBackground()) {
+                return context.getString(R.string.status_no_background);
+            } else if (MailService.isSyncBlocked()) {
+                return context.getString(R.string.status_syncing_blocked);
+            } else if (MailService.isPollAndPushDisabled()) {
+                return context.getString(R.string.status_poll_and_push_disabled);
             } else if (MailService.isSyncDisabled()) {
                 return context.getString(R.string.status_syncing_off);
             } else {
