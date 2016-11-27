@@ -76,7 +76,7 @@ public class ActivityListenerTest {
 
         String operation = activityListener.getOperation(context);
 
-        assertEquals("Syncing disabled", operation);
+        assertEquals("Polling and pushing disabled", operation);
     }
 
     @Test
@@ -86,7 +86,7 @@ public class ActivityListenerTest {
 
         String operation = activityListener.getOperation(context);
 
-        assertEquals("Syncing disabled", operation);
+        assertEquals("Polling and pushing disabled", operation);
     }
 
     @Test
