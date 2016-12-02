@@ -10,6 +10,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.SynchronousQueue;
 
 import android.app.Application;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -21,6 +22,7 @@ import android.net.Uri;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.PowerManager;
 import android.os.StrictMode;
 import android.text.format.Time;
 import android.util.Log;
@@ -396,10 +398,10 @@ public class K9 extends Application {
      */
     protected void registerReceivers() {
         final StorageGoneReceiver receiver = new StorageGoneReceiver();
-        final IntentFilter filter = new IntentFilter();
-        filter.addAction(Intent.ACTION_MEDIA_EJECT);
-        filter.addAction(Intent.ACTION_MEDIA_UNMOUNTED);
-        filter.addDataScheme("file");
+        final IntentFilter mediaFilter = new IntentFilter();
+        mediaFilter.addAction(Intent.ACTION_MEDIA_EJECT);
+        mediaFilter.addAction(Intent.ACTION_MEDIA_UNMOUNTED);
+        mediaFilter.addDataScheme("file");
 
         final BlockingQueue<Handler> queue = new SynchronousQueue<Handler>();
 
@@ -420,7 +422,7 @@ public class K9 extends Application {
 
         try {
             final Handler storageGoneHandler = queue.take();
-            registerReceiver(receiver, filter, null, storageGoneHandler);
+            registerReceiver(receiver, mediaFilter, null, storageGoneHandler);
             Log.i(K9.LOG_TAG, "Registered: unmount receiver");
         } catch (InterruptedException e) {
             Log.e(K9.LOG_TAG, "Unable to register unmount receiver", e);
@@ -428,6 +430,19 @@ public class K9 extends Application {
 
         registerReceiver(new ShutdownReceiver(), new IntentFilter(Intent.ACTION_SHUTDOWN));
         Log.i(K9.LOG_TAG, "Registered: shutdown receiver");
+
+        IntentFilter powerFilter = new IntentFilter();
+        powerFilter.addAction(PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED);
+        powerFilter.addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED);
+
+        registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                //TODO: Handle power intent
+                Log.i(K9.LOG_TAG, "PowerReceiver.onReceive" + intent);
+            }
+        }, powerFilter);
+        Log.i(K9.LOG_TAG, "Registered: power event receiver");
     }
 
     public static void save(StorageEditor editor) {

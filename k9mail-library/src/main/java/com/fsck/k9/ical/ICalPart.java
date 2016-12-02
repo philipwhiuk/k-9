@@ -1,5 +1,7 @@
 package com.fsck.k9.ical;
 
+import android.support.annotation.NonNull;
+
 import com.fsck.k9.mail.Address;
 import com.fsck.k9.mail.MessagingException;
 import com.fsck.k9.mail.Part;
@@ -27,7 +29,7 @@ import biweekly.property.RecurrenceRule;
 public class ICalPart {
     private final Part underlyingPart;
 
-    public ICalPart(Part part) {
+    public ICalPart(@NonNull Part part) {
         this.underlyingPart = part;
     }
 

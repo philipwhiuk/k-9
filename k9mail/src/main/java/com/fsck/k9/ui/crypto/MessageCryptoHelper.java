@@ -1044,7 +1044,7 @@ public class MessageCryptoHelper {
         return replacementPart;
     }
 
-    private static MimeBodyPart extractClearsignedTextReplacementPart(Part part) {
+    private static MimeBodyPart extractClearsignedTextReplacementPart(@NonNull Part part) {
         try {
             String clearsignedText = MessageExtractor.getTextFromPart(part);
             String replacementText = OpenPgpUtils.extractClearsignedMessage(clearsignedText);

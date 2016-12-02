@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.Uri;
+import android.os.PowerManager;
 import android.util.Log;
 
 import com.fsck.k9.K9;
@@ -47,6 +48,7 @@ public class BootReceiver extends CoreReceiver {
                 MailService.actionReset(context, tmpWakeLockId);
                 tmpWakeLockId = null;
             }
+
         } else if (FIRE_INTENT.equals(action)) {
             Intent alarmedIntent = intent.getParcelableExtra(ALARMED_INTENT);
             String alarmedAction = alarmedIntent.getAction();

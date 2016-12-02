@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
@@ -188,7 +189,7 @@ public class MessageDecryptVerifier {
         return isPgpEncrypted || isPgpSigned;
     }
 
-    private static boolean isPartPgpInlineEncryptedOrSigned(Part part) {
+    private static boolean isPartPgpInlineEncryptedOrSigned(@NonNull Part part) {
         if (!part.isMimeType(CryptoMimeTypes.TEXT_PLAIN) && !part.isMimeType(CryptoMimeTypes.APPLICATION_PGP)) {
             return false;
         }

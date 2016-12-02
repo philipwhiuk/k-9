@@ -35,6 +35,7 @@ import com.fsck.k9.helper.Contacts;
 import com.fsck.k9.helper.HtmlConverter;
 import com.fsck.k9.helper.Utility;
 import com.fsck.k9.mail.Address;
+import com.fsck.k9.mail.K9MailLib;
 import com.fsck.k9.mailstore.AttachmentResolver;
 import com.fsck.k9.mailstore.AttachmentViewInfo;
 import com.fsck.k9.mailstore.ICalendarViewInfo;
@@ -460,29 +461,33 @@ public class MessageContainerView extends LinearLayout implements OnLayoutChange
     public void renderCalendarEvents(MessageViewInfo messageViewInfo) {
         if (messageViewInfo.iCalendarEvents != null) {
             for (ICalendarViewInfo iCalendar : messageViewInfo.iCalendarEvents) {
-                ICalendarView view;
-                switch(iCalendar.iCalData.getMethod().getValue()) {
-                    case "PUBLISH":
-                        view = (ICalendarPublishView) mInflater
-                                .inflate(R.layout.message_view_ical_publish, mCalendars, false);
-                        break;
-                    case "REQUEST":
-                        view = (ICalendarRequestView) mInflater
-                                .inflate(R.layout.message_view_ical_request, mCalendars, false);
-                        break;
-                    case "REPLY":
-                        view = (ICalendarReplyView) mInflater
-                                .inflate(R.layout.message_view_ical_reply, mCalendars, false);
-                        break;
-                    default:
-                        Log.i(K9.LOG_TAG, "Unhandled iCalendar method type:"
-                                + iCalendar.iCalData.getMethod().getValue());
-                        continue;
+                if (iCalendar.iCalData != null) {
+                    ICalendarView view;
+                    switch (iCalendar.iCalData.getMethod().getValue()) {
+                        case "PUBLISH":
+                            view = (ICalendarPublishView) mInflater
+                                    .inflate(R.layout.message_view_ical_publish, mCalendars, false);
+                            break;
+                        case "REQUEST":
+                            view = (ICalendarRequestView) mInflater
+                                    .inflate(R.layout.message_view_ical_request, mCalendars, false);
+                            break;
+                        case "REPLY":
+                            view = (ICalendarReplyView) mInflater
+                                    .inflate(R.layout.message_view_ical_reply, mCalendars, false);
+                            break;
+                        default:
+                            Log.i(K9.LOG_TAG, "Unhandled iCalendar method type:"
+                                    + iCalendar.iCalData.getMethod().getValue());
+                            continue;
+                    }
+                    view.setCallback(iCalendarCallback);
+                    view.setICalendar(iCalendar);
+                    view.setShowSummary(subject == null || !subject.equals(iCalendar.iCalData.getSummary()));
+                    mCalendars.addView(view);
+                } else {
+                    Log.w(K9.LOG_TAG, "Empty iCalData");
                 }
-                view.setCallback(iCalendarCallback);
-                view.setICalendar(iCalendar);
-                view.setShowSummary(subject == null || !subject.equals(iCalendar.iCalData.getSummary()));
-                mCalendars.addView(view);
             }
         }
     }

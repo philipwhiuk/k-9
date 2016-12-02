@@ -41,14 +41,14 @@ public class MessageExtractor {
 
     private MessageExtractor() {}
 
-    public static String getTextFromPart(Part part)
+    public static String getTextFromPart(@NonNull Part part)
             throws MessagingException, IOException, UnsupportedContentTransferEncodingException {
         return getTextFromPart(part, NO_TEXT_SIZE_LIMIT);
     }
 
-    public static String getTextFromPart(Part part, long textSizeLimit)
+    public static String getTextFromPart(@NonNull Part part, long textSizeLimit)
             throws MessagingException, IOException, UnsupportedContentTransferEncodingException {
-        if ((part != null) && (part.getBody() != null)) {
+        if (part.getBody() != null) {
             final Body body = part.getBody();
             if (body instanceof TextBody) {
                 return ((TextBody) body).getRawText();
@@ -61,7 +61,7 @@ public class MessageExtractor {
                 throw new MessagingException("Provided non-text part: " + part);
             }
         } else {
-            throw new MessagingException("Provided invalid part: " + part);
+            return "";
         }
     }
 
