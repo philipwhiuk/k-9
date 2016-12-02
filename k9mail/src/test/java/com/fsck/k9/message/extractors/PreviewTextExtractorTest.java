@@ -28,7 +28,9 @@ public class PreviewTextExtractorTest {
     public void extractPreview_withEmptyBody_shouldThrow() throws Exception {
         Part part = new MimeBodyPart(null, "text/plain");
 
-        previewTextExtractor.extractPreview(part);
+        String preview = previewTextExtractor.extractPreview(part);
+
+        assertEquals("", preview);
     }
 
     @Test
