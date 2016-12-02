@@ -29,11 +29,13 @@ public class MessageExtractorTest {
         part = new MimeBodyPart();
     }
 
-    @Test(expected = MessagingException.class)
-    public void getTextFromPart_withNoBody_shouldThrowException() throws Exception {
+    @Test
+    public void getTextFromPart_withNoBody_shouldReturnEmptyString() throws Exception {
         part.setBody(null);
 
-        MessageExtractor.getTextFromPart(part);
+        String result = MessageExtractor.getTextFromPart(part);
+
+        assertEquals("", result);
     }
 
     @Test
