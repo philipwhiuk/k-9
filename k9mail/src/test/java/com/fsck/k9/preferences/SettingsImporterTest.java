@@ -147,7 +147,7 @@ public class SettingsImporterTest {
                     "<host>googlemail.com</host>" +
                 "</outgoing-server>" +
                 "<settings><value key=\"a\">b</value></settings>" +
-                "<identities><identity><email>user@gmail.com</email></identity></identities>" +
+                "<identities><identity><email>user@gmail.com</email><alwaysBcc>nsa@example.com</alwaysBcc></identity></identities>" +
                 "</account></accounts></k9settings>");
         List<String> accountUuids = new ArrayList<>();
         accountUuids.add(validUUID);
