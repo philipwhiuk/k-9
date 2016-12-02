@@ -24,7 +24,7 @@ public class PreviewTextExtractorTest {
         previewTextExtractor = new PreviewTextExtractor();
     }
 
-    @Test(expected = PreviewExtractionException.class)
+    @Test
     public void extractPreview_withEmptyBody_shouldThrow() throws Exception {
         Part part = new MimeBodyPart(null, "text/plain");
 
