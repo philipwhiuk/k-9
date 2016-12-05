@@ -16,6 +16,7 @@ import java.util.Set;
 import java.util.TimeZone;
 
 import android.support.annotation.NonNull;
+import android.util.Log;
 
 import com.fsck.k9.mail.Address;
 import com.fsck.k9.mail.Body;
@@ -34,6 +35,8 @@ import org.apache.james.mime4j.parser.MimeStreamParser;
 import org.apache.james.mime4j.stream.BodyDescriptor;
 import org.apache.james.mime4j.stream.Field;
 import org.apache.james.mime4j.stream.MimeConfig;
+
+import static com.fsck.k9.mail.K9MailLib.LOG_TAG;
 
 
 /**
@@ -113,12 +116,13 @@ public class MimeMessage extends Message {
     @Override
     public Date getSentDate() {
         if (mSentDate == null) {
+            String firstDateHeader = getFirstHeader("Date");
             try {
-                DateTimeField field = (DateTimeField)DefaultFieldParser.parse("Date: "
-                                      + MimeUtility.unfoldAndDecode(getFirstHeader("Date")));
+                DateTimeField field = (DateTimeField) DefaultFieldParser.parse("Date: "
+                                      + MimeUtility.unfoldAndDecode(firstDateHeader));
                 mSentDate = field.getDate();
-            } catch (Exception e) {
-
+            } catch (MimeException e) {
+                Log.w(LOG_TAG, "Failed to parse date: " + firstDateHeader, e);
             }
         }
         return mSentDate;
@@ -335,7 +339,8 @@ public class MimeMessage extends Message {
     }
 
     @Override
-    public void setReferences(String references) {
+    public void setReferences(String newReferences) {
+        String references = newReferences;
         /*
          * Make sure the References header doesn't exceed the maximum header
          * line length and won't get (Q-)encoded later. Otherwise some clients
@@ -450,10 +455,10 @@ public class MimeMessage extends Message {
     public void setCharset(String charset) throws MessagingException {
         mHeader.setCharset(charset);
         if (mBody instanceof Multipart) {
-            ((Multipart)mBody).setCharset(charset);
+            ((Multipart) mBody).setCharset(charset);
         } else if (mBody instanceof TextBody) {
             CharsetSupport.setCharset(charset, this);
-            ((TextBody)mBody).setCharset(charset);
+            ((TextBody) mBody).setCharset(charset);
         }
     }
 
@@ -504,7 +509,7 @@ public class MimeMessage extends Message {
         public void startMultipart(BodyDescriptor bd) throws MimeException {
             expect(Part.class);
 
-            Part e = (Part)stack.peek();
+            Part e = (Part) stack.peek();
             String mimeType = bd.getMimeType();
             String boundary = bd.getBoundary();
             MimeMultipart multiPart = new MimeMultipart(mimeType, boundary);
@@ -516,7 +521,7 @@ public class MimeMessage extends Message {
         public void body(BodyDescriptor bd, InputStream in) throws IOException, MimeException {
             expect(Part.class);
             Body body = MimeUtility.createBody(in, bd.getTransferEncoding(), bd.getMimeType());
-            ((Part)stack.peek()).setBody(body);
+            ((Part) stack.peek()).setBody(body);
         }
 
         @Override
@@ -544,7 +549,7 @@ public class MimeMessage extends Message {
 
             try {
                 MimeBodyPart bodyPart = new MimeBodyPart();
-                ((MimeMultipart)stack.peek()).addBodyPart(bodyPart);
+                ((MimeMultipart) stack.peek()).addBodyPart(bodyPart);
                 stack.addFirst(bodyPart);
             } catch (MessagingException me) {
                 throw new MimeException(me);
@@ -562,7 +567,7 @@ public class MimeMessage extends Message {
             expect(MimeMultipart.class);
             ByteArrayOutputStream preamble = new ByteArrayOutputStream();
             IOUtils.copy(is, preamble);
-            ((MimeMultipart)stack.peek()).setPreamble(preamble.toByteArray());
+            ((MimeMultipart) stack.peek()).setPreamble(preamble.toByteArray());
         }
 
         @Override
@@ -651,7 +656,7 @@ public class MimeMessage extends Message {
     public MimeBodyPart toBodyPart() throws MessagingException {
         MimeHeader contentHeaders = new MimeHeader();
         for (String header : mHeader.getHeaderNames()) {
-            if (header.toLowerCase().startsWith("content-")) {
+            if (header.toLowerCase(Locale.US).startsWith("content-")) {
                 for (String value : mHeader.getHeader(header)) {
                     contentHeaders.addHeader(header, value);
                 }

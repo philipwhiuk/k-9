@@ -20,8 +20,9 @@ public class XOAuth2ChallengeParser {
     public static boolean shouldRetry(String response, String host) {
         String decodedResponse = Base64.decode(response);
 
-        if (K9MailLib.isDebug())
-            Log.v(LOG_TAG, "Challenge response: "+ decodedResponse);
+        if (K9MailLib.isDebug()) {
+            Log.v(LOG_TAG, "Challenge response: " + decodedResponse);
+        }
 
         try {
             JSONObject json = new JSONObject(decodedResponse);

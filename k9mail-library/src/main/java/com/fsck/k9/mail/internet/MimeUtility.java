@@ -922,11 +922,12 @@ public class MimeUtility {
      * field the entire field is returned. Otherwise the named parameter is
      * searched for in a case insensitive fashion and returned.
      *
-     * @param headerValue the header value
+     * @param headerValueToFind the header value
      * @param parameterName the parameter name
      * @return the value. if the parameter cannot be found the method returns null.
      */
-    public static String getHeaderParameter(String headerValue, String parameterName) {
+    public static String getHeaderParameter(String headerValueToFind, String parameterName) {
+        String headerValue = headerValueToFind;
         if (headerValue == null) {
             return null;
         }
@@ -955,7 +956,7 @@ public class MimeUtility {
 
     public static Part findFirstPartByMimeType(Part part, String mimeType) {
         if (part.getBody() instanceof Multipart) {
-            Multipart multipart = (Multipart)part.getBody();
+            Multipart multipart = (Multipart) part.getBody();
             for (BodyPart bodyPart : multipart.getBodyParts()) {
                 Part ret = MimeUtility.findFirstPartByMimeType(bodyPart, mimeType);
                 if (ret != null) {
@@ -984,8 +985,9 @@ public class MimeUtility {
         return isSameMimeType(mimeType, DEFAULT_ATTACHMENT_MIME_TYPE);
     }
 
-    public static Body createBody(InputStream in, String contentTransferEncoding, String contentType)
+    public static Body createBody(InputStream in, String optionalContentTransferEncoding, String contentType)
             throws IOException {
+        String contentTransferEncoding = optionalContentTransferEncoding;
 
         if (contentTransferEncoding != null) {
             contentTransferEncoding = MimeUtility.getHeaderParameter(contentTransferEncoding, null);

@@ -229,8 +229,11 @@ class WebDavFolder extends Folder<WebDavMessage> {
     }
 
     @Override
-    public List<WebDavMessage> getMessages(int start, int end, Date earliestDate, MessageRetrievalListener<WebDavMessage> listener)
+    public List<WebDavMessage> getMessages(int requestedStart, int requestedEnd, Date earliestDate,
+                                           MessageRetrievalListener<WebDavMessage> listener)
             throws MessagingException {
+        int start = requestedStart;
+        int end = requestedEnd;
         List<WebDavMessage> messages = new ArrayList<WebDavMessage>();
         String[] uids;
         Map<String, String> headers = new HashMap<String, String>();

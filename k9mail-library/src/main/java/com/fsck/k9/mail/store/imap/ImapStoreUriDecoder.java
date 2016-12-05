@@ -1,14 +1,10 @@
 package com.fsck.k9.mail.store.imap;
 
-
-import android.text.TextUtils;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 
 import com.fsck.k9.mail.AuthType;
 import com.fsck.k9.mail.ConnectionSecurity;
-import com.fsck.k9.mail.ServerSettings;
 import com.fsck.k9.mail.ServerSettings.Type;
 
 import static com.fsck.k9.mail.helper.UrlEncodingHelper.decodeUtf8;
@@ -26,7 +22,7 @@ class ImapStoreUriDecoder {
      * </pre>
      *
      * NOTE: this method expects the userinfo part of the uri to be encoded twice, due to a bug in
-     * {@link ImapStoreUriCreator#create(ServerSettings)}.
+     * {@link ImapStoreUriCreator#create(com.fsck.k9.mail.ServerSettings)}.
      *
      * @param uri the store uri.
      */
@@ -88,7 +84,7 @@ class ImapStoreUriDecoder {
                 // Last field (password/certAlias) is empty.
                 // For imports e.g.: PLAIN:username: or username:
                 // Or XOAUTH2 where it's a valid config - XOAUTH:username:
-                if(userInfoParts.length > 1) {
+                if (userInfoParts.length > 1) {
                     authenticationType = AuthType.valueOf(userInfoParts[0]);
                     username = decodeUtf8(userInfoParts[1]);
                 } else {

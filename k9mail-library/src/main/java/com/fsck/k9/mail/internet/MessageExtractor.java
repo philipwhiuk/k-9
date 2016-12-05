@@ -12,7 +12,6 @@ import java.util.regex.Pattern;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
 import com.fsck.k9.ical.ICalParser;
 import com.fsck.k9.ical.ICalPart;
@@ -25,7 +24,6 @@ import com.fsck.k9.mail.Multipart;
 import com.fsck.k9.mail.Part;
 import org.apache.commons.io.input.BoundedInputStream;
 
-import static com.fsck.k9.mail.K9MailLib.LOG_TAG;
 import static com.fsck.k9.mail.internet.CharsetSupport.fixupCharset;
 import static com.fsck.k9.mail.internet.MimeUtility.getHeaderParameter;
 import static com.fsck.k9.mail.internet.MimeUtility.isSameMimeType;
@@ -39,7 +37,9 @@ public class MessageExtractor {
     public static final long NO_TEXT_SIZE_LIMIT = -1L;
 
 
-    private MessageExtractor() {}
+    private MessageExtractor() {
+
+    }
 
     public static String getTextFromPart(@NonNull Part part)
             throws MessagingException, IOException, UnsupportedContentTransferEncodingException {
@@ -84,7 +84,9 @@ public class MessageExtractor {
                 if (str.isEmpty()) {
                     return "";
                 }
-                Pattern p = Pattern.compile("<meta http-equiv=\"?Content-Type\"? content=\"text/html; charset=(.+?)\">", Pattern.CASE_INSENSITIVE);
+                Pattern p = Pattern.compile(
+                        "<meta http-equiv=\"?Content-Type\"? content=\"text/html; charset=(.+?)\">",
+                        Pattern.CASE_INSENSITIVE);
                 Matcher m = p.matcher(str);
                 if (m.find()) {
                     charset = m.group(1);
@@ -252,17 +254,21 @@ public class MessageExtractor {
         }
     }
 
-    private static Message getMessageFromPart(Part part) {
+    private static Message getMessageFromPart(Part providedPart) {
+        Part part = providedPart;
         while (part != null) {
-            if (part instanceof Message)
-                return (Message)part;
+            if (part instanceof Message) {
+                return (Message) part;
+            }
 
-            if (!(part instanceof BodyPart))
+            if (!(part instanceof BodyPart)) {
                 return null;
+            }
 
-            Multipart multipart = ((BodyPart)part).getParent();
-            if (multipart == null)
+            Multipart multipart = ((BodyPart) part).getParent();
+            if (multipart == null) {
                 return null;
+            }
 
             part = multipart.getParent();
         }
@@ -335,7 +341,8 @@ public class MessageExtractor {
      * @throws MessagingException In case of an error.
      */
     private static List<Viewable> findHtmlPart(Multipart multipart, Set<Part> knownTextParts,
-            @Nullable List<Part> outputNonViewableParts, @Nullable List<ICalPart> outputCalendarParts, boolean directChild) throws MessagingException {
+            @Nullable List<Part> outputNonViewableParts, @Nullable List<ICalPart> outputCalendarParts,
+            boolean directChild) throws MessagingException {
         boolean saveNonViewableParts = outputNonViewableParts != null;
         boolean saveCalendarParts = outputCalendarParts != null;
         List<Viewable> viewables = new ArrayList<>();

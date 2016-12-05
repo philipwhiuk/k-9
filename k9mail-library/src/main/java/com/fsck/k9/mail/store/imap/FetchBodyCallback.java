@@ -18,10 +18,10 @@ class FetchBodyCallback implements ImapResponseCallback {
 
     @Override
     public Object foundLiteral(ImapResponse response,
-                               FixedLengthInputStream literal) throws MessagingException, IOException {
+                               FixedLengthInputStream literal) throws IOException, MessagingException {
         if (response.getTag() == null &&
                 ImapResponseParser.equalsIgnoreCase(response.get(1), "FETCH")) {
-            ImapList fetchList = (ImapList)response.getKeyedValue("FETCH");
+            ImapList fetchList = (ImapList) response.getKeyedValue("FETCH");
             String uid = fetchList.getKeyedString("UID");
 
             ImapMessage message = (ImapMessage) mMessageMap.get(uid);

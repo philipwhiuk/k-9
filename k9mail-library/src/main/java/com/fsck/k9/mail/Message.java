@@ -48,18 +48,18 @@ public abstract class Message implements Part, Body {
         if (o == null || !(o instanceof Message)) {
             return false;
         }
-        Message other = (Message)o;
+        Message other = (Message) o;
         return (getUid().equals(other.getUid())
                 && getFolder().getName().equals(other.getFolder().getName()));
     }
 
     @Override
     public int hashCode() {
-        final int MULTIPLIER = 31;
+        final int multiplier = 31;
 
         int result = 1;
-        result = MULTIPLIER * result + mFolder.getName().hashCode();
-        result = MULTIPLIER * result + mUid.hashCode();
+        result = multiplier * result + mFolder.getName().hashCode();
+        result = multiplier * result + mUid.hashCode();
         return result;
     }
 
@@ -149,7 +149,9 @@ public abstract class Message implements Part, Body {
 
     public abstract int getSize();
 
-    public void delete(String trashFolderName) throws MessagingException {}
+    public void delete(String trashFolderName) throws MessagingException {
+
+    }
 
     /*
      * TODO Refactor Flags at some point to be able to store user defined flags.
@@ -190,7 +192,9 @@ public abstract class Message implements Part, Body {
     }
 
 
-    public void destroy() throws MessagingException {}
+    public void destroy() throws MessagingException {
+
+    }
 
     @Override
     public abstract void setEncoding(String encoding) throws MessagingException;
@@ -233,9 +237,7 @@ public abstract class Message implements Part, Body {
      * <p>
      * <strong>Note:</strong>
      * This method was introduced as a hack to prevent {@code ConcurrentModificationException}s. It
-     * shouldn't be used unless absolutely necessary. See the comment in
-     * {@link com.fsck.k9.activity.MessageView.Listener#loadMessageForViewHeadersAvailable(com.fsck.k9.Account, String, String, Message)}
-     * for more information.
+     * shouldn't be used unless absolutely necessary.
      * </p>
      */
     @Override

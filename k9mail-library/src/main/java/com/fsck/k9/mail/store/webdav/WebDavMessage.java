@@ -27,7 +27,8 @@ class WebDavMessage extends MimeMessage {
         this.mFolder = folder;
     }
 
-    public void setUrl(String url) {
+    public void setUrl(String newUrl) {
+        String url = newUrl;
         // TODO: This is a not as ugly hack (ie, it will actually work). But it's still horrible
         // XXX: prevent URLs from getting to us that are broken
         if (!(url.toLowerCase(Locale.US).contains("http"))) {

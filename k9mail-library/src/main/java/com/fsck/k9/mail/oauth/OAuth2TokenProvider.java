@@ -11,7 +11,7 @@ public interface OAuth2TokenProvider {
     /**
      * A default timeout value to use when fetching tokens.
      */
-    public static final int OAUTH2_TIMEOUT = 30000;
+    int OAUTH2_TIMEOUT = 30000;
 
     /**
      * @return Accounts suitable for OAuth 2.0 token provision.

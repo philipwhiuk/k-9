@@ -55,14 +55,15 @@ public abstract class Multipart implements Body {
     }
 
     public void setCharset(String charset) throws MessagingException {
-        if (mParts.isEmpty())
+        if (mParts.isEmpty()) {
             return;
+        }
 
         BodyPart part = mParts.get(0);
         Body body = part.getBody();
         if (body instanceof TextBody) {
             CharsetSupport.setCharset(charset, part);
-            ((TextBody)body).setCharset(charset);
+            ((TextBody) body).setCharset(charset);
         }
     }
 

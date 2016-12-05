@@ -2,13 +2,20 @@ package com.fsck.k9.mail.store.webdav;
 
 import android.util.Log;
 
-import com.fsck.k9.mail.*;
-import com.fsck.k9.mail.filter.Base64;
 import com.fsck.k9.mail.CertificateValidationException;
+import com.fsck.k9.mail.ConnectionSecurity;
+import com.fsck.k9.mail.Folder;
+import com.fsck.k9.mail.K9MailLib;
+import com.fsck.k9.mail.Message;
+import com.fsck.k9.mail.MessagingException;
+import com.fsck.k9.mail.ServerSettings;
+import com.fsck.k9.mail.filter.Base64;
 import com.fsck.k9.mail.store.RemoteStore;
 import com.fsck.k9.mail.store.StoreConfig;
 
-import org.apache.http.*;
+import org.apache.http.Header;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.protocol.ClientContext;
@@ -28,12 +35,20 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 import static com.fsck.k9.mail.K9MailLib.DEBUG_PROTOCOL_WEBDAV;
 import static com.fsck.k9.mail.K9MailLib.LOG_TAG;
@@ -323,16 +338,19 @@ public class WebDavStore extends RemoteStore {
         }
 
         folderName = getFolderName(specialFoldersMap.get(WebDavConstants.DAV_MAIL_DRAFTS_FOLDER));
-        if (folderName != null)
+        if (folderName != null) {
             mStoreConfig.setDraftsFolderName(folderName);
+        }
 
         folderName = getFolderName(specialFoldersMap.get(WebDavConstants.DAV_MAIL_TRASH_FOLDER));
-        if (folderName != null)
+        if (folderName != null) {
             mStoreConfig.setTrashFolderName(folderName);
+        }
 
         folderName = getFolderName(specialFoldersMap.get(WebDavConstants.DAV_MAIL_SPAM_FOLDER));
-        if (folderName != null)
+        if (folderName != null) {
             mStoreConfig.setSpamFolderName(folderName);
+        }
 
         // K-9 Mail's outbox is a special local folder and different from Exchange/WebDAV's outbox.
         /*
@@ -342,8 +360,9 @@ public class WebDavStore extends RemoteStore {
         */
 
         folderName = getFolderName(specialFoldersMap.get(WebDavConstants.DAV_MAIL_SENT_FOLDER));
-        if (folderName != null)
+        if (folderName != null) {
             mStoreConfig.setSentFolderName(folderName);
+        }
 
         /**
          * Next we get all the folders (including "special" ones)
@@ -355,8 +374,9 @@ public class WebDavStore extends RemoteStore {
 
         for (String tempUrl : folderUrls) {
             WebDavFolder folder = createFolder(tempUrl);
-            if (folder != null)
+            if (folder != null) {
                 folderList.add(folder);
+            }
         }
 
         return folderList;
@@ -370,8 +390,9 @@ public class WebDavStore extends RemoteStore {
      * @return
      */
     private WebDavFolder createFolder(String folderUrl) {
-        if (folderUrl == null)
+        if (folderUrl == null) {
             return null;
+        }
 
         WebDavFolder wdFolder = null;
         String folderName = getFolderName(folderUrl);
@@ -387,8 +408,9 @@ public class WebDavStore extends RemoteStore {
     }
 
     private String getFolderName(String folderUrl) {
-        if (folderUrl == null)
+        if (folderUrl == null) {
             return null;
+        }
 
         // Here we extract the folder name starting from the complete url.
         // folderUrl is in the form http://mail.domain.com/exchange/username/foldername
@@ -396,18 +418,20 @@ public class WebDavStore extends RemoteStore {
         int folderSlash = -1;
         for (int j = 0; j < 5; j++) {
             folderSlash = folderUrl.indexOf('/', folderSlash + 1);
-            if (folderSlash < 0)
+            if (folderSlash < 0) {
                 break;
+            }
         }
 
         if (folderSlash > 0) {
             String fullPathName;
 
             // Removes the final slash if present
-            if (folderUrl.charAt(folderUrl.length() - 1) == '/')
+            if (folderUrl.charAt(folderUrl.length() - 1) == '/') {
                 fullPathName = folderUrl.substring(folderSlash + 1, folderUrl.length() - 1);
-            else
+            } else {
                 fullPathName = folderUrl.substring(folderSlash + 1);
+            }
 
             // Decodes the url-encoded folder name (i.e. "My%20folder" => "My Folder"
 
@@ -430,8 +454,9 @@ public class WebDavStore extends RemoteStore {
     }
 
     public Folder getSendSpoolFolder() throws MessagingException {
-        if (mSendFolder == null)
+        if (mSendFolder == null) {
             mSendFolder = getFolder(WebDavConstants.DAV_MAIL_SEND_FOLDER);
+        }
 
         return mSendFolder;
     }
@@ -743,7 +768,9 @@ public class WebDavStore extends RemoteStore {
     public void doFBA(ConnectionInfo info)
             throws IOException, MessagingException {
         // Clear out cookies from any previous authentication.
-        if (mAuthCookies != null) mAuthCookies.clear();
+        if (mAuthCookies != null) {
+            mAuthCookies.clear();
+        }
 
         WebDavHttpClient httpClient = getHttpClient();
 
@@ -1044,7 +1071,7 @@ public class WebDavStore extends RemoteStore {
         if (response.getFirstHeader("Location") != null) {
             // TODO: This may indicate lack of authentication or may alternatively be something we should follow
             throw new IOException("Unexpected redirect during request processing. " +
-                    "Expected response from: "+url+" but told to redirect to:" +
+                    "Expected response from: " + url + " but told to redirect to:" +
                     response.getFirstHeader("Location").getValue());
         } else {
             throw new IOException("Unexpected redirect during request processing. " +

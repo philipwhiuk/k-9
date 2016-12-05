@@ -1,6 +1,5 @@
 package com.fsck.k9.mail.store;
 
-import android.accounts.AccountManager;
 import android.content.Context;
 import android.net.ConnectivityManager;
 
@@ -40,7 +39,7 @@ public abstract class RemoteStore extends Store {
     /**
      * Get an instance of a remote mail store.
      */
-    public synchronized static Store getInstance(Context context, StoreConfig storeConfig,
+    public static synchronized Store getInstance(Context context, StoreConfig storeConfig,
                                                  OAuth2TokenProvider oAuth2TokenProvider)
             throws MessagingException {
         String uri = storeConfig.getStoreUri();

@@ -31,7 +31,6 @@ import java.util.zip.InflaterInputStream;
 
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.provider.Settings;
 import android.util.Log;
 
 import com.fsck.k9.mail.Authentication;
@@ -215,8 +214,9 @@ class ImapConnection {
     }
 
     private boolean behindCaptivePortal() {
-        if(connectivityManager.getActiveNetworkInfo().getType() != ConnectivityManager.TYPE_WIFI)
+        if (connectivityManager.getActiveNetworkInfo().getType() != ConnectivityManager.TYPE_WIFI) {
             return false;
+        }
         String server = "connectivitycheck.gstatic.com";
         try {
             URL mURL = new URL("http", server, "/generate_204");
@@ -231,14 +231,15 @@ class ImapConnection {
                 urlConnection.getInputStream();
                 httpResponseCode = urlConnection.getResponseCode();
             } catch (IOException ioe) {
+                if (K9MailLib.isDebug()) {
+                    Log.d(K9MailLib.LOG_TAG, "IO exception checking for captive portal", ioe);
+                }
             } finally {
-                if (urlConnection != null) urlConnection.disconnect();
+                if (urlConnection != null) {
+                    urlConnection.disconnect();
+                }
             }
-            if (httpResponseCode == 204) {
-                return false;
-            } else {
-                return true;
-            }
+            return httpResponseCode != 204;
         } catch (MalformedURLException e) {
             Log.e(K9MailLib.LOG_TAG, "Invalid captive portal URL, server=" + server);
             return false;
@@ -772,7 +773,7 @@ class ImapConnection {
             open();
 
             String tag = Integer.toString(nextCommandTag++);
-            String commandToSend = tag + " " + command + " " + initialClientResponse+ "\r\n";
+            String commandToSend = tag + " " + command + " " + initialClientResponse + "\r\n";
             outputStream.write(commandToSend.getBytes());
             outputStream.flush();
 
@@ -780,7 +781,7 @@ class ImapConnection {
                 if (sensitive && !K9MailLib.isDebugSensitive()) {
                     Log.v(LOG_TAG, getLogId() + ">>> [Command Hidden, Enable Sensitive Debug Logging To Show]");
                 } else {
-                    Log.v(LOG_TAG,  getLogId() + ">>> " + tag + " " + command+ " " + initialClientResponse);
+                    Log.v(LOG_TAG,  getLogId() + ">>> " + tag + " " + command + " " + initialClientResponse);
                 }
             }
 

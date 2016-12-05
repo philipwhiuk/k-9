@@ -5,15 +5,24 @@ import android.support.annotation.VisibleForTesting;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.fsck.k9.mail.*;
+import com.fsck.k9.mail.Address;
+import com.fsck.k9.mail.AuthType;
+import com.fsck.k9.mail.Authentication;
+import com.fsck.k9.mail.AuthenticationFailedException;
+import com.fsck.k9.mail.CertificateValidationException;
+import com.fsck.k9.mail.ConnectionSecurity;
+import com.fsck.k9.mail.K9MailLib;
+import com.fsck.k9.mail.Message;
 import com.fsck.k9.mail.Message.RecipientType;
+import com.fsck.k9.mail.MessagingException;
+import com.fsck.k9.mail.ServerSettings;
+import com.fsck.k9.mail.Transport;
 import com.fsck.k9.mail.filter.Base64;
 import com.fsck.k9.mail.filter.EOLConvertingOutputStream;
 import com.fsck.k9.mail.filter.LineWrapOutputStream;
 import com.fsck.k9.mail.filter.PeekableInputStream;
 import com.fsck.k9.mail.filter.SmtpDataStuffing;
 import com.fsck.k9.mail.internet.CharsetSupport;
-import com.fsck.k9.mail.CertificateValidationException;
 import com.fsck.k9.mail.oauth.OAuth2TokenProvider;
 import com.fsck.k9.mail.oauth.XOAuth2ChallengeParser;
 import com.fsck.k9.mail.ssl.TrustedSocketFactory;
@@ -25,9 +34,23 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.*;
+import java.net.Inet6Address;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.SocketAddress;
+import java.net.SocketException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
+import biweekly.util.IOUtils;
 
 import static com.fsck.k9.mail.K9MailLib.DEBUG_PROTOCOL_SMTP;
 import static com.fsck.k9.mail.K9MailLib.LOG_TAG;
@@ -270,7 +293,7 @@ public class SmtpTransport extends Transport {
                 }
             }
 
-            Map<String,String> extensions = sendHello(localHost);
+            Map<String, String> extensions = sendHello(localHost);
 
             m8bitEncodingAllowed = extensions.containsKey("8BITMIME");
 
@@ -460,7 +483,7 @@ public class SmtpTransport extends Transport {
      * @throws MessagingException
      *          In case of a malformed response.
      */
-    private Map<String,String> sendHello(String host) throws IOException, MessagingException {
+    private Map<String, String> sendHello(String host) throws IOException, MessagingException {
         Map<String, String> extensions = new HashMap<String, String>();
         try {
             List<String> results = executeSimpleCommand("EHLO " + host);
@@ -568,22 +591,15 @@ public class SmtpTransport extends Transport {
         try {
             executeSimpleCommand("QUIT");
         } catch (Exception e) {
-
+            Log.d(K9MailLib.LOG_TAG, "Exception while quitting", e);
         }
-        try {
-            mIn.close();
-        } catch (Exception e) {
 
-        }
-        try {
-            mOut.close();
-        } catch (Exception e) {
-
-        }
+        IOUtils.closeQuietly(mIn);
+        IOUtils.closeQuietly(mOut);
         try {
             mSocket.close();
         } catch (Exception e) {
-
+            //Closing socket
         }
         mIn = null;
         mOut = null;
@@ -594,17 +610,18 @@ public class SmtpTransport extends Transport {
         StringBuilder sb = new StringBuilder();
         int d;
         while ((d = mIn.read()) != -1) {
-            if (((char)d) == '\r') {
+            if (((char) d) == '\r') {
                 continue;
-            } else if (((char)d) == '\n') {
+            } else if (((char) d) == '\n') {
                 break;
             } else {
-                sb.append((char)d);
+                sb.append((char) d);
             }
         }
         String ret = sb.toString();
-        if (K9MailLib.isDebug() && DEBUG_PROTOCOL_SMTP)
+        if (K9MailLib.isDebug() && DEBUG_PROTOCOL_SMTP) {
             Log.d(LOG_TAG, "SMTP <<< " + ret);
+        }
 
         return ret;
     }
@@ -658,19 +675,28 @@ public class SmtpTransport extends Transport {
         }
 
     }
+
+    /**
+     * @deprecated Use {@link #executeSimpleCommandWithResponse(String, boolean)}
+     * @param command Command to execute
+     * @return Results
+     * @throws IOException IO error
+     * @throws MessagingException Messaging error
+     */
     @Deprecated
     private List<String> executeSimpleCommand(String command) throws IOException, MessagingException {
         return executeSimpleCommand(command, false);
     }
 
     /**
-     * TODO:  All responses should be checked to confirm that they start with a valid
+     * @deprecated TODO:  All responses should be checked to confirm that they start with a valid
      * reply code, and that the reply code is appropriate for the command being executed.
      * That means it should either be a 2xx code (generally) or a 3xx code in special cases
      * (e.g., DATA & AUTH LOGIN commands).  Reply codes should be made available as part of
      * the returned object.
      *
      * This should be done using the non-deprecated API below.
+     *
      */
     @Deprecated
     private List<String> executeSimpleCommand(String command, boolean sensitive)
@@ -885,7 +911,7 @@ public class SmtpTransport extends Transport {
                 Authentication.computeXoauth(username,
                         oauthTokenProvider.getToken(username, OAuth2TokenProvider.OAUTH2_TIMEOUT)),
                 true);
-        if(response.replyCode == SMTP_CONTINUE_REQUEST) {
+        if (response.replyCode == SMTP_CONTINUE_REQUEST) {
             retryXoauthWithNewToken = XOAuth2ChallengeParser.shouldRetry(
                     response.message, mHost);
 

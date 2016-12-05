@@ -48,14 +48,16 @@ public class ICalData {
     }
 
     private void updateContentsFromEvent(VEvent event) {
-        if (event.getSummary() != null)
+        if (event.getSummary() != null) {
             summary = event.getSummary().getValue();
+        }
         organizer = event.getOrganizer();
 
-        if (event.getLocation() != null)
+        if (event.getLocation() != null) {
             location = event.getLocation().getValue();
+        }
 
-        if(event.getDateStart() != null) {
+        if (event.getDateStart() != null) {
             date = event.getDateStart().getValue().getTime();
         }
 
@@ -75,7 +77,7 @@ public class ICalData {
         List<Attendee> needsActionList = new ArrayList<>();
         List<Attendee> tentativeList = new ArrayList<>();
 
-        for(Attendee attendee: attendees) {
+        for (Attendee attendee: attendees) {
             if (attendee.getParticipationLevel() != null) {
                 if (attendee.getParticipationLevel().equals(ParticipationLevel.REQUIRED)) {
                     requiredList.add(attendee);
@@ -144,7 +146,7 @@ public class ICalData {
     }
 
     public String getDateTime() {
-        return new SimpleDateFormat().format(new Date(date));
+        return SimpleDateFormat.getDateInstance().format(new Date(date));
     }
 
     public String getLocation() {

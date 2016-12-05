@@ -18,7 +18,7 @@ import static com.fsck.k9.mail.helper.UrlEncodingHelper.encodeUtf8;
  * SEARCH and PROPFIND
  */
 public class HttpGeneric extends HttpEntityEnclosingRequestBase {
-    public String METHOD_NAME = "POST";
+    public String methodName = "POST";
 
     public HttpGeneric() {
         super();
@@ -78,12 +78,12 @@ public class HttpGeneric extends HttpEntityEnclosingRequestBase {
 
     @Override
     public String getMethod() {
-        return METHOD_NAME;
+        return methodName;
     }
 
     public void setMethod(String method) {
         if (method != null) {
-            METHOD_NAME = method;
+            methodName = method;
         }
     }
 }
