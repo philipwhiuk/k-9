@@ -138,7 +138,7 @@ public class BinaryTempFileBody implements RawDataBody, SizeAware {
             } finally {
                 Log.d(K9MailLib.LOG_TAG, "deleting temp file");
                 boolean deleted = mFile.delete();
-                if(!deleted) {
+                if (!deleted) {
                     Log.e(K9MailLib.LOG_TAG, "Failed to delete temporary file");
                 }
             }
