@@ -12,12 +12,14 @@ import java.util.regex.Pattern;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.fsck.k9.ical.ICalParser;
 import com.fsck.k9.ical.ICalPart;
 import com.fsck.k9.mail.Body;
 import com.fsck.k9.mail.BodyPart;
 import com.fsck.k9.mail.CryptoMimeTypes;
+import com.fsck.k9.mail.K9MailLib;
 import com.fsck.k9.mail.Message;
 import com.fsck.k9.mail.MessagingException;
 import com.fsck.k9.mail.Multipart;
@@ -78,6 +80,7 @@ public class MessageExtractor {
             InputStream in = MimeUtility.decodeBody(body);
             try {
                 byte[] buf = new byte[256];
+                //noinspection ResultOfMethodCallIgnored
                 in.read(buf, 0, buf.length);
                 String str = new String(buf, "US-ASCII");
 
@@ -94,7 +97,11 @@ public class MessageExtractor {
             } finally {
                 try {
                     MimeUtility.closeInputStreamWithoutDeletingTemporaryFiles(in);
-                } catch (IOException e) { /* ignore */ }
+                } catch (IOException e) {
+                    if (K9MailLib.isDebug()) {
+                        Log.v(K9MailLib.LOG_TAG, "Exception closing input stream", e);
+                    }
+                }
             }
         }
         charset = fixupCharset(charset, getMessageFromPart(part));

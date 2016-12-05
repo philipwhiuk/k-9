@@ -17,6 +17,7 @@
 
 package com.fsck.k9.mail.filter;
 
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
 
@@ -34,19 +35,19 @@ import java.nio.charset.Charset;
  * @version $Id$
  */
 public class Base64 {
-    public static String decode(String encoded) {
+    public static String decode(String encoded) throws UnsupportedEncodingException {
         if (encoded == null) {
             return null;
         }
-        byte[] decoded = new Base64().decode(encoded.getBytes());
-        return new String(decoded);
+        byte[] decoded = new Base64().decode(encoded.getBytes("US-ASCII"));
+        return new String(decoded, Charset.forName("US-ASCII"));
     }
 
-    public static String encode(String s) {
+    public static String encode(String s) throws UnsupportedEncodingException {
         if (s == null) {
             return null;
         }
-        byte[] encoded = new Base64().encode(s.getBytes());
+        byte[] encoded = new Base64().encode(s.getBytes("US-ASCII"));
         return new String(encoded);
     }
 

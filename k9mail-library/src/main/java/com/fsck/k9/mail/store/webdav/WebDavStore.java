@@ -235,7 +235,7 @@ public class WebDavStore extends RemoteStore {
     private Map<String, WebDavFolder> mFolderList = new HashMap<String, WebDavFolder>();
 
     public WebDavStore(StoreConfig storeConfig, WebDavHttpClient.WebDavHttpClientFactory clientFactory)
-            throws MessagingException {
+            throws MessagingException, UnsupportedEncodingException {
         super(storeConfig, null);
         mHttpClientFactory = clientFactory;
 
@@ -882,7 +882,7 @@ public class WebDavStore extends RemoteStore {
             throws IOException {
         String formAction = null;
 
-        BufferedReader reader = new BufferedReader(new InputStreamReader(istream), 4096);
+        BufferedReader reader = new BufferedReader(new InputStreamReader(istream, "US-ASCII"), 4096);
         String tempText;
 
         // Read line by line until we find something like: <form action="owaauth.dll"...>.

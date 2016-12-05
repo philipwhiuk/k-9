@@ -758,7 +758,7 @@ class ImapFolder extends Folder<ImapMessage> {
                         if (literal != null) {
                             if (literal instanceof String) {
                                 String bodyString = (String) literal;
-                                InputStream bodyStream = new ByteArrayInputStream(bodyString.getBytes());
+                                InputStream bodyStream = new ByteArrayInputStream(bodyString.getBytes("US-ASCII"));
                                 imapMessage.parse(bodyStream);
                             } else if (literal instanceof Integer) {
                                 // All the work was done in FetchBodyCallback.foundLiteral()
@@ -836,7 +836,7 @@ class ImapFolder extends Folder<ImapMessage> {
                             MimeMessageHelper.setBody(part, (Body) literal);
                         } else if (literal instanceof String) {
                             String bodyString = (String) literal;
-                            InputStream bodyStream = new ByteArrayInputStream(bodyString.getBytes());
+                            InputStream bodyStream = new ByteArrayInputStream(bodyString.getBytes("US-ASCII"));
 
                             String contentTransferEncoding =
                                     part.getHeader(MimeHeader.HEADER_CONTENT_TRANSFER_ENCODING)[0];

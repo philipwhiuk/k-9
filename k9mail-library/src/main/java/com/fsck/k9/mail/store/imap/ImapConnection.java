@@ -483,7 +483,7 @@ class ImapConnection {
         }
 
         if (response.isContinuationRequested()) {
-            outputStream.write("\r\n".getBytes());
+            outputStream.write("\r\n".getBytes("US-ASCII"));
             outputStream.flush();
         }
     }
@@ -497,7 +497,7 @@ class ImapConnection {
             throw new MessagingException("Invalid Cram-MD5 nonce received");
         }
 
-        byte[] b64Nonce = response.getString(0).getBytes();
+        byte[] b64Nonce = response.getString(0).getBytes("US-ASCII");
         byte[] b64CRAM = Authentication.computeCramMd5Bytes(settings.getUsername(), settings.getPassword(), b64Nonce);
 
         outputStream.write(b64CRAM);
@@ -527,7 +527,7 @@ class ImapConnection {
         readContinuationResponse(tag);
 
         String credentials = "\000" + settings.getUsername() + "\000" + settings.getPassword();
-        byte[] encodedCredentials = Base64.encodeBase64(credentials.getBytes());
+        byte[] encodedCredentials = Base64.encodeBase64(credentials.getBytes("US-ASCII"));
 
         outputStream.write(encodedCredentials);
         outputStream.write('\r');
@@ -774,7 +774,7 @@ class ImapConnection {
 
             String tag = Integer.toString(nextCommandTag++);
             String commandToSend = tag + " " + command + " " + initialClientResponse + "\r\n";
-            outputStream.write(commandToSend.getBytes());
+            outputStream.write(commandToSend.getBytes("US-ASCII"));
             outputStream.flush();
 
             if (K9MailLib.isDebug() && DEBUG_PROTOCOL_IMAP) {
@@ -798,7 +798,7 @@ class ImapConnection {
 
             String tag = Integer.toString(nextCommandTag++);
             String commandToSend = tag + " " + command + "\r\n";
-            outputStream.write(commandToSend.getBytes());
+            outputStream.write(commandToSend.getBytes("US-ASCII"));
             outputStream.flush();
 
             if (K9MailLib.isDebug() && DEBUG_PROTOCOL_IMAP) {
@@ -817,7 +817,7 @@ class ImapConnection {
     }
 
     public void sendContinuation(String continuation) throws IOException {
-        outputStream.write(continuation.getBytes());
+        outputStream.write(continuation.getBytes("US-ASCII"));
         outputStream.write('\r');
         outputStream.write('\n');
         outputStream.flush();

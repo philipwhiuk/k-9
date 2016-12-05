@@ -56,7 +56,7 @@ public class Authentication {
         try {
             byte[] nonce = Base64.decodeBase64(b64Nonce);
 
-            byte[] secretBytes = password.getBytes();
+            byte[] secretBytes = password.getBytes(US_ASCII);
             MessageDigest md = MessageDigest.getInstance("MD5");
             if (secretBytes.length > 64) {
                 secretBytes = md.digest(secretBytes);
@@ -92,7 +92,7 @@ public class Authentication {
     public static String computeXoauth(String username, String authToken) throws UnsupportedEncodingException {
         String formattedAuthenticationString = String.format(XOAUTH_FORMAT, username, authToken);
         byte[] base64encodedAuthenticationString =
-                Base64.encodeBase64(formattedAuthenticationString.getBytes());
+                Base64.encodeBase64(formattedAuthenticationString.getBytes(US_ASCII));
 
         return new String(base64encodedAuthenticationString, US_ASCII);
     }

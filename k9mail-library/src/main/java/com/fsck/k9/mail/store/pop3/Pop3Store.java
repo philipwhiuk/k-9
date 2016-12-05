@@ -32,6 +32,7 @@ import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
@@ -449,11 +450,11 @@ public class Pop3Store extends RemoteStore {
             }
         }
 
-        private void authPlain() throws MessagingException {
+        private void authPlain() throws MessagingException, UnsupportedEncodingException {
             executeSimpleCommand("AUTH PLAIN");
             try {
                 byte[] encodedBytes = Base64.encodeBase64(("\000" + mUsername
-                        + "\000" + mPassword).getBytes());
+                        + "\000" + mPassword).getBytes("US-ASCII"));
                 executeSimpleCommand(new String(encodedBytes), true);
             } catch (Pop3ErrorResponse e) {
                 throw new AuthenticationFailedException(
@@ -500,7 +501,7 @@ public class Pop3Store extends RemoteStore {
             }
         }
 
-        private void authExternal() throws MessagingException {
+        private void authExternal() throws MessagingException, UnsupportedEncodingException {
             try {
                 executeSimpleCommand(
                         String.format("AUTH EXTERNAL %s",
@@ -1065,7 +1066,7 @@ public class Pop3Store extends RemoteStore {
         }
 
         private void writeLine(String s) throws IOException {
-            mOut.write(s.getBytes());
+            mOut.write(s.getBytes("US-ASCII"));
             mOut.write('\r');
             mOut.write('\n');
             mOut.flush();

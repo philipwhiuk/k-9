@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.nio.charset.Charset;
 
 import com.fsck.k9.mail.BodyPart;
 import com.fsck.k9.mail.BoundaryGenerator;
@@ -73,7 +74,7 @@ public class MimeMultipart extends Multipart {
 
     @Override
     public void writeTo(OutputStream out) throws IOException, MessagingException {
-        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out), 1024);
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, Charset.forName("US-ASCII")), 1024);
 
         if (preamble != null) {
             out.write(preamble);

@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Set;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 
 public class MimeHeader implements Cloneable {
@@ -97,7 +98,7 @@ public class MimeHeader implements Cloneable {
     }
 
     public void writeTo(OutputStream out) throws IOException {
-        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out), 1024);
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, Charset.forName("US-ASCII")), 1024);
         for (Field field : mFields) {
             if (field.hasRawData()) {
                 writer.write(field.getRaw());
@@ -181,7 +182,7 @@ public class MimeHeader implements Cloneable {
             return new Field(name, null, raw);
         }
 
-        private Field(String name, String value, String raw) {
+        private Field(String name, @Nullable String value, @Nullable String raw) {
             if (name == null) {
                 throw new NullPointerException("Argument 'name' cannot be null");
             }

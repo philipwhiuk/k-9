@@ -666,7 +666,7 @@ class WebDavFolder extends Folder<WebDavMessage> {
                 message.writeTo(msgOut);
                 msgOut.flush();
 
-                bodyEntity = new StringEntity(out.toString(), "UTF-8");
+                bodyEntity = new StringEntity(out.toString("US-ASCII"), "UTF-8");
                 bodyEntity.setContentType("message/rfc822");
 
                 String messageURL = mFolderUrl;

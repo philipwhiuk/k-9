@@ -44,6 +44,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -451,7 +452,7 @@ public class SmtpTransport extends Transport {
     private void parseOptionalSizeValue(Map<String, String> extensions) {
         if (extensions.containsKey("SIZE")) {
             String optionalsizeValue = extensions.get("SIZE");
-            if (optionalsizeValue != null && optionalsizeValue != "") {
+            if (optionalsizeValue != null && optionalsizeValue.length() != 0) {
                 try {
                     mLargestAcceptableMessage = Integer.parseInt(optionalsizeValue);
                 } catch (NumberFormatException e) {
@@ -637,7 +638,7 @@ public class SmtpTransport extends Transport {
             Log.d(LOG_TAG, commandToLog);
         }
 
-        byte[] data = s.concat("\r\n").getBytes();
+        byte[] data = s.concat("\r\n").getBytes("US-ASCII");
 
         /*
          * Important: Send command + CRLF using just one write() call. Using
