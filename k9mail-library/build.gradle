@@ -15,7 +15,7 @@ repositories {
 
 android {
     lintOptions {
-        abortOnError false
+        abortOnError true
     }
 }
 
@@ -28,7 +28,7 @@ dependencies {
     compile 'net.sf.biweekly:biweekly:0.6.0'
     compile "com.android.support:support-annotations:${androidSupportLibraryVersion}"
 
-    androidTestCompile 'com.android.support.test:runner:0.4.1'
+    androidTestCompile 'com.android.support.test:runner:0.5'
     androidTestCompile 'com.madgag.spongycastle:pg:1.51.0.0'
 
     testCompile "com.squareup.okio:okio:${okioVersion}"
@@ -73,5 +73,12 @@ android {
         exclude 'META-INF/NOTICE'
         exclude 'META-INF/NOTICE.txt'
         exclude 'LICENSE.txt'
+    }
+}
+
+tasks.withType(FindBugs) {
+    reports {
+        xml.enabled = true
+        html.enabled = true
     }
 }
