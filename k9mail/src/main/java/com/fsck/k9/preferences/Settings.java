@@ -1,5 +1,6 @@
 package com.fsck.k9.preferences;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -245,6 +246,13 @@ public class Settings {
      */
     public static class InvalidSettingValueException extends Exception {
         private static final long serialVersionUID = 1L;
+
+        public InvalidSettingValueException() {
+        }
+
+        public InvalidSettingValueException(String msg, Throwable cause) {
+            super(msg, cause);
+        }
     }
 
     /**
@@ -260,7 +268,7 @@ public class Settings {
      *   <li>
      *   The one that is used by the internal preference {@link Storage}. It is usually obtained by
      *   calling {@code toString()} on the internal representation of the setting value (see e.g.
-     *   {@link K9#save(android.content.SharedPreferences.Editor)}).
+     *   {@link K9#save(StorageEditor)}).
      *   </li>
      *   <li>
      *   The "pretty" version that is used by the import/export settings file (e.g. colors are

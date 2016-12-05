@@ -14,6 +14,7 @@ import com.fsck.k9.mailstore.LocalFolder;
 import com.fsck.k9.mailstore.LocalMessage;
 import com.fsck.k9.mail.filter.Base64;
 
+import java.io.UnsupportedEncodingException;
 import java.util.StringTokenizer;
 
 public class MessageReference implements Parcelable {
@@ -58,9 +59,13 @@ public class MessageReference implements Parcelable {
             // Split the identity, stripping away the first two characters representing the version and delimiter.
             StringTokenizer tokens = new StringTokenizer(identity.substring(2), IDENTITY_SEPARATOR, false);
             if (tokens.countTokens() >= 3) {
-                accountUuid = Base64.decode(tokens.nextToken());
-                folderName = Base64.decode(tokens.nextToken());
-                uid = Base64.decode(tokens.nextToken());
+                try {
+                    accountUuid = Base64.decode(tokens.nextToken());
+                    folderName = Base64.decode(tokens.nextToken());
+                    uid = Base64.decode(tokens.nextToken());
+                } catch (UnsupportedEncodingException e) {
+                    throw new MessagingException("Unable to decode account information", e);
+                }
 
                 if (tokens.hasMoreTokens()) {
                     final String flagString = tokens.nextToken();
@@ -89,22 +94,26 @@ public class MessageReference implements Parcelable {
      *
      * @return Serialized string.
      */
-    public String toIdentityString() {
-        StringBuilder refString = new StringBuilder();
+    public String toIdentityString() throws MessagingException {
+        try {
+            StringBuilder refString = new StringBuilder();
 
-        refString.append(IDENTITY_VERSION_1);
-        refString.append(IDENTITY_SEPARATOR);
-        refString.append(Base64.encode(accountUuid));
-        refString.append(IDENTITY_SEPARATOR);
-        refString.append(Base64.encode(folderName));
-        refString.append(IDENTITY_SEPARATOR);
-        refString.append(Base64.encode(uid));
-        if (flag != null) {
+            refString.append(IDENTITY_VERSION_1);
             refString.append(IDENTITY_SEPARATOR);
-            refString.append(flag.name());
-        }
+            refString.append(Base64.encode(accountUuid));
+            refString.append(IDENTITY_SEPARATOR);
+            refString.append(Base64.encode(folderName));
+            refString.append(IDENTITY_SEPARATOR);
+            refString.append(Base64.encode(uid));
+            if (flag != null) {
+                refString.append(IDENTITY_SEPARATOR);
+                refString.append(flag.name());
+            }
 
-        return refString.toString();
+            return refString.toString();
+        } catch (UnsupportedEncodingException e) {
+            throw new MessagingException("Unable to encode identity", e);
+        }
     }
 
     @Override

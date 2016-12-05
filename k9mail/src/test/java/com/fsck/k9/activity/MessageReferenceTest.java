@@ -19,14 +19,14 @@ import static junit.framework.Assert.assertTrue;
 public class MessageReferenceTest {
 
     @Test
-    public void checkIdentityStringFromMessageReferenceWithoutFlag() {
+    public void checkIdentityStringFromMessageReferenceWithoutFlag() throws MessagingException {
         MessageReference messageReference = createMessageReference("o hai!", "folder", "10101010");
 
         assertEquals("!:byBoYWkh:Zm9sZGVy:MTAxMDEwMTA=", messageReference.toIdentityString());
     }
 
     @Test
-    public void checkIdentityStringFromMessageReferenceWithFlag() {
+    public void checkIdentityStringFromMessageReferenceWithFlag() throws MessagingException {
         MessageReference messageReference =
                 createMessageReferenceWithFlag("o hai!", "folder", "10101010", Flag.ANSWERED);
 

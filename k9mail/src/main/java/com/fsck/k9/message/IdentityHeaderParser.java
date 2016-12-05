@@ -1,6 +1,7 @@
 package com.fsck.k9.message;
 
 
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -9,6 +10,7 @@ import android.net.Uri;
 import android.util.Log;
 
 import com.fsck.k9.K9;
+import com.fsck.k9.mail.MessagingException;
 import com.fsck.k9.mail.filter.Base64;
 
 
@@ -21,7 +23,7 @@ public class IdentityHeaderParser {
      *
      * @return A map containing the value for each {@link IdentityField} in the identity string.
      */
-    public static Map<IdentityField, String> parse(final String identityString) {
+    public static Map<IdentityField, String> parse(final String identityString) throws MessagingException {
         Map<IdentityField, String> identity = new HashMap<IdentityField, String>();
 
         if (K9.DEBUG) {
@@ -67,25 +69,30 @@ public class IdentityHeaderParser {
             StringTokenizer tokenizer = new StringTokenizer(identityString, ":", false);
 
             // First item is the body length. We use this to separate the composed reply from the quoted text.
-            if (tokenizer.hasMoreTokens()) {
-                String bodyLengthS = Base64.decode(tokenizer.nextToken());
-                try {
-                    identity.put(IdentityField.LENGTH, Integer.valueOf(bodyLengthS).toString());
-                } catch (Exception e) {
-                    Log.e(K9.LOG_TAG, "Unable to parse bodyLength '" + bodyLengthS + "'");
+            try {
+
+                if (tokenizer.hasMoreTokens()) {
+                    String bodyLengthS = Base64.decode(tokenizer.nextToken());
+                    try {
+                        identity.put(IdentityField.LENGTH, Integer.valueOf(bodyLengthS).toString());
+                    } catch (Exception e) {
+                        Log.e(K9.LOG_TAG, "Unable to parse bodyLength '" + bodyLengthS + "'");
+                    }
                 }
-            }
-            if (tokenizer.hasMoreTokens()) {
-                identity.put(IdentityField.SIGNATURE, Base64.decode(tokenizer.nextToken()));
-            }
-            if (tokenizer.hasMoreTokens()) {
-                identity.put(IdentityField.NAME, Base64.decode(tokenizer.nextToken()));
-            }
-            if (tokenizer.hasMoreTokens()) {
-                identity.put(IdentityField.EMAIL, Base64.decode(tokenizer.nextToken()));
-            }
-            if (tokenizer.hasMoreTokens()) {
-                identity.put(IdentityField.QUOTED_TEXT_MODE, Base64.decode(tokenizer.nextToken()));
+                if (tokenizer.hasMoreTokens()) {
+                    identity.put(IdentityField.SIGNATURE, Base64.decode(tokenizer.nextToken()));
+                }
+                if (tokenizer.hasMoreTokens()) {
+                    identity.put(IdentityField.NAME, Base64.decode(tokenizer.nextToken()));
+                }
+                if (tokenizer.hasMoreTokens()) {
+                    identity.put(IdentityField.EMAIL, Base64.decode(tokenizer.nextToken()));
+                }
+                if (tokenizer.hasMoreTokens()) {
+                    identity.put(IdentityField.QUOTED_TEXT_MODE, Base64.decode(tokenizer.nextToken()));
+                }
+            } catch (UnsupportedEncodingException e) {
+                throw new MessagingException("Unable to decode identity", e);
             }
         }
 

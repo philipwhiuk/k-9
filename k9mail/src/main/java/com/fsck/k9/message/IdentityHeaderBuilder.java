@@ -9,7 +9,10 @@ import com.fsck.k9.Account.QuoteStyle;
 import com.fsck.k9.Identity;
 import com.fsck.k9.K9;
 import com.fsck.k9.activity.MessageReference;
+import com.fsck.k9.mail.MessagingException;
 import com.fsck.k9.mail.internet.TextBody;
+
+import java.io.UnsupportedEncodingException;
 
 
 public class IdentityHeaderBuilder {
@@ -38,7 +41,7 @@ public class IdentityHeaderBuilder {
      *
      * @return Identity string.
      */
-    public String build() {
+    public String build() throws MessagingException {
         //FIXME: check arguments
 
         uri = new Uri.Builder();

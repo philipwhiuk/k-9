@@ -191,7 +191,7 @@ public abstract class MessageBuilder {
         }
     }
 
-    private String buildIdentityHeader(TextBody body, TextBody bodyPlain) {
+    private String buildIdentityHeader(TextBody body, TextBody bodyPlain) throws MessagingException {
         return new IdentityHeaderBuilder()
                 .setCursorPosition(cursorPosition)
                 .setIdentity(identity)

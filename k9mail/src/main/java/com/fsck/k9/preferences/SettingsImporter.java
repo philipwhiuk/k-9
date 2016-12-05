@@ -3,6 +3,7 @@ package com.fsck.k9.preferences;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -377,7 +378,11 @@ public class SettingsImporter {
         // Write incoming server settings (storeUri)
         ServerSettings incoming = new ImportedServerSettings(account.incoming);
         String storeUri = RemoteStore.createStoreUri(incoming);
-        putString(editor, accountKeyPrefix + Account.STORE_URI_KEY, Base64.encode(storeUri));
+        try {
+            putString(editor, accountKeyPrefix + Account.STORE_URI_KEY, Base64.encode(storeUri));
+        } catch (UnsupportedEncodingException e) {
+            throw new InvalidSettingValueException("Unable to encode store URI", e);
+        }
 
         // Mark account as disabled if the AuthType isn't EXTERNAL and the
         // settings file didn't contain a password
@@ -393,7 +398,11 @@ public class SettingsImporter {
             // Write outgoing server settings (transportUri)
             ServerSettings outgoing = new ImportedServerSettings(account.outgoing);
             String transportUri = Transport.createTransportUri(outgoing);
-            putString(editor, accountKeyPrefix + Account.TRANSPORT_URI_KEY, Base64.encode(transportUri));
+            try {
+                putString(editor, accountKeyPrefix + Account.TRANSPORT_URI_KEY, Base64.encode(transportUri));
+            } catch (UnsupportedEncodingException e) {
+                throw new InvalidSettingValueException("Unable to encode store URI", e);
+            }
 
             /*
              * Mark account as disabled if the settings file contained a

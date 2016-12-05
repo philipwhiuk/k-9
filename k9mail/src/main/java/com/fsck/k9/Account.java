@@ -1,6 +1,7 @@
 
 package com.fsck.k9;
 
+import java.io.UnsupportedEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -397,9 +398,17 @@ public class Account implements BaseAccount, StoreConfig {
 
         Storage storage = preferences.getStorage();
 
-        mStoreUri = Base64.decode(storage.getString(mUuid + ".storeUri", null));
+        try {
+            mStoreUri = Base64.decode(storage.getString(mUuid + ".storeUri", null));
+        } catch (UnsupportedEncodingException e) {
+            Log.e(K9.LOG_TAG, "Unable to decode string: " + storage.getString(mUuid + ".storeUri", null), e);
+        }
         mLocalStorageProviderId = storage.getString(mUuid + ".localStorageProvider", StorageManager.getInstance(K9.app).getDefaultProviderId());
-        mTransportUri = Base64.decode(storage.getString(mUuid + ".transportUri", null));
+        try {
+            mTransportUri = Base64.decode(storage.getString(mUuid + ".storeUri", null));
+        } catch (UnsupportedEncodingException e) {
+            Log.e(K9.LOG_TAG, "Unable to decode string: " + storage.getString(mUuid + ".storeUri", null), e);
+        }
         mDescription = storage.getString(mUuid + ".description", null);
         mAlwaysBcc = storage.getString(mUuid + ".alwaysBcc", mAlwaysBcc);
         mAutomaticCheckIntervalMinutes = storage.getInt(mUuid + ".automaticCheckIntervalMinutes", -1);
@@ -719,9 +728,17 @@ public class Account implements BaseAccount, StoreConfig {
             editor.putString("accountUuids", accountUuids);
         }
 
-        editor.putString(mUuid + ".storeUri", Base64.encode(mStoreUri));
+        try {
+            editor.putString(mUuid + ".storeUri", Base64.encode(mStoreUri));
+        } catch (UnsupportedEncodingException e) {
+            Log.w(K9.LOG_TAG, "Unable to encode URI:" + mStoreUri, e);
+        }
         editor.putString(mUuid + ".localStorageProvider", mLocalStorageProviderId);
-        editor.putString(mUuid + ".transportUri", Base64.encode(mTransportUri));
+        try {
+            editor.putString(mUuid + ".transportUri", Base64.encode(mTransportUri));
+        } catch (UnsupportedEncodingException e) {
+            Log.w(K9.LOG_TAG, "Unable to encode URI:" + mTransportUri, e);
+        }
         editor.putString(mUuid + ".description", mDescription);
         editor.putString(mUuid + ".alwaysBcc", mAlwaysBcc);
         editor.putInt(mUuid + ".automaticCheckIntervalMinutes", mAutomaticCheckIntervalMinutes);

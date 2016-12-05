@@ -235,7 +235,7 @@ public class WebDavStore extends RemoteStore {
     private Map<String, WebDavFolder> mFolderList = new HashMap<String, WebDavFolder>();
 
     public WebDavStore(StoreConfig storeConfig, WebDavHttpClient.WebDavHttpClientFactory clientFactory)
-            throws MessagingException, UnsupportedEncodingException {
+            throws MessagingException {
         super(storeConfig, null);
         mHttpClientFactory = clientFactory;
 
@@ -282,7 +282,11 @@ public class WebDavStore extends RemoteStore {
         // The inbox path would look like: "https://mail.domain.com/Exchange/alias/Inbox".
         mUrl = getRoot() + mPath + mMailboxPath;
 
-        mAuthString = "Basic " + Base64.encode(mUsername + ":" + mPassword);
+        try {
+            mAuthString = "Basic " + Base64.encode(mUsername + ":" + mPassword);
+        } catch (UnsupportedEncodingException e) {
+            throw new MessagingException("Unable to encode authentication information", e);
+        }
     }
 
     private String getRoot() {

@@ -8,6 +8,8 @@ import com.fsck.k9.mail.filter.Base64;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
+
 import static com.fsck.k9.mail.K9MailLib.LOG_TAG;
 
 /**
@@ -17,7 +19,7 @@ import static com.fsck.k9.mail.K9MailLib.LOG_TAG;
 public class XOAuth2ChallengeParser {
     public static final String BAD_RESPONSE = "400";
 
-    public static boolean shouldRetry(String response, String host) {
+    public static boolean shouldRetry(String response, String host) throws UnsupportedEncodingException {
         String decodedResponse = Base64.decode(response);
 
         if (K9MailLib.isDebug()) {
