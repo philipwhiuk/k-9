@@ -79,32 +79,36 @@ public class ICalData {
 
         for (Attendee attendee: attendees) {
             if (attendee.getParticipationLevel() != null) {
-                if (attendee.getParticipationLevel().equals(ParticipationLevel.REQUIRED)) {
+                ParticipationLevel level = attendee.getParticipationLevel();
+
+                if (level.equals(ParticipationLevel.REQUIRED)) {
                     requiredList.add(attendee);
-                } else if (attendee.getParticipationLevel().equals(ParticipationLevel.OPTIONAL)) {
+                } else if (level.equals(ParticipationLevel.OPTIONAL)) {
                     optionalList.add(attendee);
-                } else if (attendee.getParticipationLevel().equals(ParticipationLevel.FYI)) {
+                } else if (level.equals(ParticipationLevel.FYI)) {
                     fyiList.add(attendee);
                 }
             }
             if (attendee.getParticipationStatus() != null) {
-                if (attendee.getParticipationStatus().equals(ParticipationStatus.ACCEPTED)) {
+                ParticipationStatus status = attendee.getParticipationStatus();
+
+                if (status.equals(ParticipationStatus.ACCEPTED)) {
                     acceptedList.add(attendee);
-                } else if (attendee.getParticipationLevel().equals(ParticipationStatus.CONFIRMED)) {
+                } else if (status.equals(ParticipationStatus.CONFIRMED)) {
                     confirmedList.add(attendee);
-                } else if (attendee.getParticipationLevel().equals(ParticipationStatus.DECLINED)) {
+                } else if (status.equals(ParticipationStatus.DECLINED)) {
                     declinedList.add(attendee);
-                } else if (attendee.getParticipationLevel().equals(ParticipationStatus.IN_PROCESS)) {
+                } else if (status.equals(ParticipationStatus.IN_PROCESS)) {
                     inProcessList.add(attendee);
-                } else if (attendee.getParticipationLevel().equals(ParticipationStatus.COMPLETED)) {
+                } else if (status.equals(ParticipationStatus.COMPLETED)) {
                     completedList.add(attendee);
-                } else if (attendee.getParticipationLevel().equals(ParticipationStatus.DELEGATED)) {
+                } else if (status.equals(ParticipationStatus.DELEGATED)) {
                     delegatedList.add(attendee);
-                } else if (attendee.getParticipationLevel().equals(ParticipationStatus.SENT)) {
+                } else if (status.equals(ParticipationStatus.SENT)) {
                     sentList.add(attendee);
-                } else if (attendee.getParticipationLevel().equals(ParticipationStatus.NEEDS_ACTION)) {
+                } else if (status.equals(ParticipationStatus.NEEDS_ACTION)) {
                     needsActionList.add(attendee);
-                } else if (attendee.getParticipationLevel().equals(ParticipationStatus.TENTATIVE)) {
+                } else if (status.equals(ParticipationStatus.TENTATIVE)) {
                     tentativeList.add(attendee);
                 }
             }
