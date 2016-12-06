@@ -47,8 +47,8 @@ public class GlobalSettings {
                         Environment.DIRECTORY_DOWNLOADS)))
             ));
         s.put("backgroundOperations", Settings.versions(
-                new V(1, new EnumSetting<K9.BACKGROUND_OPS>(
-                        K9.BACKGROUND_OPS.class, K9.BACKGROUND_OPS.WHEN_CHECKED_AUTO_SYNC))
+                new V(1, new EnumSetting<K9.BackgroundOperation>(
+                        K9.BackgroundOperation.class, K9.BackgroundOperation.WHEN_CHECKED_AUTO_SYNC))
             ));
         s.put("changeRegisteredNameColor", Settings.versions(
                 new V(1, new BooleanSetting(false))
