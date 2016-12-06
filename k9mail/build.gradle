@@ -119,3 +119,10 @@ if (project.hasProperty('storeFile')) {
 if (project.hasProperty('storePassword')) {
     android.signingConfigs.release.storePassword = storePassword
 }
+
+tasks.withType(FindBugs) {
+    reports {
+        xml.enabled = false
+        html.enabled = true
+    }
+}
