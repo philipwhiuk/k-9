@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.text.method.LinkMovementMethod;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.Button;
 import android.widget.TextView;
 
 import com.fsck.k9.R;
@@ -17,7 +16,7 @@ import com.fsck.k9.helper.HtmlConverter;
 /**
  * Displays a welcome message when no accounts have been created yet.
  */
-public class WelcomeMessage extends K9Activity implements OnClickListener{
+public class WelcomeMessage extends K9Activity implements OnClickListener {
 
     public static void showWelcomeMessage(Context context) {
         Intent intent = new Intent(context, WelcomeMessage.class);

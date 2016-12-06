@@ -13,13 +13,16 @@ import com.fsck.k9.Preferences;
 
 import java.util.List;
 
-import static com.fsck.k9.remotecontrol.K9RemoteControl.*;
+import static com.fsck.k9.remotecontrol.K9RemoteControl.K9_ACCOUNT_UUIDS;
+import static com.fsck.k9.remotecontrol.K9RemoteControl.K9_ACCOUNT_DESCRIPTIONS;
 
 public class RemoteControlReceiver extends CoreReceiver {
     @Override
-    public Integer receive(Context context, Intent intent, Integer tmpWakeLockId) {
-        if (K9.DEBUG)
+    public Integer receive(Context context, Intent intent, Integer providedWakeLockId) {
+        Integer tmpWakeLockId = providedWakeLockId;
+        if (K9.DEBUG) {
             Log.i(K9.LOG_TAG, "RemoteControlReceiver.onReceive" + intent);
+        }
 
         if (K9RemoteControl.K9_SET.equals(intent.getAction())) {
             RemoteControlService.set(context, intent, tmpWakeLockId);

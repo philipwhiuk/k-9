@@ -4,15 +4,12 @@ import com.fsck.k9.Account;
 import com.fsck.k9.K9;
 import com.fsck.k9.Preferences;
 import com.fsck.k9.R;
-import com.fsck.k9.mail.Store;
 import com.fsck.k9.service.DatabaseUpgradeService;
 
-import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.widget.TextView;
@@ -25,12 +22,12 @@ import android.widget.TextView;
  * The current upgrade process works as follows:
  * <ol>
  * <li>Activities that access an account's database call
- *     {@link #actionUpgradeDatabases(Context, Intent)} in their {@link Activity#onCreate(Bundle)}
+ *     {@link #actionUpgradeDatabases(Context, Intent)} in their {@link android.app.Activity#onCreate(Bundle)}
  *     method.</li>
  * <li>{@link #actionUpgradeDatabases(Context, Intent)} will call {@link K9#areDatabasesUpToDate()}
  *     to check if we already know whether the databases have been upgraded.</li>
  * <li>{@link K9#areDatabasesUpToDate()} will compare the last known database version stored in a
- *     {@link SharedPreferences} file to {@link com.fsck.k9.mailstore.LocalStore#DB_VERSION}. This
+ *     {@link android.content.SharedPreferences} file to {@link com.fsck.k9.mailstore.LocalStore#DB_VERSION}. This
  *     is done as an optimization because it's faster than opening all of the accounts' databases
  *     one by one.</li>
  * <li>If there was an error reading the cached database version or if it shows the databases need
@@ -46,10 +43,10 @@ import android.widget.TextView;
  *     {@link #actionUpgradeDatabases(Context, Intent)}.</li>
  * </ol>
  * </p><p>
- * Currently we make no attempts to stop the background code (e.g. {@link MessagingController}) from
+ * Currently we make no attempts to stop the background code (e.g. {@link com.fsck.k9.controller.MessagingController}) from
  * opening the accounts' databases. If this happens the upgrade is performed in one of the
  * background threads and not by {@link DatabaseUpgradeService}. But this is not a problem. Due to
- * the locking in {@link Store#getLocalInstance(Account, Context)} the upgrade
+ * the locking in {@link com.fsck.k9.mailstore.LocalStore#getInstance(Account, Context)} the upgrade
  * service will block in the {@link Account#getLocalStore()} call and from the outside (especially
  * for this activity) it will appear as if {@link DatabaseUpgradeService} is performing the upgrade.
  * </p>

@@ -22,7 +22,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.fsck.k9.R;
-import com.fsck.k9.mail.internet.SecureTransportState;
 import com.fsck.k9.view.MessageCryptoDisplayStatus;
 import com.fsck.k9.view.ThemeUtils;
 import com.fsck.k9.view.TransportCryptoDisplayStatus;
@@ -38,14 +37,14 @@ public class SecurityInfoDialog extends DialogFragment {
     private View dialogView;
 
     private View topIconFrame;
-    private ImageView topIcon_1;
-    private ImageView topIcon_2;
-    private ImageView topIcon_3;
+    private ImageView topIcon1;
+    private ImageView topIcon2;
+    private ImageView topIcon3;
     private TextView topText;
 
     private View bottomIconFrame;
-    private ImageView bottomIcon_1;
-    private ImageView bottomIcon_2;
+    private ImageView bottomIcon1;
+    private ImageView bottomIcon2;
     private TextView bottomText;
 
     private View transportIconFrame;
@@ -73,14 +72,14 @@ public class SecurityInfoDialog extends DialogFragment {
         dialogView = LayoutInflater.from(getActivity()).inflate(R.layout.message_crypto_info_dialog, null);
 
         topIconFrame = dialogView.findViewById(R.id.crypto_info_top_frame);
-        topIcon_1 = (ImageView) topIconFrame.findViewById(R.id.crypto_info_top_icon_1);
-        topIcon_2 = (ImageView) topIconFrame.findViewById(R.id.crypto_info_top_icon_2);
-        topIcon_3 = (ImageView) topIconFrame.findViewById(R.id.crypto_info_top_icon_3);
+        topIcon1 = (ImageView) topIconFrame.findViewById(R.id.crypto_info_top_icon_1);
+        topIcon2 = (ImageView) topIconFrame.findViewById(R.id.crypto_info_top_icon_2);
+        topIcon3 = (ImageView) topIconFrame.findViewById(R.id.crypto_info_top_icon_3);
         topText = (TextView) dialogView.findViewById(R.id.crypto_info_top_text);
 
         bottomIconFrame = dialogView.findViewById(R.id.crypto_info_bottom_frame);
-        bottomIcon_1 = (ImageView) bottomIconFrame.findViewById(R.id.crypto_info_bottom_icon_1);
-        bottomIcon_2 = (ImageView) bottomIconFrame.findViewById(R.id.crypto_info_bottom_icon_2);
+        bottomIcon1 = (ImageView) bottomIconFrame.findViewById(R.id.crypto_info_bottom_icon_1);
+        bottomIcon2 = (ImageView) bottomIconFrame.findViewById(R.id.crypto_info_bottom_icon_2);
         bottomText = (TextView) dialogView.findViewById(R.id.crypto_info_bottom_text);
 
         transportIconFrame = dialogView.findViewById(R.id.transport_info_frame);
@@ -108,7 +107,7 @@ public class SecurityInfoDialog extends DialogFragment {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
                     Fragment frag = getTargetFragment();
-                    if (! (frag instanceof OnClickShowCryptoKeyListener)) {
+                    if (!(frag instanceof OnClickShowCryptoKeyListener)) {
                         throw new AssertionError("Displaying activity must implement OnClickShowCryptoKeyListener!");
                     }
                     ((OnClickShowCryptoKeyListener) frag).onClickShowCryptoKey();
@@ -142,10 +141,11 @@ public class SecurityInfoDialog extends DialogFragment {
         @ColorInt int color = ThemeUtils.getStyledColor(getActivity(), displayStatus.colorAttr);
         transportIcon.setImageResource(displayStatus.statusIconRes);
         transportIcon.setColorFilter(color);
-        if (displayStatus.textRes != null)
+        if (displayStatus.textRes != null) {
             transportText.setText(displayStatus.textRes);
-        else
+        } else {
             transportText.setVisibility(View.GONE);
+        }
     }
 
     private void setMessageSingleLine(@AttrRes int colorAttr,
@@ -153,16 +153,16 @@ public class SecurityInfoDialog extends DialogFragment {
             @DrawableRes Integer statusDotsRes) {
         @ColorInt int color = ThemeUtils.getStyledColor(getActivity(), colorAttr);
 
-        topIcon_1.setImageResource(statusIconRes);
-        topIcon_1.setColorFilter(color);
+        topIcon1.setImageResource(statusIconRes);
+        topIcon1.setColorFilter(color);
         topText.setText(topTextRes);
 
         if (statusDotsRes != null) {
-            topIcon_3.setImageResource(statusDotsRes);
-            topIcon_3.setColorFilter(color);
-            topIcon_3.setVisibility(View.VISIBLE);
+            topIcon3.setImageResource(statusDotsRes);
+            topIcon3.setColorFilter(color);
+            topIcon3.setVisibility(View.VISIBLE);
         } else {
-            topIcon_3.setVisibility(View.GONE);
+            topIcon3.setVisibility(View.GONE);
         }
 
         bottomText.setVisibility(View.GONE);
@@ -172,17 +172,17 @@ public class SecurityInfoDialog extends DialogFragment {
     private void setMessageWithAnimation(@AttrRes int colorAttr,
             @StringRes int topTextRes, @DrawableRes int statusIconRes,
             @StringRes int bottomTextRes, @DrawableRes int statusDotsRes) {
-        topIcon_1.setImageResource(statusIconRes);
-        topIcon_2.setImageResource(statusDotsRes);
-        topIcon_3.setVisibility(View.GONE);
+        topIcon1.setImageResource(statusIconRes);
+        topIcon2.setImageResource(statusDotsRes);
+        topIcon3.setVisibility(View.GONE);
         topText.setText(topTextRes);
 
-        bottomIcon_1.setImageResource(statusIconRes);
-        bottomIcon_2.setImageResource(statusDotsRes);
+        bottomIcon1.setImageResource(statusIconRes);
+        bottomIcon2.setImageResource(statusDotsRes);
         bottomText.setText(bottomTextRes);
 
-        topIcon_1.setColorFilter(ThemeUtils.getStyledColor(getActivity(), colorAttr));
-        bottomIcon_2.setColorFilter(ThemeUtils.getStyledColor(getActivity(), colorAttr));
+        topIcon1.setColorFilter(ThemeUtils.getStyledColor(getActivity(), colorAttr));
+        bottomIcon2.setColorFilter(ThemeUtils.getStyledColor(getActivity(), colorAttr));
 
         prepareIconAnimation();
     }

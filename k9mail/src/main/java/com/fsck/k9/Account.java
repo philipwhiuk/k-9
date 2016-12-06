@@ -35,7 +35,6 @@ import com.fsck.k9.mail.filter.Base64;
 import com.fsck.k9.mail.store.RemoteStore;
 import com.fsck.k9.mail.store.StoreConfig;
 import com.fsck.k9.mailstore.StorageManager;
-import com.fsck.k9.mailstore.StorageManager.StorageProvider;
 import com.fsck.k9.mailstore.LocalStore;
 import com.fsck.k9.preferences.StorageEditor;
 import com.fsck.k9.preferences.Storage;
@@ -403,7 +402,8 @@ public class Account implements BaseAccount, StoreConfig {
         } catch (UnsupportedEncodingException e) {
             Log.e(K9.LOG_TAG, "Unable to decode string: " + storage.getString(mUuid + ".storeUri", null), e);
         }
-        mLocalStorageProviderId = storage.getString(mUuid + ".localStorageProvider", StorageManager.getInstance(K9.app).getDefaultProviderId());
+        mLocalStorageProviderId = storage.getString(mUuid + ".localStorageProvider",
+                StorageManager.getInstance(K9.app).getDefaultProviderId());
         try {
             mTransportUri = Base64.decode(storage.getString(mUuid + ".storeUri", null));
         } catch (UnsupportedEncodingException e) {
@@ -669,8 +669,8 @@ public class Account implements BaseAccount, StoreConfig {
         if (moveUp) {
             for (int i = 0; i < uuids.length; i++) {
                 if (i > 0 && uuids[i].equals(mUuid)) {
-                    newUuids[i] = newUuids[i-1];
-                    newUuids[i-1] = mUuid;
+                    newUuids[i] = newUuids[i - 1];
+                    newUuids[i - 1] = mUuid;
                 }
                 else {
                     newUuids[i] = uuids[i];
@@ -680,8 +680,8 @@ public class Account implements BaseAccount, StoreConfig {
         else {
             for (int i = uuids.length - 1; i >= 0; i--) {
                 if (i < uuids.length - 1 && uuids[i].equals(mUuid)) {
-                    newUuids[i] = newUuids[i+1];
-                    newUuids[i+1] = mUuid;
+                    newUuids[i] = newUuids[i + 1];
+                    newUuids[i + 1] = mUuid;
                 }
                 else {
                     newUuids[i] = uuids[i];
@@ -1379,7 +1379,7 @@ public class Account implements BaseAccount, StoreConfig {
     @Override
     public boolean equals(Object o) {
         if (o instanceof Account) {
-            return ((Account)o).mUuid.equals(mUuid);
+            return ((Account) o).mUuid.equals(mUuid);
         }
         return super.equals(o);
     }
@@ -1590,23 +1590,25 @@ public class Account implements BaseAccount, StoreConfig {
             now.set(Calendar.MILLISECOND, 0);
             if (age < 28) {
                 now.add(Calendar.DATE, age * -1);
-            } else switch (age) {
-                case 28:
-                    now.add(Calendar.MONTH, -1);
-                    break;
-                case 56:
-                    now.add(Calendar.MONTH, -2);
-                    break;
-                case 84:
-                    now.add(Calendar.MONTH, -3);
-                    break;
-                case 168:
-                    now.add(Calendar.MONTH, -6);
-                    break;
-                case 365:
-                    now.add(Calendar.YEAR, -1);
-                    break;
+            } else {
+                switch (age) {
+                    case 28:
+                        now.add(Calendar.MONTH, -1);
+                        break;
+                    case 56:
+                        now.add(Calendar.MONTH, -2);
+                        break;
+                    case 84:
+                        now.add(Calendar.MONTH, -3);
+                        break;
+                    case 168:
+                        now.add(Calendar.MONTH, -6);
+                        break;
+                    case 365:
+                        now.add(Calendar.YEAR, -1);
+                        break;
                 }
+            }
 
             return now.getTime();
         }
@@ -1806,8 +1808,8 @@ public class Account implements BaseAccount, StoreConfig {
     }
 
     /**
-     * @return <code>true</code> if our {@link StorageProvider} is ready. (e.g.
-     *         card inserted)
+     * @return <code>true</code> if our
+     * {@link com.fsck.k9.mailstore.StorageManager.StorageProvider} is ready. (e.g. SD card is inserted)
      */
     public boolean isAvailable(Context context) {
         String localStorageProviderId = getLocalStorageProviderId();

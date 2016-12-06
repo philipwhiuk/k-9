@@ -7,9 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 import android.content.Context;
-import android.graphics.PorterDuff;
 import android.graphics.Typeface;
-import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.SpannableString;
@@ -24,7 +22,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.widget.CheckBox;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.QuickContactBadge;
 import android.widget.TextView;
@@ -45,8 +42,6 @@ import com.fsck.k9.mail.Flag;
 import com.fsck.k9.mail.Message;
 import com.fsck.k9.mail.MessagingException;
 import com.fsck.k9.mail.internet.MimeUtility;
-import com.fsck.k9.mail.internet.ReceivedHeaders;
-import com.fsck.k9.mail.internet.SecureTransportState;
 import com.fsck.k9.ui.messageview.OnCryptoClickListener;
 
 
@@ -156,7 +151,7 @@ public class MessageHeader extends LinearLayout implements OnClickListener, OnLo
             }
             case R.id.to:
             case R.id.cc: {
-                expand((TextView)view, ((TextView)view).getEllipsize() != null);
+                expand((TextView) view, ((TextView) view).getEllipsize() != null);
                 layoutChanged();
                 break;
             }
@@ -465,12 +460,12 @@ public class MessageHeader extends LinearLayout implements OnClickListener, OnLo
 
     @Override
     public void onRestoreInstanceState(Parcelable state) {
-        if(!(state instanceof SavedState)) {
+        if (!(state instanceof SavedState)) {
             super.onRestoreInstanceState(state);
             return;
         }
 
-        SavedState savedState = (SavedState)state;
+        SavedState savedState = (SavedState) state;
         super.onRestoreInstanceState(savedState.getSuperState());
 
         mSavedState = savedState;

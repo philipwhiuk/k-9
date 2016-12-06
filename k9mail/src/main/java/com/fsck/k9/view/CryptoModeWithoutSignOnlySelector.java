@@ -67,9 +67,9 @@ public class CryptoModeWithoutSignOnlySelector extends FrameLayout
         float crossfadeValue1, crossfadeValue2, crossfadeValue3;
 
         if (progress < CROSSFADE_THRESH_1_HIGH) {
-            crossfadeValue1 = (progress -CROSSFADE_THRESH_1_LOW) / CROSSFADE_DIVISOR_1;
+            crossfadeValue1 = (progress - CROSSFADE_THRESH_1_LOW) / CROSSFADE_DIVISOR_1;
             if (crossfadeValue1 > 1.0f) {
-                crossfadeValue1 = 2.0f -crossfadeValue1;
+                crossfadeValue1 = 2.0f - crossfadeValue1;
             }
         } else {
             crossfadeValue1 = 0.0f;
@@ -77,16 +77,16 @@ public class CryptoModeWithoutSignOnlySelector extends FrameLayout
 
 
         if (progress > CROSSFADE_THRESH_2_LOW && progress < CROSSFADE_THRESH_2_HIGH) {
-            crossfadeValue2 = (progress -CROSSFADE_THRESH_2_LOW) / CROSSFADE_DIVISOR_2;
+            crossfadeValue2 = (progress - CROSSFADE_THRESH_2_LOW) / CROSSFADE_DIVISOR_2;
             if (crossfadeValue2 > 1.0f) {
-                crossfadeValue2 = 2.0f -crossfadeValue2;
+                crossfadeValue2 = 2.0f - crossfadeValue2;
             }
         } else {
             crossfadeValue2 = 0.0f;
         }
 
         if (progress > CROSSFADE_THRESH_3_LOW) {
-            crossfadeValue3 = (progress -CROSSFADE_THRESH_3_LOW) / CROSSFADE_DIVISOR_3;
+            crossfadeValue3 = (progress - CROSSFADE_THRESH_3_LOW) / CROSSFADE_DIVISOR_3;
         } else {
             crossfadeValue3 = 0.0f;
         }

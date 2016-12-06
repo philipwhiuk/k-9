@@ -20,10 +20,10 @@ import com.fsck.k9.notification.NotificationActionService;
 
 
 public class NotificationDeleteConfirmation extends Activity {
-    private final static String EXTRA_ACCOUNT_UUID = "accountUuid";
-    private final static String EXTRA_MESSAGE_REFERENCES = "messageReferences";
+    private static final String EXTRA_ACCOUNT_UUID = "accountUuid";
+    private static final String EXTRA_MESSAGE_REFERENCES = "messageReferences";
 
-    private final static int DIALOG_CONFIRM = 1;
+    private static final int DIALOG_CONFIRM = 1;
 
     private Account account;
     private ArrayList<MessageReference> messagesToDelete;

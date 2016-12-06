@@ -112,15 +112,15 @@ public class MessageCryptoPresenter implements OnCryptoClickListener {
                 break;
             }
 
+            case LOADING: {
+                throw new IllegalStateException("Displaying message while in loading state!");
+            }
+
             case INCOMPLETE_SIGNED:
             case UNSUPPORTED_SIGNED:
             default: {
                 messageView.showMessage(account, messageViewInfo);
                 break;
-            }
-
-            case LOADING: {
-                throw new IllegalStateException("Displaying message while in loading state!");
             }
         }
 

@@ -16,7 +16,7 @@ import com.fsck.k9.ui.crypto.MessageCryptoAnnotations;
 
 
 public class LocalMessageExtractorLoader extends AsyncTaskLoader<MessageViewInfo> {
-    private static final MessageViewInfoExtractor messageViewInfoExtractor = MessageViewInfoExtractor.getInstance();
+    private static final MessageViewInfoExtractor MESSAGE_VIEW_INFO_EXTRACTOR = MessageViewInfoExtractor.getInstance();
 
 
     private final Message message;
@@ -52,7 +52,7 @@ public class LocalMessageExtractorLoader extends AsyncTaskLoader<MessageViewInfo
     @WorkerThread
     public MessageViewInfo loadInBackground() {
         try {
-            return messageViewInfoExtractor.extractMessageForView(message, annotations);
+            return MESSAGE_VIEW_INFO_EXTRACTOR.extractMessageForView(message, annotations);
         } catch (Exception e) {
             Log.e(K9.LOG_TAG, "Error while decoding message", e);
             return null;

@@ -134,12 +134,12 @@ public class MessageReference implements Parcelable {
 
     @Override
     public int hashCode() {
-        final int MULTIPLIER = 31;
+        final int multiplier = 31;
 
         int result = 1;
-        result = MULTIPLIER * result + ((accountUuid == null) ? 0 : accountUuid.hashCode());
-        result = MULTIPLIER * result + ((folderName == null) ? 0 : folderName.hashCode());
-        result = MULTIPLIER * result + ((uid == null) ? 0 : uid.hashCode());
+        result = multiplier * result + ((accountUuid == null) ? 0 : accountUuid.hashCode());
+        result = multiplier * result + ((folderName == null) ? 0 : folderName.hashCode());
+        result = multiplier * result + ((uid == null) ? 0 : uid.hashCode());
         return result;
     }
 

@@ -5,7 +5,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
@@ -18,24 +17,17 @@ import android.annotation.SuppressLint;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Application;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnMultiChoiceClickListener;
 import android.content.Intent;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
-import android.util.SparseBooleanArray;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
@@ -44,20 +36,14 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.webkit.WebView;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
-import android.widget.CompoundButton.OnCheckedChangeListener;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -77,16 +63,10 @@ import com.fsck.k9.activity.setup.Prefs;
 import com.fsck.k9.activity.setup.WelcomeMessage;
 import com.fsck.k9.controller.MessagingController;
 import com.fsck.k9.helper.SizeFormatter;
-import com.fsck.k9.mail.AuthType;
-import com.fsck.k9.mail.ServerSettings;
-import com.fsck.k9.mail.Transport;
-import com.fsck.k9.mail.store.RemoteStore;
 import com.fsck.k9.mailstore.StorageManager;
 import com.fsck.k9.preferences.SettingsExporter;
 import com.fsck.k9.preferences.SettingsImportExportException;
 import com.fsck.k9.preferences.SettingsImporter;
-import com.fsck.k9.preferences.SettingsImporter.AccountDescription;
-import com.fsck.k9.preferences.SettingsImporter.AccountDescriptionPair;
 import com.fsck.k9.preferences.SettingsImporter.ImportContents;
 import com.fsck.k9.preferences.SettingsImporter.ImportResults;
 import com.fsck.k9.search.LocalSearch;
@@ -275,7 +255,8 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
             }
         }
         @Override
-        public void accountStatusChanged(BaseAccount account, AccountStats stats) {
+        public void accountStatusChanged(BaseAccount account, AccountStats providedStats) {
+            AccountStats stats = providedStats;
             AccountStats oldStats = accountStats.get(account.getUuid());
             int oldUnreadMessageCount = 0;
             if (oldStats != null) {
@@ -296,7 +277,7 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
                 mHandler.progress(Window.PROGRESS_END);
                 mHandler.refreshTitle();
             } else {
-                int level = (Window.PROGRESS_END / mAdapter.getCount()) * (mAdapter.getCount() - pendingWork.size()) ;
+                int level = (Window.PROGRESS_END / mAdapter.getCount()) * (mAdapter.getCount() - pendingWork.size());
                 mHandler.progress(level);
             }
         }
@@ -463,7 +444,7 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
     @SuppressWarnings("unchecked")
     private void restoreAccountStats(Bundle icicle) {
         if (icicle != null) {
-            Map<String, AccountStats> oldStats = (Map<String, AccountStats>)icicle.get(ACCOUNT_STATS);
+            Map<String, AccountStats> oldStats = (Map<String, AccountStats>) icicle.get(ACCOUNT_STATS);
             if (oldStats != null) {
                 accountStats.putAll(oldStats);
             }
@@ -525,19 +506,19 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
     }
 
     private List<BaseAccount> accounts = new ArrayList<BaseAccount>();
-    private enum ACCOUNT_LOCATION {
+    private enum AccountLocation {
         TOP, MIDDLE, BOTTOM;
     }
-    private EnumSet<ACCOUNT_LOCATION> accountLocation(BaseAccount account) {
-        EnumSet<ACCOUNT_LOCATION> accountLocation = EnumSet.of(ACCOUNT_LOCATION.MIDDLE);
+    private EnumSet<AccountLocation> accountLocation(BaseAccount account) {
+        EnumSet<AccountLocation> accountLocation = EnumSet.of(AccountLocation.MIDDLE);
         if (accounts.size() > 0) {
             if (accounts.get(0).equals(account)) {
-                accountLocation.remove(ACCOUNT_LOCATION.MIDDLE);
-                accountLocation.add(ACCOUNT_LOCATION.TOP);
+                accountLocation.remove(AccountLocation.MIDDLE);
+                accountLocation.add(AccountLocation.TOP);
             }
             if (accounts.get(accounts.size() - 1).equals(account)) {
-                accountLocation.remove(ACCOUNT_LOCATION.MIDDLE);
-                accountLocation.add(ACCOUNT_LOCATION.BOTTOM);
+                accountLocation.remove(AccountLocation.MIDDLE);
+                accountLocation.add(AccountLocation.BOTTOM);
             }
         }
         return accountLocation;
@@ -643,10 +624,10 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
     @SuppressLint("StringFormatInvalid")
     private boolean onOpenAccount(BaseAccount account) {
         if (account instanceof SearchAccount) {
-            SearchAccount searchAccount = (SearchAccount)account;
+            SearchAccount searchAccount = (SearchAccount) account;
             MessageList.actionDisplaySearch(this, searchAccount.getRelatedSearch(), false, false);
         } else {
-            Account realAccount = (Account)account;
+            Account realAccount = (Account) account;
             if (!realAccount.isEnabled()) {
                 onActivateAccount(realAccount);
                 return false;
@@ -664,7 +645,8 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
                 LocalSearch search = new LocalSearch(realAccount.getAutoExpandFolderName());
                 search.addAllowedFolder(realAccount.getAutoExpandFolderName());
                 search.addAccountUuid(realAccount.getUuid());
-                MessageList.actionDisplaySearch(this, search, false, true);}
+                MessageList.actionDisplaySearch(this, search, false, true);
+            }
         }
         return true;
     }
@@ -758,14 +740,14 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
 
     @Override
     public boolean onContextItemSelected(android.view.MenuItem item) {
-        AdapterContextMenuInfo menuInfo = (AdapterContextMenuInfo)item.getMenuInfo();
+        AdapterContextMenuInfo menuInfo = (AdapterContextMenuInfo) item.getMenuInfo();
         // submenus don't actually set the menuInfo, so the "advanced"
         // submenu wouldn't work.
         if (menuInfo != null) {
-            mSelectedContextAccount = (BaseAccount)getListView().getItemAtPosition(menuInfo.position);
+            mSelectedContextAccount = (BaseAccount) getListView().getItemAtPosition(menuInfo.position);
         }
         if (mSelectedContextAccount instanceof Account) {
-            Account realAccount = (Account)mSelectedContextAccount;
+            Account realAccount = (Account) mSelectedContextAccount;
             switch (item.getItemId()) {
                 case R.id.delete_account:
                     onDeleteAccount(realAccount);
@@ -818,7 +800,7 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
     }
 
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        BaseAccount account = (BaseAccount)parent.getItemAtPosition(position);
+        BaseAccount account = (BaseAccount) parent.getItemAtPosition(position);
         onOpenAccount(account);
     }
 
@@ -892,14 +874,14 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
             }
         }
         else {
-            EnumSet<ACCOUNT_LOCATION> accountLocation = accountLocation(account);
-            if (accountLocation.contains(ACCOUNT_LOCATION.TOP)) {
+            EnumSet<AccountLocation> accountLocation = accountLocation(account);
+            if (accountLocation.contains(AccountLocation.TOP)) {
                 menu.findItem(R.id.move_up).setEnabled(false);
             }
             else {
                 menu.findItem(R.id.move_up).setEnabled(true);
             }
-            if (accountLocation.contains(ACCOUNT_LOCATION.BOTTOM)) {
+            if (accountLocation.contains(AccountLocation.BOTTOM)) {
                 menu.findItem(R.id.move_down).setEnabled(false);
             }
             else {
@@ -928,8 +910,9 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         Log.i(K9.LOG_TAG, "onActivityResult requestCode = " + requestCode + ", resultCode = "
                 + resultCode + ", data = " + data);
-        if (resultCode != RESULT_OK)
+        if (resultCode != RESULT_OK) {
             return;
+        }
         if (data == null) {
             return;
         }
@@ -1022,7 +1005,7 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
 
                 holder.chip = view.findViewById(R.id.chip);
                 holder.folders = (ImageButton) view.findViewById(R.id.folders);
-                holder.accountsItemLayout = (LinearLayout)view.findViewById(R.id.accounts_item_layout);
+                holder.accountsItemLayout = (LinearLayout) view.findViewById(R.id.accounts_item_layout);
 
                 view.setTag(holder);
             }
@@ -1054,35 +1037,38 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
                 holder.newMessageCountWrapper.setVisibility(unreadMessageCount > 0 ? View.VISIBLE : View.GONE);
 
                 holder.flaggedMessageCount.setText(String.format("%d", stats.flaggedMessageCount));
-                holder.flaggedMessageCountWrapper.setVisibility(K9.messageListStars() && stats.flaggedMessageCount > 0 ? View.VISIBLE : View.GONE);
+                holder.flaggedMessageCountWrapper.setVisibility(
+                        K9.messageListStars() && stats.flaggedMessageCount > 0 ? View.VISIBLE : View.GONE);
 
                 holder.flaggedMessageCountWrapper.setOnClickListener(createFlaggedSearchListener(account));
                 holder.newMessageCountWrapper.setOnClickListener(createUnreadSearchListener(account));
 
                 holder.activeIcons.setOnClickListener(new OnClickListener() {
                     public void onClick(View v) {
-                        Toast toast = Toast.makeText(getApplication(), getString(R.string.tap_hint), Toast.LENGTH_SHORT);
+                        Toast toast = Toast.makeText(getApplication(),
+                                getString(R.string.tap_hint), Toast.LENGTH_SHORT);
                         toast.show();
                     }
-                }
-                                                     );
+                });
 
             } else {
                 holder.newMessageCountWrapper.setVisibility(View.GONE);
                 holder.flaggedMessageCountWrapper.setVisibility(View.GONE);
             }
             if (account instanceof Account) {
-                Account realAccount = (Account)account;
+                Account realAccount = (Account) account;
 
                 holder.chip.setBackgroundColor(realAccount.getChipColor());
 
-                holder.flaggedMessageCountIcon.setBackgroundDrawable( realAccount.generateColorChip(false, true).drawable() );
-                holder.newMessageCountIcon.setBackgroundDrawable( realAccount.generateColorChip(false, false).drawable() );
+                holder.flaggedMessageCountIcon.setBackgroundDrawable(realAccount.generateColorChip(false, true).drawable());
+                holder.newMessageCountIcon.setBackgroundDrawable(realAccount.generateColorChip(false, false).drawable());
 
             } else {
                 holder.chip.setBackgroundColor(0xff999999);
-                holder.newMessageCountIcon.setBackgroundDrawable( new ColorChip(0xff999999, false, ColorChip.CIRCULAR).drawable() );
-                holder.flaggedMessageCountIcon.setBackgroundDrawable(new ColorChip(0xff999999, false, ColorChip.STAR).drawable());
+                holder.newMessageCountIcon.setBackgroundDrawable(
+                        new ColorChip(0xff999999, false, ColorChip.CIRCULAR).drawable());
+                holder.flaggedMessageCountIcon.setBackgroundDrawable(
+                        new ColorChip(0xff999999, false, ColorChip.STAR).drawable());
             }
 
 
@@ -1097,7 +1083,7 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
                 holder.folders.setVisibility(View.VISIBLE);
                 holder.folders.setOnClickListener(new OnClickListener() {
                     public void onClick(View v) {
-                        FolderList.actionHandleAccount(Accounts.this, (Account)account);
+                        FolderList.actionHandleAccount(Accounts.this, (Account) account);
 
                     }
                 });

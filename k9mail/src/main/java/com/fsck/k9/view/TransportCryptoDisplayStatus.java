@@ -8,10 +8,6 @@ import android.support.annotation.StringRes;
 
 import com.fsck.k9.R;
 import com.fsck.k9.mail.internet.SecureTransportState;
-import com.fsck.k9.mailstore.CryptoResultAnnotation;
-
-import org.openintents.openpgp.OpenPgpDecryptionResult;
-import org.openintents.openpgp.OpenPgpSignatureResult;
 
 
 public enum TransportCryptoDisplayStatus {

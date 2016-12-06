@@ -32,7 +32,7 @@ public class K9AboutDialogBuilder {
     public static AlertDialog.Builder create(final Accounts accounts) {
 
         String appName = accounts.getString(R.string.app_name);
-        String webpageUrlLink = "<a href=\"" + accounts.getString(R.string.app_webpage_url) + "\">"+appName+"</a>";
+        String webpageUrlLink = "<a href=\"" + accounts.getString(R.string.app_webpage_url) + "\">" + appName + "</a>";
         int year = Calendar.getInstance().get(Calendar.YEAR);
         WebView wv = new WebView(accounts);
         StringBuilder html = new StringBuilder()

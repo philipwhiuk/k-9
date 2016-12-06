@@ -153,7 +153,7 @@ public class ICalendarReplyView extends ICalendarView implements View.OnClickLis
         final CharSequence declined = ICalendarHelper.toFriendly(iCalendar.iCalData.getDeclined(), contacts);
         final CharSequence tentative = ICalendarHelper.toFriendly(iCalendar.iCalData.getTentative(), contacts);
 
-        if(iCalendar.iCalData.getRecurrenceRule() == null) {
+        if (iCalendar.iCalData.getRecurrenceRule() == null) {
             mRecurrenceView.setVisibility(GONE);
         } else {
             mRecurrenceView.setText(buildRule(iCalendar.iCalData.getRecurrenceRule().getValue(), getResources()));

@@ -335,11 +335,12 @@ public class MessageLoaderHelper {
         }
     }
 
-    private void onDecodeMessageFinished(MessageViewInfo messageViewInfo) {
+    private void onDecodeMessageFinished(MessageViewInfo providedMessageViewInfo) {
         if (callback == null) {
             throw new IllegalStateException("unexpected call when callback is already detached");
         }
 
+        MessageViewInfo messageViewInfo = providedMessageViewInfo;
         if (messageViewInfo == null) {
             messageViewInfo = createErrorStateMessageViewInfo();
             callback.onMessageViewInfoLoadFailed(messageViewInfo);

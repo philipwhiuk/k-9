@@ -12,9 +12,9 @@ public abstract class ICalendarView extends LinearLayout {
         super(context, attrs);
     }
 
-    abstract public void setCallback(ICalendarViewCallback iCalendarCallback);
+    public abstract void setCallback(ICalendarViewCallback iCalendarCallback);
 
-    abstract public void setICalendar(ICalendarViewInfo iCalendar);
+    public abstract void setICalendar(ICalendarViewInfo iCalendar);
 
-    abstract public void setShowSummary(boolean shouldShowSummary);
+    public abstract void setShowSummary(boolean shouldShowSummary);
 }

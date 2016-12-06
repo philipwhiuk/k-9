@@ -171,8 +171,7 @@ public enum MessageCryptoDisplayStatus {
             R.attr.openpgp_red,
             R.drawable.status_lock_error,
             R.string.crypto_msg_encrypted_smime_unavailable
-    ),
-    ;
+    );
 
     @AttrRes public final int colorAttr;
 

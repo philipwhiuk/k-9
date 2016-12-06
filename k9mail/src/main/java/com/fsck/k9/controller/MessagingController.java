@@ -145,7 +145,7 @@ public class MessagingController {
     private volatile boolean stopped = false;
 
 
-    public synchronized static MessagingController getInstance(Context context) {
+    public static synchronized MessagingController getInstance(Context context) {
         if (inst == null) {
             Context appContext = context.getApplicationContext();
             NotificationController notificationController = NotificationController.newInstance(appContext);
@@ -211,7 +211,7 @@ public class MessagingController {
                                           + " THIS SHOULD NEVER HAPPEN.");
                                 }
                             }
-                        } .start();
+                        }.start();
                     }
 
                     if (K9.DEBUG) {
@@ -236,7 +236,8 @@ public class MessagingController {
         putCommand(queuedCommands, description, listener, runnable, false);
     }
 
-    private void putCommand(BlockingQueue<Command> queue, String description, MessagingListener listener, Runnable runnable, boolean isForeground) {
+    private void putCommand(BlockingQueue<Command> queue, String description,
+                            MessagingListener listener, Runnable runnable, boolean isForeground) {
         int retries = 10;
         Exception e = null;
         while (retries-- > 0) {
@@ -422,7 +423,7 @@ public class MessagingController {
         try {
             Store store = account.getRemoteStore();
 
-            List <? extends Folder > remoteFolders = store.getPersonalNamespaces(false);
+            List<? extends Folder> remoteFolders = store.getPersonalNamespaces(false);
 
             LocalStore localStore = account.getLocalStore();
             Set<String> remoteFolderNames = new HashSet<>();
@@ -514,9 +515,13 @@ public class MessagingController {
             // Collecting statistics of the search result
             MessageRetrievalListener<LocalMessage> retrievalListener = new MessageRetrievalListener<LocalMessage>() {
                 @Override
-                public void messageStarted(String message, int number, int ofTotal) {}
+                public void messageStarted(String message, int number, int ofTotal) {
+
+                }
                 @Override
-                public void messagesFinished(int number) {}
+                public void messagesFinished(int number) {
+
+                }
                 @Override
                 public void messageFinished(LocalMessage message, int number, int ofTotal) {
                     if (!isMessageSuppressed(message)) {
@@ -748,8 +753,9 @@ public class MessagingController {
         Folder remoteFolder = null;
         LocalFolder tLocalFolder = null;
 
-        if (K9.DEBUG)
+        if (K9.DEBUG) {
             Log.i(K9.LOG_TAG, "Synchronizing folder " + account.getDescription() + ":" + folder);
+        }
 
         for (MessagingListener l : getListeners(listener)) {
             l.synchronizeMailboxStarted(account, folder);
@@ -767,8 +773,9 @@ public class MessagingController {
 
         Exception commandException = null;
         try {
-            if (K9.DEBUG)
+            if (K9.DEBUG) {
                 Log.d(K9.LOG_TAG, "SYNC: About to process pending commands for account " + account.getDescription());
+            }
 
             try {
                 processPendingCommandsSynchronous(account);
@@ -783,8 +790,9 @@ public class MessagingController {
              * Get the message list from the local store and create an index of
              * the uids within the list.
              */
-            if (K9.DEBUG)
+            if (K9.DEBUG) {
                 Log.v(K9.LOG_TAG, "SYNC: About to get local folder " + folder);
+            }
 
             final LocalStore localStore = account.getLocalStore();
             tLocalFolder = localStore.getFolder(folder);
@@ -798,17 +806,19 @@ public class MessagingController {
             }
 
             if (providedRemoteFolder != null) {
-                if (K9.DEBUG)
+                if (K9.DEBUG) {
                     Log.v(K9.LOG_TAG, "SYNC: using providedRemoteFolder " + folder);
+                }
                 remoteFolder = providedRemoteFolder;
             } else {
                 Store remoteStore = account.getRemoteStore();
 
-                if (K9.DEBUG)
+                if (K9.DEBUG) {
                     Log.v(K9.LOG_TAG, "SYNC: About to get remote folder " + folder);
+                }
                 remoteFolder = remoteStore.getFolder(folder);
 
-                if (! verifyOrCreateRemoteSpecialFolder(account, folder, remoteFolder, listener)) {
+                if (!verifyOrCreateRemoteSpecialFolder(account, folder, remoteFolder, listener)) {
                     return;
                 }
 
@@ -834,13 +844,15 @@ public class MessagingController {
                 /*
                  * Open the remote folder. This pre-loads certain metadata like message count.
                  */
-                if (K9.DEBUG)
+                if (K9.DEBUG) {
                     Log.v(K9.LOG_TAG, "SYNC: About to open remote folder " + folder);
+                }
 
                 remoteFolder.open(Folder.OPEN_MODE_RW);
                 if (Expunge.EXPUNGE_ON_POLL == account.getExpungePolicy()) {
-                    if (K9.DEBUG)
+                    if (K9.DEBUG) {
                         Log.d(K9.LOG_TAG, "SYNC: Expunging folder " + account.getDescription() + ":" + folder);
+                    }
                     remoteFolder.expunge();
                 }
 
@@ -862,8 +874,9 @@ public class MessagingController {
             final List<Message> remoteMessages = new ArrayList<>();
             Map<String, Message> remoteUidMap = new HashMap<>();
 
-            if (K9.DEBUG)
+            if (K9.DEBUG) {
                 Log.v(K9.LOG_TAG, "SYNC: Remote message count for folder " + folder + " is " + remoteMessageCount);
+            }
             final Date earliestDate = account.getEarliestPollDate();
 
 
@@ -876,8 +889,10 @@ public class MessagingController {
                     remoteStart = 1;
                 }
 
-                if (K9.DEBUG)
-                    Log.v(K9.LOG_TAG, "SYNC: About to get messages " + remoteStart + " through " + remoteMessageCount + " for folder " + folder);
+                if (K9.DEBUG) {
+                    Log.v(K9.LOG_TAG, "SYNC: About to get messages " + remoteStart +
+                            " through " + remoteMessageCount + " for folder " + folder);
+                }
 
                 final AtomicInteger headerProgress = new AtomicInteger(0);
                 for (MessagingListener l : getListeners(listener)) {
@@ -900,14 +915,15 @@ public class MessagingController {
                         remoteUidMap.put(thisMess.getUid(), thisMess);
                     }
                 }
-                if (K9.DEBUG)
+                if (K9.DEBUG) {
                     Log.v(K9.LOG_TAG, "SYNC: Got " + remoteUidMap.size() + " messages for folder " + folder);
+                }
 
                 for (MessagingListener l : getListeners(listener)) {
                     l.synchronizeMailboxHeadersFinished(account, folder, headerProgress.get(), remoteUidMap.size());
                 }
 
-            } else if(remoteMessageCount < 0) {
+            } else if (remoteMessageCount < 0) {
                 throw new Exception("Message count " + remoteMessageCount + " for folder " + folder);
             }
 
@@ -957,9 +973,10 @@ public class MessagingController {
             localFolder.setLastChecked(System.currentTimeMillis());
             localFolder.setStatus(null);
 
-            if (K9.DEBUG)
+            if (K9.DEBUG) {
                 Log.d(K9.LOG_TAG, "Done synchronizing folder " + account.getDescription() + ":" + folder +
-                      " @ " + new Date() + " with " + newMessages + " new messages");
+                        " @ " + new Date() + " with " + newMessages + " new messages");
+            }
 
             for (MessagingListener l : getListeners(listener)) {
                 l.synchronizeMailboxFinished(account, folder, remoteMessageCount, newMessages);
@@ -976,8 +993,9 @@ public class MessagingController {
                 }
             }
 
-            if (K9.DEBUG)
+            if (K9.DEBUG) {
                 Log.i(K9.LOG_TAG, "Done synchronizing folder " + account.getDescription() + ":" + folder);
+            }
 
         } catch (AuthenticationFailedException e) {
             handleAuthenticationFailure(account, true);
@@ -989,8 +1007,9 @@ public class MessagingController {
             boolean isNetworkConnectionIssue = (e instanceof MessagingException)
                     && !((MessagingException) e).hadActiveNetworkConnection();
 
-            if (!isNetworkConnectionIssue)
+            if (!isNetworkConnectionIssue) {
                 Log.e(K9.LOG_TAG, "synchronizeMailbox", e);
+            }
             // If we don't set the last checked, it can try too often during
             // failure conditions
             String rootMessage = getRootCauseMessage(e);
@@ -1063,8 +1082,9 @@ public class MessagingController {
                     for (MessagingListener l : getListeners(listener)) {
                         l.synchronizeMailboxFinished(account, folder, 0, 0);
                     }
-                    if (K9.DEBUG)
+                    if (K9.DEBUG) {
                         Log.i(K9.LOG_TAG, "Done synchronizing folder " + folder);
+                    }
 
                     return false;
                 }
@@ -1124,7 +1144,8 @@ public class MessagingController {
         List<Message> messages = new ArrayList<>(inputMessages);
 
         for (Message message : messages) {
-            evaluateMessageForDownload(message, folder, localFolder, remoteFolder, account, unsyncedMessages, syncFlagMessages , flagSyncOnly);
+            evaluateMessageForDownload(message, folder, localFolder, remoteFolder, account,
+                    unsyncedMessages, syncFlagMessages , flagSyncOnly);
         }
 
         final AtomicInteger progress = new AtomicInteger(0);
@@ -1133,8 +1154,9 @@ public class MessagingController {
             l.synchronizeMailboxProgress(account, folder, progress.get(), todo);
         }
 
-        if (K9.DEBUG)
+        if (K9.DEBUG) {
             Log.d(K9.LOG_TAG, "SYNC: Have " + unsyncedMessages.size() + " unsynced messages");
+        }
 
         messages.clear();
         final List<Message> largeMessages = new ArrayList<>();
@@ -1159,8 +1181,9 @@ public class MessagingController {
             }
             fp.add(FetchProfile.Item.ENVELOPE);
 
-            if (K9.DEBUG)
+            if (K9.DEBUG) {
                 Log.d(K9.LOG_TAG, "SYNC: About to fetch " + unsyncedMessages.size() + " unsynced messages for folder " + folder);
+            }
 
             fetchUnsyncedMessages(account, remoteFolder, unsyncedMessages, smallMessages, largeMessages, progress, todo, fp);
 
@@ -1177,11 +1200,12 @@ public class MessagingController {
                 Log.d(K9.LOG_TAG, "SYNC: Synced unsynced messages for folder " + folder);
             }
         }
-        if (K9.DEBUG)
+        if (K9.DEBUG) {
             Log.d(K9.LOG_TAG, "SYNC: Have "
-                  + largeMessages.size() + " large messages and "
-                  + smallMessages.size() + " small messages out of "
-                  + unsyncedMessages.size() + " unsynced messages");
+                    + largeMessages.size() + " large messages and "
+                    + smallMessages.size() + " small messages out of "
+                    + unsyncedMessages.size() + " unsynced messages");
+        }
 
         unsyncedMessages.clear();
         /*
@@ -1211,8 +1235,9 @@ public class MessagingController {
 
         refreshLocalMessageFlags(account, remoteFolder, localFolder, syncFlagMessages, progress, todo);
 
-        if (K9.DEBUG)
+        if (K9.DEBUG) {
             Log.d(K9.LOG_TAG, "SYNC: Synced remote messages for folder " + folder + ", " + newMessages.get() + " new messages");
+        }
 
         if (purgeToVisibleLimit) {
             localFolder.purgeToVisibleLimit(new MessageRemovalListener() {
@@ -1263,8 +1288,9 @@ public class MessagingController {
         if (localMessage == null) {
             if (!flagSyncOnly) {
                 if (!message.isSet(Flag.X_DOWNLOADED_FULL) && !message.isSet(Flag.X_DOWNLOADED_PARTIAL)) {
-                    if (K9.DEBUG)
+                    if (K9.DEBUG) {
                         Log.v(K9.LOG_TAG, "Message with uid " + message.getUid() + " has not yet been downloaded");
+                    }
 
                     unsyncedMessages.add(message);
                 } else {

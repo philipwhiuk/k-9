@@ -9,7 +9,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.Uri;
-import android.os.PowerManager;
 import android.util.Log;
 
 import com.fsck.k9.K9;
@@ -25,9 +24,11 @@ public class BootReceiver extends CoreReceiver {
     public static final String AT_TIME = "com.fsck.k9.service.BroadcastReceiver.atTime";
 
     @Override
-    public Integer receive(Context context, Intent intent, Integer tmpWakeLockId) {
-        if (K9.DEBUG)
+    public Integer receive(Context context, Intent intent, Integer providedWakeLockId) {
+        Integer tmpWakeLockId = providedWakeLockId;
+        if (K9.DEBUG) {
             Log.i(K9.LOG_TAG, "BootReceiver.onReceive" + intent);
+        }
 
         final String action = intent.getAction();
         if (Intent.ACTION_BOOT_COMPLETED.equals(action)) {
@@ -43,8 +44,8 @@ public class BootReceiver extends CoreReceiver {
             MailService.connectivityChange(context, tmpWakeLockId);
             tmpWakeLockId = null;
         } else if ("com.android.sync.SYNC_CONN_STATUS_CHANGED".equals(action)) {
-            K9.BACKGROUND_OPS bOps = K9.getBackgroundOps();
-            if (bOps == K9.BACKGROUND_OPS.WHEN_CHECKED_AUTO_SYNC) {
+            K9.BackgroundOperation bOps = K9.getBackgroundOps();
+            if (bOps == K9.BackgroundOperation.WHEN_CHECKED_AUTO_SYNC) {
                 MailService.actionReset(context, tmpWakeLockId);
                 tmpWakeLockId = null;
             }
@@ -52,16 +53,18 @@ public class BootReceiver extends CoreReceiver {
         } else if (FIRE_INTENT.equals(action)) {
             Intent alarmedIntent = intent.getParcelableExtra(ALARMED_INTENT);
             String alarmedAction = alarmedIntent.getAction();
-            if (K9.DEBUG)
+            if (K9.DEBUG) {
                 Log.i(K9.LOG_TAG, "BootReceiver Got alarm to fire alarmedIntent " + alarmedAction);
+            }
             alarmedIntent.putExtra(WAKE_LOCK_ID, tmpWakeLockId);
             tmpWakeLockId = null;
             context.startService(alarmedIntent);
         } else if (SCHEDULE_INTENT.equals(action)) {
             long atTime = intent.getLongExtra(AT_TIME, -1);
             Intent alarmedIntent = intent.getParcelableExtra(ALARMED_INTENT);
-            if (K9.DEBUG)
+            if (K9.DEBUG) {
                 Log.i(K9.LOG_TAG, "BootReceiver Scheduling intent " + alarmedIntent + " for " + new Date(atTime));
+            }
 
             PendingIntent pi = buildPendingIntent(context, intent);
             K9AlarmManager alarmMgr = K9AlarmManager.getAlarmManager(context);
@@ -69,8 +72,9 @@ public class BootReceiver extends CoreReceiver {
             alarmMgr.set(AlarmManager.RTC_WAKEUP, atTime, pi);
         } else if (CANCEL_INTENT.equals(action)) {
             Intent alarmedIntent = intent.getParcelableExtra(ALARMED_INTENT);
-            if (K9.DEBUG)
+            if (K9.DEBUG) {
                 Log.i(K9.LOG_TAG, "BootReceiver Canceling alarmedIntent " + alarmedIntent);
+            }
 
             PendingIntent pi = buildPendingIntent(context, intent);
 
@@ -96,8 +100,9 @@ public class BootReceiver extends CoreReceiver {
     }
 
     public static void scheduleIntent(Context context, long atTime, Intent alarmedIntent) {
-        if (K9.DEBUG)
+        if (K9.DEBUG) {
             Log.i(K9.LOG_TAG, "BootReceiver Got request to schedule alarmedIntent " + alarmedIntent.getAction());
+        }
         Intent i = new Intent();
         i.setClass(context, BootReceiver.class);
         i.setAction(SCHEDULE_INTENT);
@@ -107,8 +112,9 @@ public class BootReceiver extends CoreReceiver {
     }
 
     public static void cancelIntent(Context context, Intent alarmedIntent) {
-        if (K9.DEBUG)
+        if (K9.DEBUG) {
             Log.i(K9.LOG_TAG, "BootReceiver Got request to cancel alarmedIntent " + alarmedIntent.getAction());
+        }
         Intent i = new Intent();
         i.setClass(context, BootReceiver.class);
         i.setAction(CANCEL_INTENT);

@@ -55,7 +55,7 @@ public class QuotedMessageMvpView {
         OnClickListener onClickListener = new OnClickListener() {
             @Override
             public void onClick(View view) {
-                switch(view.getId()) {
+                switch (view.getId()) {
                     case R.id.quoted_text_show:
                         presenter.onClickShowQuotedText();
                         break;

@@ -126,7 +126,7 @@ public abstract class CoreService extends Service {
         }
 
         if (createIfNotExists) {
-          addWakeLock(context,intent);
+          addWakeLock(context, intent);
         }
     }
 

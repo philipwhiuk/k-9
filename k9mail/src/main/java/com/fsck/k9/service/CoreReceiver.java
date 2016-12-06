@@ -30,8 +30,9 @@ public class CoreReceiver extends BroadcastReceiver {
         wakeLock.acquire(K9.BOOT_RECEIVER_WAKE_LOCK_TIMEOUT);
         Integer tmpWakeLockId = wakeLockSeq.getAndIncrement();
         wakeLocks.put(tmpWakeLockId, wakeLock);
-        if (K9.DEBUG)
+        if (K9.DEBUG) {
             Log.v(K9.LOG_TAG, "CoreReceiver Created wakeLock " + tmpWakeLockId);
+        }
         return tmpWakeLockId;
     }
 
@@ -39,8 +40,9 @@ public class CoreReceiver extends BroadcastReceiver {
         if (wakeLockId != null) {
             TracingWakeLock wl = wakeLocks.remove(wakeLockId);
             if (wl != null) {
-                if (K9.DEBUG)
+                if (K9.DEBUG) {
                     Log.v(K9.LOG_TAG, "CoreReceiver Releasing wakeLock " + wakeLockId);
+                }
                 wl.release();
             } else {
                 Log.w(K9.LOG_TAG, "BootReceiver WakeLock " + wakeLockId + " doesn't exist");
@@ -52,13 +54,15 @@ public class CoreReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         Integer tmpWakeLockId = CoreReceiver.getWakeLock(context);
         try {
-            if (K9.DEBUG)
+            if (K9.DEBUG) {
                 Log.i(K9.LOG_TAG, "CoreReceiver.onReceive" + intent);
+            }
             if (CoreReceiver.WAKE_LOCK_RELEASE.equals(intent.getAction())) {
                 Integer wakeLockId = intent.getIntExtra(WAKE_LOCK_ID, -1);
                 if (wakeLockId != -1) {
-                    if (K9.DEBUG)
+                    if (K9.DEBUG) {
                         Log.v(K9.LOG_TAG, "CoreReceiver Release wakeLock " + wakeLockId);
+                    }
                     CoreReceiver.releaseWakeLock(wakeLockId);
                 }
             } else {
@@ -74,8 +78,9 @@ public class CoreReceiver extends BroadcastReceiver {
     }
 
     public static void releaseWakeLock(Context context, int wakeLockId) {
-        if (K9.DEBUG)
+        if (K9.DEBUG) {
             Log.v(K9.LOG_TAG, "CoreReceiver Got request to release wakeLock " + wakeLockId);
+        }
         Intent i = new Intent();
         i.setClass(context, CoreReceiver.class);
         i.setAction(WAKE_LOCK_RELEASE);

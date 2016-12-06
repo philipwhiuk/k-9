@@ -149,7 +149,10 @@ public class FolderList extends K9ListActivity {
         public void accountSizeChanged(final long oldSize, final long newSize) {
             runOnUiThread(new Runnable() {
                 public void run() {
-                    String toastText = getString(R.string.account_size_changed, mAccount.getDescription(), SizeFormatter.formatSize(getApplication(), oldSize), SizeFormatter.formatSize(getApplication(), newSize));
+                    String toastText = getString(R.string.account_size_changed,
+                            mAccount.getDescription(),
+                            SizeFormatter.formatSize(getApplication(), oldSize),
+                            SizeFormatter.formatSize(getApplication(), newSize));
 
                     Toast toast = Toast.makeText(getApplication(), toastText, Toast.LENGTH_LONG);
                     toast.show();
@@ -269,7 +272,7 @@ public class FolderList extends K9ListActivity {
         mListView.setScrollingCacheEnabled(false);
         mListView.setOnItemClickListener(new OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                onOpenFolder(((FolderInfoHolder)mAdapter.getItem(position)).name);
+                onOpenFolder(((FolderInfoHolder) mAdapter.getItem(position)).name);
             }
         });
         registerForContextMenu(mListView);
@@ -383,8 +386,9 @@ public class FolderList extends K9ListActivity {
             finish();
             return;
         }
-        if (mAdapter == null)
+        if (mAdapter == null) {
             initializeActivityView();
+        }
 
         mHandler.refreshTitle();
 
@@ -402,43 +406,42 @@ public class FolderList extends K9ListActivity {
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         //Shortcuts that work no matter what is selected
         switch (keyCode) {
-        case KeyEvent.KEYCODE_Q: {
-            onAccounts();
-            return true;
-        }
+            case KeyEvent.KEYCODE_Q: {
+                onAccounts();
+                return true;
+            }
 
-        case KeyEvent.KEYCODE_S: {
-            onEditAccount();
-            return true;
-        }
+            case KeyEvent.KEYCODE_S: {
+                onEditAccount();
+                return true;
+            }
 
-        case KeyEvent.KEYCODE_H: {
-            Toast toast = Toast.makeText(this, R.string.folder_list_help_key, Toast.LENGTH_LONG);
-            toast.show();
-            return true;
-        }
+            case KeyEvent.KEYCODE_H: {
+                Toast toast = Toast.makeText(this, R.string.folder_list_help_key, Toast.LENGTH_LONG);
+                toast.show();
+                return true;
+            }
 
-        case KeyEvent.KEYCODE_1: {
-            setDisplayMode(FolderMode.FIRST_CLASS);
-            return true;
+            case KeyEvent.KEYCODE_1: {
+                setDisplayMode(FolderMode.FIRST_CLASS);
+                return true;
+            }
+            case KeyEvent.KEYCODE_2: {
+                setDisplayMode(FolderMode.FIRST_AND_SECOND_CLASS);
+                return true;
+            }
+            case KeyEvent.KEYCODE_3: {
+                setDisplayMode(FolderMode.NOT_SECOND_CLASS);
+                return true;
+            }
+            case KeyEvent.KEYCODE_4: {
+                setDisplayMode(FolderMode.ALL);
+                return true;
+            }
         }
-        case KeyEvent.KEYCODE_2: {
-            setDisplayMode(FolderMode.FIRST_AND_SECOND_CLASS);
-            return true;
-        }
-        case KeyEvent.KEYCODE_3: {
-            setDisplayMode(FolderMode.NOT_SECOND_CLASS);
-            return true;
-        }
-        case KeyEvent.KEYCODE_4: {
-            setDisplayMode(FolderMode.ALL);
-            return true;
-        }
-        }//switch
-
 
         return super.onKeyDown(keyCode, event);
-    }//onKeyDown
+    }
 
     private void setDisplayMode(FolderMode newMode) {
         mAccount.setFolderDisplayMode(newMode);
@@ -637,7 +640,7 @@ public class FolderList extends K9ListActivity {
     }
 
     @Override public boolean onContextItemSelected(android.view.MenuItem item) {
-        AdapterContextMenuInfo info = (AdapterContextMenuInfo) item .getMenuInfo();
+        AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
         FolderInfoHolder folder = (FolderInfoHolder) mAdapter.getItem(info.position);
 
         switch (item.getItemId()) {
@@ -671,7 +674,7 @@ public class FolderList extends K9ListActivity {
         private Filter mFilter = new FolderListFilter();
 
         public Object getItem(long position) {
-            return getItem((int)position);
+            return getItem((int) position);
         }
 
         public Object getItem(int position) {
@@ -680,7 +683,7 @@ public class FolderList extends K9ListActivity {
 
 
         public long getItemId(int position) {
-            return mFilteredFolders.get(position).folder.getName().hashCode() ;
+            return mFilteredFolders.get(position).folder.getName().hashCode();
         }
 
         public int getCount() {
@@ -990,7 +993,7 @@ public class FolderList extends K9ListActivity {
                 holder.folderStatus = (TextView) view.findViewById(R.id.folder_status);
                 holder.activeIcons = (RelativeLayout) view.findViewById(R.id.active_icons);
                 holder.chip = view.findViewById(R.id.chip);
-                holder.folderListItemLayout = (LinearLayout)view.findViewById(R.id.folder_list_item_layout);
+                holder.folderListItemLayout = (LinearLayout) view.findViewById(R.id.folder_list_item_layout);
                 holder.rawFolderName = folder.name;
 
                 view.setTag(holder);
@@ -1035,7 +1038,7 @@ public class FolderList extends K9ListActivity {
                 holder.folderStatus.setVisibility(View.GONE);
             }
 
-            if(folder.unreadMessageCount == -1) {
+            if (folder.unreadMessageCount == -1) {
                folder.unreadMessageCount = 0;
                 try {
                     folder.unreadMessageCount  = folder.folder.getUnreadMessageCount();

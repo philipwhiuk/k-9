@@ -152,7 +152,7 @@ public class ICalendarRequestView extends ICalendarView implements View.OnClickL
         final CharSequence optional = ICalendarHelper.toFriendly(iCalendar.iCalData.getOptional(), contacts);
         final CharSequence fyi = ICalendarHelper.toFriendly(iCalendar.iCalData.getFyi(), contacts);
 
-        if(iCalendar.iCalData.getRecurrenceRule() == null) {
+        if (iCalendar.iCalData.getRecurrenceRule() == null) {
             mRecurrenceView.setVisibility(GONE);
         } else {
             mRecurrenceView.setText(buildRule(iCalendar.iCalData.getRecurrenceRule().getValue(), getResources()));

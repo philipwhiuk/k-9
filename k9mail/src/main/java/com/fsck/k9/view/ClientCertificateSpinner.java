@@ -64,7 +64,8 @@ public class ClientCertificateSpinner extends LinearLayout {
         });
     }
 
-    public void setAlias(String alias) {
+    public void setAlias(String providedAlias) {
+        String alias = providedAlias;
         // Note: KeyChainAliasCallback gives back "" on cancel
         if (alias != null && alias.equals("")) {
             alias = null;
@@ -102,8 +103,9 @@ public class ClientCertificateSpinner extends LinearLayout {
         KeyChain.choosePrivateKeyAlias(mActivity, new KeyChainAliasCallback() {
             @Override
             public void alias(String alias) {
-                if (K9.DEBUG)
+                if (K9.DEBUG) {
                     Log.d(K9.LOG_TAG, "User has selected client certificate alias: " + alias);
+                }
 
                 setAlias(alias);
             }

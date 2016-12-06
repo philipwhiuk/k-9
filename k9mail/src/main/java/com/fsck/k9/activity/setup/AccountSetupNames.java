@@ -12,7 +12,10 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
-import com.fsck.k9.*;
+
+import com.fsck.k9.Account;
+import com.fsck.k9.Preferences;
+import com.fsck.k9.R;
 import com.fsck.k9.activity.Accounts;
 import com.fsck.k9.activity.K9Activity;
 import com.fsck.k9.helper.Utility;
@@ -38,9 +41,9 @@ public class AccountSetupNames extends K9Activity implements OnClickListener {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.account_setup_names);
-        mDescription = (EditText)findViewById(R.id.account_description);
-        mName = (EditText)findViewById(R.id.account_name);
-        mDoneButton = (Button)findViewById(R.id.done);
+        mDescription = (EditText) findViewById(R.id.account_description);
+        mName = (EditText) findViewById(R.id.account_name);
+        mDoneButton = (Button) findViewById(R.id.done);
         mDoneButton.setOnClickListener(this);
 
         TextWatcher validationTextWatcher = new TextWatcher() {

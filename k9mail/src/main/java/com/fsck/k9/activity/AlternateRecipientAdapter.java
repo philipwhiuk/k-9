@@ -86,7 +86,8 @@ public class AlternateRecipientAdapter extends BaseAdapter {
     }
 
     @Override
-    public View getView(int position, View view, ViewGroup parent) {
+    public View getView(int position, View providedView, ViewGroup parent) {
+        View view = providedView;
         if (view == null) {
             view = newView(parent);
         }

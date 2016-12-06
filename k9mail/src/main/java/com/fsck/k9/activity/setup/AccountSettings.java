@@ -40,7 +40,6 @@ import com.fsck.k9.activity.ChooseIdentity;
 import com.fsck.k9.activity.ColorPickerDialog;
 import com.fsck.k9.activity.K9PreferenceActivity;
 import com.fsck.k9.activity.ManageIdentities;
-import com.fsck.k9.activity.compose.RecipientPresenter;
 import com.fsck.k9.crypto.CryptoMethod;
 import com.fsck.k9.crypto.OpenPgpApiHelper;
 import com.fsck.k9.mail.Folder;
@@ -927,10 +926,11 @@ public class AccountSettings extends K9PreferenceActivity {
 
         // In webdav account we use the exact folder name also for inbox,
         // since it varies because of internationalization
-        if (mAccount.getStoreUri().startsWith("webdav"))
+        if (mAccount.getStoreUri().startsWith("webdav")) {
             mAccount.setAutoExpandFolderName(mAutoExpandFolder.getValue());
-        else
+        } else {
             mAccount.setAutoExpandFolderName(reverseTranslateFolder(mAutoExpandFolder.getValue()));
+        }
 
         if (mIsMoveCapable) {
             mAccount.setArchiveFolderName(mArchiveFolder.getValue());
@@ -1120,7 +1120,7 @@ public class AccountSettings extends K9PreferenceActivity {
 
     private void doVibrateTest(Preference preference) {
         // Do the vibration to show the user what it's like.
-        Vibrator vibrate = (Vibrator)preference.getContext().getSystemService(Context.VIBRATOR_SERVICE);
+        Vibrator vibrate = (Vibrator) preference.getContext().getSystemService(Context.VIBRATOR_SERVICE);
         vibrate.vibrate(NotificationSetting.getVibration(
                             Integer.parseInt(mAccountVibratePattern.getValue()),
                             Integer.parseInt(mAccountVibrateTimes.getValue())), -1);
@@ -1131,17 +1131,20 @@ public class AccountSettings extends K9PreferenceActivity {
      * @param maxResults Search limit to update the summary with.
      */
     private void updateRemoteSearchLimit(String maxResults) {
-        if (maxResults != null) {
-            if (maxResults.equals("0")) {
-                maxResults = getString(R.string.account_settings_remote_search_num_results_entries_all);
+        String formattedMaxResults = maxResults;
+        if (formattedMaxResults != null) {
+            if (formattedMaxResults.equals("0")) {
+                formattedMaxResults = getString(R.string.account_settings_remote_search_num_results_entries_all);
             }
 
-            mRemoteSearchNumResults.setSummary(String.format(getString(R.string.account_settings_remote_search_num_summary), maxResults));
+            mRemoteSearchNumResults.setSummary(String.format(
+                    getString(R.string.account_settings_remote_search_num_summary),
+                    formattedMaxResults));
         }
     }
 
     private class PopulateFolderPrefsTask extends AsyncTask<Void, Void, Void> {
-        List <? extends Folder > folders = new LinkedList<LocalFolder>();
+        List<? extends Folder> folders = new LinkedList<LocalFolder>();
         String[] allFolderValues;
         String[] allFolderLabels;
 
@@ -1155,7 +1158,7 @@ public class AccountSettings extends K9PreferenceActivity {
 
             // TODO: In the future the call above should be changed to only return remote folders.
             // For now we just remove the Outbox folder if present.
-            Iterator <? extends Folder > iter = folders.iterator();
+            Iterator<? extends Folder> iter = folders.iterator();
             while (iter.hasNext()) {
                 Folder folder = iter.next();
                 if (mAccount.getOutboxFolderName().equals(folder.getName())) {
@@ -1180,17 +1183,17 @@ public class AccountSettings extends K9PreferenceActivity {
 
         @Override
         protected void onPreExecute() {
-            mAutoExpandFolder = (ListPreference)findPreference(PREFERENCE_AUTO_EXPAND_FOLDER);
+            mAutoExpandFolder = (ListPreference) findPreference(PREFERENCE_AUTO_EXPAND_FOLDER);
             mAutoExpandFolder.setEnabled(false);
-            mArchiveFolder = (ListPreference)findPreference(PREFERENCE_ARCHIVE_FOLDER);
+            mArchiveFolder = (ListPreference) findPreference(PREFERENCE_ARCHIVE_FOLDER);
             mArchiveFolder.setEnabled(false);
-            mDraftsFolder = (ListPreference)findPreference(PREFERENCE_DRAFTS_FOLDER);
+            mDraftsFolder = (ListPreference) findPreference(PREFERENCE_DRAFTS_FOLDER);
             mDraftsFolder.setEnabled(false);
-            mSentFolder = (ListPreference)findPreference(PREFERENCE_SENT_FOLDER);
+            mSentFolder = (ListPreference) findPreference(PREFERENCE_SENT_FOLDER);
             mSentFolder.setEnabled(false);
-            mSpamFolder = (ListPreference)findPreference(PREFERENCE_SPAM_FOLDER);
+            mSpamFolder = (ListPreference) findPreference(PREFERENCE_SPAM_FOLDER);
             mSpamFolder.setEnabled(false);
-            mTrashFolder = (ListPreference)findPreference(PREFERENCE_TRASH_FOLDER);
+            mTrashFolder = (ListPreference) findPreference(PREFERENCE_TRASH_FOLDER);
             mTrashFolder.setEnabled(false);
 
             if (!mIsMoveCapable) {

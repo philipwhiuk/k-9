@@ -56,7 +56,7 @@ import com.fsck.k9.search.SearchAccount;
 
 public class MessageProvider extends ContentProvider {
 
-    public static interface MessageColumns extends BaseColumns {
+    public interface MessageColumns extends BaseColumns {
         /**
          * The number of milliseconds since Jan. 1, 1970, midnight GMT.
          *
@@ -124,7 +124,7 @@ public class MessageProvider extends ContentProvider {
         String INCREMENT = "id";
     }
 
-    protected static interface QueryHandler {
+    protected interface QueryHandler {
         /**
          * The path this instance is able to respond to.
          *
@@ -152,7 +152,7 @@ public class MessageProvider extends ContentProvider {
      * @param <T>
      * @param <K>
      */
-    public static interface FieldExtractor<T, K> {
+    public interface FieldExtractor<T, K> {
         K getField(T source);
     }
 
@@ -328,7 +328,8 @@ public class MessageProvider extends ContentProvider {
                 projectionToUse = projection;
             }
 
-            final LinkedHashMap < String, FieldExtractor < MessageInfoHolder, ? >> extractors = resolveMessageExtractors(projectionToUse, holders.size());
+            final LinkedHashMap<String, FieldExtractor<MessageInfoHolder, ?>> extractors =
+                    resolveMessageExtractors(projectionToUse, holders.size());
             final int fieldCount = extractors.size();
 
             final String[] actualProjection = extractors.keySet().toArray(new String[fieldCount]);
@@ -338,7 +339,7 @@ public class MessageProvider extends ContentProvider {
                 final Object[] o = new Object[fieldCount];
 
                 int i = 0;
-                for (final FieldExtractor < MessageInfoHolder, ? > extractor : extractors.values()) {
+                for (final FieldExtractor<MessageInfoHolder, ?> extractor : extractors.values()) {
                     o[i] = extractor.getField(holder);
                     i += 1;
                 }
@@ -350,8 +351,10 @@ public class MessageProvider extends ContentProvider {
         }
 
         // returns LinkedHashMap (rather than Map) to emphasize the inner element ordering
-        protected LinkedHashMap < String, FieldExtractor < MessageInfoHolder, ? >> resolveMessageExtractors(final String[] projection, int count) {
-            final LinkedHashMap < String, FieldExtractor < MessageInfoHolder, ? >> extractors = new LinkedHashMap < String, FieldExtractor < MessageInfoHolder, ? >> ();
+        protected LinkedHashMap<String, FieldExtractor<MessageInfoHolder, ?>> resolveMessageExtractors(
+                final String[] projection, int count) {
+            final LinkedHashMap<String, FieldExtractor<MessageInfoHolder, ?>> extractors =
+                    new LinkedHashMap<>();
 
             for (final String field : projection) {
                 if (extractors.containsKey(field)) {
@@ -416,9 +419,10 @@ public class MessageProvider extends ContentProvider {
             return getAllAccounts(projection);
         }
 
-        public Cursor getAllAccounts(String[] projection) {
+        public Cursor getAllAccounts(String[] providedProjection) {
+            String[] projection = providedProjection;
             // Default projection
-            if(projection == null) {
+            if (projection == null) {
                 projection = new String[] { FIELD_ACCOUNT_NUMBER, FIELD_ACCOUNT_NAME };
             }
 
@@ -430,15 +434,15 @@ public class MessageProvider extends ContentProvider {
 
                 // Build account row
                 int fieldIndex = 0;
-                for(String field : projection) {
+                for (String field : projection) {
 
-                    if(FIELD_ACCOUNT_NUMBER.equals(field)) {
+                    if (FIELD_ACCOUNT_NUMBER.equals(field)) {
                         values[fieldIndex] = account.getAccountNumber();
-                    } else if(FIELD_ACCOUNT_NAME.equals(field)) {
+                    } else if (FIELD_ACCOUNT_NAME.equals(field)) {
                         values[fieldIndex] = account.getDescription();
-                    } else if(FIELD_ACCOUNT_UUID.equals(field)) {
+                    } else if (FIELD_ACCOUNT_UUID.equals(field)) {
                         values[fieldIndex] = account.getUuid();
-                    } else if(FIELD_ACCOUNT_COLOR.equals(field)) {
+                    } else if (FIELD_ACCOUNT_COLOR.equals(field)) {
                         values[fieldIndex] = account.getChipColor();
                     } else {
                         values[fieldIndex] = null;

@@ -24,7 +24,9 @@ import com.fsck.k9.mail.internet.MimeUtility;
 import com.fsck.k9.provider.AttachmentProvider.AttachmentProviderColumns;
 import org.apache.commons.io.IOUtils;
 
-
+/**
+ * @deprecated
+ */
 @Deprecated
 class DownloadImageTask extends AsyncTask<String, Void, String> {
     private static final String[] ATTACHMENT_PROJECTION = new String[] {

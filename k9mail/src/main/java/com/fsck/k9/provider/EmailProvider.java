@@ -42,9 +42,9 @@ import android.text.TextUtils;
  * - add support for account list and folder list
  */
 public class EmailProvider extends ContentProvider {
-    private static final UriMatcher sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
+    private static final UriMatcher EMPTY_URI_MATCHER = new UriMatcher(UriMatcher.NO_MATCH);
 
-    public static final String AUTHORITY = BuildConfig.APPLICATION_ID +".provider.email";
+    public static final String AUTHORITY = BuildConfig.APPLICATION_ID + ".provider.email";
 
     public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY);
 
@@ -110,7 +110,7 @@ public class EmailProvider extends ContentProvider {
     private static final String THREADS_TABLE = "threads";
 
     static {
-        UriMatcher matcher = sUriMatcher;
+        UriMatcher matcher = EMPTY_URI_MATCHER;
 
         matcher.addURI(AUTHORITY, "account/*/messages", MESSAGES);
         matcher.addURI(AUTHORITY, "account/*/messages/threaded", MESSAGES_THREADED);
@@ -120,70 +120,70 @@ public class EmailProvider extends ContentProvider {
     }
 
     public interface SpecialColumns {
-        public static final String ACCOUNT_UUID = "account_uuid";
+         String ACCOUNT_UUID = "account_uuid";
 
-        public static final String THREAD_COUNT = "thread_count";
+         String THREAD_COUNT = "thread_count";
 
-        public static final String FOLDER_NAME = "name";
-        public static final String INTEGRATE = "integrate";
+         String FOLDER_NAME = "name";
+         String INTEGRATE = "integrate";
     }
 
     public interface MessageColumns {
-        public static final String ID = "id";
-        public static final String UID = "uid";
-        public static final String INTERNAL_DATE = "internal_date";
-        public static final String SUBJECT = "subject";
-        public static final String DATE = "date";
-        public static final String MESSAGE_ID = "message_id";
-        public static final String SENDER_LIST = "sender_list";
-        public static final String TO_LIST = "to_list";
-        public static final String CC_LIST = "cc_list";
-        public static final String BCC_LIST = "bcc_list";
-        public static final String REPLY_TO_LIST = "reply_to_list";
-        public static final String FLAGS = "flags";
-        public static final String ATTACHMENT_COUNT = "attachment_count";
-        public static final String FOLDER_ID = "folder_id";
-        public static final String PREVIEW_TYPE = "preview_type";
-        public static final String PREVIEW = "preview";
-        public static final String READ = "read";
-        public static final String FLAGGED = "flagged";
-        public static final String ANSWERED = "answered";
-        public static final String FORWARDED = "forwarded";
+        String ID = "id";
+        String UID = "uid";
+        String INTERNAL_DATE = "internal_date";
+        String SUBJECT = "subject";
+        String DATE = "date";
+        String MESSAGE_ID = "message_id";
+        String SENDER_LIST = "sender_list";
+        String TO_LIST = "to_list";
+        String CC_LIST = "cc_list";
+        String BCC_LIST = "bcc_list";
+        String REPLY_TO_LIST = "reply_to_list";
+        String FLAGS = "flags";
+        String ATTACHMENT_COUNT = "attachment_count";
+        String FOLDER_ID = "folder_id";
+        String PREVIEW_TYPE = "preview_type";
+        String PREVIEW = "preview";
+        String READ = "read";
+        String FLAGGED = "flagged";
+        String ANSWERED = "answered";
+        String FORWARDED = "forwarded";
     }
 
     private interface InternalMessageColumns extends MessageColumns {
-        public static final String DELETED = "deleted";
-        public static final String EMPTY = "empty";
-        public static final String MIME_TYPE = "mime_type";
+        String DELETED = "deleted";
+        String EMPTY = "empty";
+        String MIME_TYPE = "mime_type";
     }
 
     public interface FolderColumns {
-        public static final String ID = "id";
-        public static final String NAME = "name";
-        public static final String LAST_UPDATED = "last_updated";
-        public static final String UNREAD_COUNT = "unread_count";
-        public static final String VISIBLE_LIMIT = "visible_limit";
-        public static final String STATUS = "status";
-        public static final String PUSH_STATE = "push_state";
-        public static final String LAST_PUSHED = "last_pushed";
-        public static final String FLAGGED_COUNT = "flagged_count";
-        public static final String INTEGRATE = "integrate";
-        public static final String TOP_GROUP = "top_group";
-        public static final String POLL_CLASS = "poll_class";
-        public static final String PUSH_CLASS = "push_class";
-        public static final String DISPLAY_CLASS = "display_class";
+        String ID = "id";
+        String NAME = "name";
+        String LAST_UPDATED = "last_updated";
+        String UNREAD_COUNT = "unread_count";
+        String VISIBLE_LIMIT = "visible_limit";
+        String STATUS = "status";
+        String PUSH_STATE = "push_state";
+        String LAST_PUSHED = "last_pushed";
+        String FLAGGED_COUNT = "flagged_count";
+        String INTEGRATE = "integrate";
+        String TOP_GROUP = "top_group";
+        String POLL_CLASS = "poll_class";
+        String PUSH_CLASS = "push_class";
+        String DISPLAY_CLASS = "display_class";
     }
 
     public interface ThreadColumns {
-        public static final String ID = "id";
-        public static final String MESSAGE_ID = "message_id";
-        public static final String ROOT = "root";
-        public static final String PARENT = "parent";
+        String ID = "id";
+        String MESSAGE_ID = "message_id";
+        String ROOT = "root";
+        String PARENT = "parent";
     }
 
     public interface StatsColumns {
-        public static final String UNREAD_COUNT = "unread_count";
-        public static final String FLAGGED_COUNT = "flagged_count";
+        String UNREAD_COUNT = "unread_count";
+        String FLAGGED_COUNT = "flagged_count";
     }
 
     private static final String[] STATS_DEFAULT_PROJECTION = {
@@ -209,7 +209,7 @@ public class EmailProvider extends ContentProvider {
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
             String sortOrder) {
 
-        int match = sUriMatcher.match(uri);
+        int match = EMPTY_URI_MATCHER.match(uri);
         if (match < 0) {
             throw new IllegalArgumentException("Unknown URI: " + uri);
         }

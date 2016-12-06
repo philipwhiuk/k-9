@@ -5,7 +5,9 @@ import android.content.Intent;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.util.Log;
-import com.fsck.k9.*;
+
+import com.fsck.k9.Account;
+import com.fsck.k9.K9;
 import com.fsck.k9.controller.MessagingController;
 import com.fsck.k9.controller.MessagingListener;
 import com.fsck.k9.mail.power.TracingPowerManager;
@@ -45,27 +47,31 @@ public class PollService extends CoreService {
     @Override
     public int startService(Intent intent, int startId) {
         if (START_SERVICE.equals(intent.getAction())) {
-            if (K9.DEBUG)
+            if (K9.DEBUG) {
                 Log.i(K9.LOG_TAG, "PollService started with startId = " + startId);
+            }
 
             MessagingController controller = MessagingController.getInstance(getApplication());
-            Listener listener = (Listener)controller.getCheckMailListener();
+            Listener listener = (Listener) controller.getCheckMailListener();
             if (listener == null) {
-                if (K9.DEBUG)
+                if (K9.DEBUG) {
                     Log.i(K9.LOG_TAG, "***** PollService *****: starting new check");
+                }
                 mListener.setStartId(startId);
                 mListener.wakeLockAcquire();
                 controller.setCheckMailListener(mListener);
                 controller.checkMail(this, null, false, false, mListener);
             } else {
-                if (K9.DEBUG)
+                if (K9.DEBUG) {
                     Log.i(K9.LOG_TAG, "***** PollService *****: renewing WakeLock");
+                }
                 listener.setStartId(startId);
                 listener.wakeLockAcquire();
             }
         } else if (STOP_SERVICE.equals(intent.getAction())) {
-            if (K9.DEBUG)
+            if (K9.DEBUG) {
                 Log.i(K9.LOG_TAG, "PollService stopping");
+            }
             stopSelf();
         }
 
@@ -136,8 +142,9 @@ public class PollService extends CoreService {
 
             MailService.actionReschedulePoll(PollService.this, null);
             wakeLockRelease();
-            if (K9.DEBUG)
+            if (K9.DEBUG) {
                 Log.i(K9.LOG_TAG, "PollService stopping with startId = " + startId);
+            }
 
             stopSelf(startId);
         }
@@ -145,8 +152,9 @@ public class PollService extends CoreService {
         @Override
         public void checkMailFinished(Context context, Account account) {
 
-            if (K9.DEBUG)
+            if (K9.DEBUG) {
                 Log.v(K9.LOG_TAG, "***** PollService *****: checkMailFinished");
+            }
             release();
         }
         public int getStartId() {

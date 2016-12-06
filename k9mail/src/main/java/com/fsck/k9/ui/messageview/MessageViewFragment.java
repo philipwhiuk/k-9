@@ -44,7 +44,6 @@ import com.fsck.k9.helper.FileBrowserHelper;
 import com.fsck.k9.helper.FileBrowserHelper.FileBrowserFailOverCallback;
 import com.fsck.k9.mail.Flag;
 import com.fsck.k9.mail.internet.ReceivedHeaders;
-import com.fsck.k9.mail.internet.SecureTransportState;
 import com.fsck.k9.mailstore.AttachmentViewInfo;
 import com.fsck.k9.mailstore.ICalendarViewInfo;
 import com.fsck.k9.mailstore.LocalMessage;
@@ -396,7 +395,8 @@ public class MessageViewFragment extends Fragment implements ConfirmationDialogF
         startActivityForResult(intent, activity);
     }
 
-    public void onPendingIntentResult(int requestCode, int resultCode, Intent data) {
+    public void onPendingIntentResult(int unmaskedRequestCode, int resultCode, Intent data) {
+        int requestCode = unmaskedRequestCode;
         if ((requestCode & REQUEST_MASK_LOADER_HELPER) == REQUEST_MASK_LOADER_HELPER) {
             requestCode ^= REQUEST_MASK_LOADER_HELPER;
             messageLoaderHelper.onActivityResult(requestCode, resultCode, data);
@@ -719,8 +719,9 @@ public class MessageViewFragment extends Fragment implements ConfirmationDialogF
         }
 
         @Override
-        public void startPendingIntentForCryptoPresenter(IntentSender si, Integer requestCode, Intent fillIntent,
+        public void startPendingIntentForCryptoPresenter(IntentSender si, Integer unmaskedRequestCode, Intent fillIntent,
                 int flagsMask, int flagValues, int extraFlags) throws SendIntentException {
+            Integer requestCode = unmaskedRequestCode;
             if (requestCode == null) {
                 getActivity().startIntentSender(si, fillIntent, flagsMask, flagValues, extraFlags);
                 return;
@@ -768,7 +769,7 @@ public class MessageViewFragment extends Fragment implements ConfirmationDialogF
     }
 
     public boolean isInitialized() {
-        return mInitialized ;
+        return mInitialized;
     }
 
 
@@ -824,8 +825,9 @@ public class MessageViewFragment extends Fragment implements ConfirmationDialogF
         }
 
         @Override
-        public void startIntentSenderForMessageLoaderHelper(IntentSender si, int requestCode, Intent fillIntent,
+        public void startIntentSenderForMessageLoaderHelper(IntentSender si, int unmaskedRequestCode, Intent fillIntent,
                 int flagsMask, int flagValues, int extraFlags) {
+            int requestCode = unmaskedRequestCode;
             try {
                 requestCode |= REQUEST_MASK_LOADER_HELPER;
                 getActivity().startIntentSenderForResult(

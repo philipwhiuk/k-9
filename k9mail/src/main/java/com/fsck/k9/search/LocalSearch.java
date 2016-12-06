@@ -40,7 +40,9 @@ public class LocalSearch implements SearchSpecification {
      * Use this only if the search won't be saved. Saved searches need
      * a name!
      */
-    public LocalSearch() {}
+    public LocalSearch() {
+
+    }
 
     /**
      *
@@ -284,7 +286,7 @@ public class LocalSearch implements SearchSpecification {
 
         for (ConditionsTreeNode node : leafSet) {
             if (node.getCondition().field == SearchField.SUBJECT ||
-                    node.getCondition().field == SearchField.SENDER ) {
+                    node.getCondition().field == SearchField.SENDER) {
                 return node.getCondition().value;
             }
         }

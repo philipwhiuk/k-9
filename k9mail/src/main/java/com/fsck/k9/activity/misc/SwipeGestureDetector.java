@@ -2,7 +2,6 @@ package com.fsck.k9.activity.misc;
 
 import android.content.Context;
 import android.view.MotionEvent;
-import android.view.GestureDetector.OnGestureListener;
 import android.view.GestureDetector.SimpleOnGestureListener;
 
 
@@ -42,7 +41,9 @@ public class SwipeGestureDetector extends SimpleOnGestureListener {
     }
 
     @Override
-    public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+    public boolean onFling(MotionEvent e1Sent, MotionEvent e2, float velocityX, float velocityY) {
+        MotionEvent e1 = e1Sent;
+
         // Apparently sometimes e1 is null
         // Found a workaround here: http://stackoverflow.com/questions/4151385/
         if (e1 == null) {
@@ -91,9 +92,9 @@ public class SwipeGestureDetector extends SimpleOnGestureListener {
      */
     public interface OnSwipeGestureListener {
         /**
-         * Called when a swipe from right to left is handled by {@link MyGestureDetector}.
+         * Called when a swipe from right to left is handled by {@link SwipeGestureDetector}.
          *
-         * <p>See {@link OnGestureListener#onFling(MotionEvent, MotionEvent, float, float)}
+         * <p>See {@link android.view.GestureDetector.OnGestureListener#onFling(MotionEvent, MotionEvent, float, float)}
          * for more information on the {@link MotionEvent}s being passed.</p>
          *
          * @param e1
@@ -104,9 +105,9 @@ public class SwipeGestureDetector extends SimpleOnGestureListener {
         void onSwipeRightToLeft(final MotionEvent e1, final MotionEvent e2);
 
         /**
-         * Called when a swipe from left to right is handled by {@link MyGestureDetector}.
+         * Called when a swipe from left to right is handled by {@link SwipeGestureDetector}.
          *
-         * <p>See {@link OnGestureListener#onFling(MotionEvent, MotionEvent, float, float)}
+         * <p>See {@link android.view.GestureDetector.OnGestureListener#onFling(MotionEvent, MotionEvent, float, float)}
          * for more information on the {@link MotionEvent}s being passed.</p>
          *
          * @param e1

@@ -8,9 +8,18 @@ import com.fsck.k9.remotecontrol.K9RemoteControl;
 import com.fsck.k9.Preferences;
 import com.fsck.k9.R;
 import com.fsck.k9.Account.FolderMode;
-import com.fsck.k9.K9.BACKGROUND_OPS;
+import com.fsck.k9.K9.BackgroundOperation;
 
-import static com.fsck.k9.remotecontrol.K9RemoteControl.*;
+import static com.fsck.k9.remotecontrol.K9RemoteControl.K9_ACCOUNT_UUID;
+import static com.fsck.k9.remotecontrol.K9RemoteControl.K9_ALL_ACCOUNTS;
+import static com.fsck.k9.remotecontrol.K9RemoteControl.K9_BACKGROUND_OPERATIONS;
+import static com.fsck.k9.remotecontrol.K9RemoteControl.K9_NOTIFICATION_ENABLED;
+import static com.fsck.k9.remotecontrol.K9RemoteControl.K9_POLL_CLASSES;
+import static com.fsck.k9.remotecontrol.K9RemoteControl.K9_POLL_FREQUENCY;
+import static com.fsck.k9.remotecontrol.K9RemoteControl.K9_PUSH_CLASSES;
+import static com.fsck.k9.remotecontrol.K9RemoteControl.K9_RING_ENABLED;
+import static com.fsck.k9.remotecontrol.K9RemoteControl.K9_THEME;
+import static com.fsck.k9.remotecontrol.K9RemoteControl.K9_VIBRATE_ENABLED;
 
 import android.content.Context;
 import android.content.Intent;
@@ -20,10 +29,10 @@ import android.widget.Toast;
 import java.util.List;
 
 public class RemoteControlService extends CoreService {
-    private final static String RESCHEDULE_ACTION = "com.fsck.k9.service.RemoteControlService.RESCHEDULE_ACTION";
-    private final static String PUSH_RESTART_ACTION = "com.fsck.k9.service.RemoteControlService.PUSH_RESTART_ACTION";
+    private static final String RESCHEDULE_ACTION = "com.fsck.k9.service.RemoteControlService.RESCHEDULE_ACTION";
+    private static final String PUSH_RESTART_ACTION = "com.fsck.k9.service.RemoteControlService.PUSH_RESTART_ACTION";
 
-    private final static String SET_ACTION = "com.fsck.k9.service.RemoteControlService.SET_ACTION";
+    private static final String SET_ACTION = "com.fsck.k9.service.RemoteControlService.SET_ACTION";
 
     public static void set(Context context, Intent i, Integer wakeLockId) {
         //  Intent i = new Intent();
@@ -37,22 +46,26 @@ public class RemoteControlService extends CoreService {
 
     @Override
     public int startService(final Intent intent, final int startId) {
-        if (K9.DEBUG)
+        if (K9.DEBUG) {
             Log.i(K9.LOG_TAG, "RemoteControlService started with startId = " + startId);
+        }
         final Preferences preferences = Preferences.getPreferences(this);
 
         if (RESCHEDULE_ACTION.equals(intent.getAction())) {
-            if (K9.DEBUG)
+            if (K9.DEBUG) {
                 Log.i(K9.LOG_TAG, "RemoteControlService requesting MailService poll reschedule");
+            }
             MailService.actionReschedulePoll(this, null);
         }
         if (PUSH_RESTART_ACTION.equals(intent.getAction())) {
-            if (K9.DEBUG)
+            if (K9.DEBUG) {
                 Log.i(K9.LOG_TAG, "RemoteControlService requesting MailService push restart");
+            }
             MailService.actionRestartPushers(this, null);
         } else if (RemoteControlService.SET_ACTION.equals(intent.getAction())) {
-            if (K9.DEBUG)
+            if (K9.DEBUG) {
                 Log.i(K9.LOG_TAG, "RemoteControlService got request to change settings");
+            }
             execute(getApplication(), new Runnable() {
                 public void run() {
                     try {
@@ -72,8 +85,10 @@ public class RemoteControlService extends CoreService {
                             //warning: account may not be isAvailable()
                             if (allAccounts || account.getUuid().equals(uuid)) {
 
-                                if (K9.DEBUG)
-                                    Log.i(K9.LOG_TAG, "RemoteControlService changing settings for account " + account.getDescription());
+                                if (K9.DEBUG) {
+                                    Log.i(K9.LOG_TAG, "RemoteControlService changing settings for account "
+                                            + account.getDescription());
+                                }
 
                                 String notificationEnabled = intent.getStringExtra(K9_NOTIFICATION_ENABLED);
                                 String ringEnabled = intent.getStringExtra(K9_RING_ENABLED);
@@ -98,7 +113,8 @@ public class RemoteControlService extends CoreService {
                                     needsReschedule |= account.setFolderSyncMode(FolderMode.valueOf(pollClasses));
                                 }
                                 if (pollFrequency != null) {
-                                    String[] allowedFrequencies = getResources().getStringArray(R.array.account_settings_check_frequency_values);
+                                    String[] allowedFrequencies = getResources().getStringArray(
+                                            R.array.account_settings_check_frequency_values);
                                     for (String allowedFrequency : allowedFrequencies) {
                                         if (allowedFrequency.equals(pollFrequency)) {
                                             Integer newInterval = Integer.parseInt(allowedFrequency);
@@ -109,14 +125,15 @@ public class RemoteControlService extends CoreService {
                                 account.save(Preferences.getPreferences(RemoteControlService.this));
                             }
                         }
-                        if (K9.DEBUG)
+                        if (K9.DEBUG) {
                             Log.i(K9.LOG_TAG, "RemoteControlService changing global settings");
+                        }
 
                         String backgroundOps = intent.getStringExtra(K9_BACKGROUND_OPERATIONS);
                         if (K9RemoteControl.K9_BACKGROUND_OPERATIONS_ALWAYS.equals(backgroundOps)
                                 || K9RemoteControl.K9_BACKGROUND_OPERATIONS_NEVER.equals(backgroundOps)
                                 || K9RemoteControl.K9_BACKGROUND_OPERATIONS_WHEN_CHECKED_AUTO_SYNC.equals(backgroundOps)) {
-                            BACKGROUND_OPS newBackgroundOps = BACKGROUND_OPS.valueOf(backgroundOps);
+                            BackgroundOperation newBackgroundOps = BackgroundOperation.valueOf(backgroundOps);
                             boolean needsReset = K9.setBackgroundOps(newBackgroundOps);
                             needsPushRestart |= needsReset;
                             needsReschedule |= needsReset;

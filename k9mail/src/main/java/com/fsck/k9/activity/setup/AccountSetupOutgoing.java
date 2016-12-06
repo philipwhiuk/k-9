@@ -11,11 +11,21 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.*;
+import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.EditText;
+import android.widget.Spinner;
+import android.widget.TextView;
+import android.widget.Toast;
 
-import com.fsck.k9.*;
+import com.fsck.k9.Account;
+import com.fsck.k9.K9;
+import com.fsck.k9.Preferences;
+import com.fsck.k9.R;
 import com.fsck.k9.account.AccountCreator;
 import com.fsck.k9.activity.K9Activity;
 import com.fsck.k9.activity.setup.AccountSetupCheckSettings.CheckDirection;
@@ -95,18 +105,18 @@ public class AccountSetupOutgoing extends K9Activity implements OnClickListener,
         }
 
 
-        mUsernameView = (EditText)findViewById(R.id.account_username);
-        mPasswordView = (EditText)findViewById(R.id.account_password);
-        mClientCertificateSpinner = (ClientCertificateSpinner)findViewById(R.id.account_client_certificate_spinner);
-        mClientCertificateLabelView = (TextView)findViewById(R.id.account_client_certificate_label);
-        mPasswordLabelView = (TextView)findViewById(R.id.account_password_label);
-        mServerView = (EditText)findViewById(R.id.account_server);
-        mPortView = (EditText)findViewById(R.id.account_port);
-        mRequireLoginView = (CheckBox)findViewById(R.id.account_require_login);
-        mRequireLoginSettingsView = (ViewGroup)findViewById(R.id.account_require_login_settings);
-        mSecurityTypeView = (Spinner)findViewById(R.id.account_security_type);
-        mAuthTypeView = (Spinner)findViewById(R.id.account_auth_type);
-        mNextButton = (Button)findViewById(R.id.next);
+        mUsernameView = (EditText) findViewById(R.id.account_username);
+        mPasswordView = (EditText) findViewById(R.id.account_password);
+        mClientCertificateSpinner = (ClientCertificateSpinner) findViewById(R.id.account_client_certificate_spinner);
+        mClientCertificateLabelView = (TextView) findViewById(R.id.account_client_certificate_label);
+        mPasswordLabelView = (TextView) findViewById(R.id.account_password_label);
+        mServerView = (EditText) findViewById(R.id.account_server);
+        mPortView = (EditText) findViewById(R.id.account_port);
+        mRequireLoginView = (CheckBox) findViewById(R.id.account_require_login);
+        mRequireLoginSettingsView = (ViewGroup) findViewById(R.id.account_require_login_settings);
+        mSecurityTypeView = (Spinner) findViewById(R.id.account_security_type);
+        mAuthTypeView = (Spinner) findViewById(R.id.account_auth_type);
+        mNextButton = (Button) findViewById(R.id.next);
 
         mNextButton.setOnClickListener(this);
 
@@ -466,7 +476,8 @@ public class AccountSetupOutgoing extends K9Activity implements OnClickListener,
 
         String newHost = mServerView.getText().toString();
         int newPort = Integer.parseInt(mPortView.getText().toString());
-        ServerSettings server = new ServerSettings(Type.SMTP, newHost, newPort, securityType, authType, username, password, clientCertificateAlias);
+        ServerSettings server = new ServerSettings(Type.SMTP, newHost, newPort, securityType,
+                authType, username, password, clientCertificateAlias);
         uri = Transport.createTransportUri(server);
         mAccount.deleteCertificate(newHost, newPort, CheckDirection.OUTGOING);
         mAccount.setTransportUri(uri);

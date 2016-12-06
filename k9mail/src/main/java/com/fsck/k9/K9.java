@@ -29,13 +29,11 @@ import android.util.Log;
 
 import com.fsck.k9.Account.SortType;
 import com.fsck.k9.activity.MessageCompose;
-import com.fsck.k9.activity.UpgradeDatabases;
 import com.fsck.k9.controller.MessagingController;
 import com.fsck.k9.controller.MessagingListener;
 import com.fsck.k9.mail.Address;
 import com.fsck.k9.mail.K9MailLib;
 import com.fsck.k9.mail.Message;
-import com.fsck.k9.mail.MessagingException;
 import com.fsck.k9.mail.internet.BinaryTempFileBody;
 import com.fsck.k9.mailstore.LocalStore;
 import com.fsck.k9.preferences.Storage;
@@ -54,7 +52,7 @@ public class K9 extends Application {
      * components') should implement this interface and register using
      * {@link K9#registerApplicationAware(ApplicationAware)}.
      */
-    public static interface ApplicationAware {
+    public interface ApplicationAware {
         /**
          * Called when the Application instance is available and ready.
          *
@@ -74,7 +72,8 @@ public class K9 extends Application {
      * accounts' databases.
      *
      * <p>
-     * See {@link UpgradeDatabases} for a detailed explanation of the database upgrade process.
+     * See {@link com.fsck.k9.activity.UpgradeDatabases} for a detailed explanation of the database
+     * upgrade process.
      * </p>
      */
     private static final String DATABASE_VERSION_CACHE = "database_version_cache";
@@ -92,18 +91,18 @@ public class K9 extends Application {
      *
      * @see ApplicationAware
      */
-    private static final List<ApplicationAware> observers = new ArrayList<ApplicationAware>();
+    private static final List<ApplicationAware> OBSERVERS = new ArrayList<ApplicationAware>();
 
     /**
      * This will be {@code true} once the initialization is complete and {@link #notifyObservers()}
      * was called.
      * Afterwards calls to {@link #registerApplicationAware(com.fsck.k9.K9.ApplicationAware)} will
-     * immediately call {@link com.fsck.k9.K9.ApplicationAware#initializeComponent(K9)} for the
+     * immediately call {@link com.fsck.k9.K9.ApplicationAware#initializeComponent(Application)} for the
      * supplied argument.
      */
     private static boolean sInitialized = false;
 
-    public enum BACKGROUND_OPS {
+    public enum BackgroundOperation {
         ALWAYS, NEVER, WHEN_CHECKED_AUTO_SYNC
     }
 
@@ -113,15 +112,15 @@ public class K9 extends Application {
     private static Theme composerTheme = Theme.USE_GLOBAL;
     private static boolean useFixedMessageTheme = true;
 
-    private static final FontSizes fontSizes = new FontSizes();
+    private static final FontSizes FONT_SIZES = new FontSizes();
 
-    private static BACKGROUND_OPS backgroundOps = BACKGROUND_OPS.WHEN_CHECKED_AUTO_SYNC;
+    private static BackgroundOperation backgroundOp = BackgroundOperation.WHEN_CHECKED_AUTO_SYNC;
     /**
      * Some log messages can be sent to a file, so that the logs
      * can be read using unprivileged access (eg. Terminal Emulator)
      * on the phone, without adb.  Set to null to disable
      */
-    public static final String logFile = null;
+    public static final String LOG_FILE = null;
     //public static final String logFile = Environment.getExternalStorageDirectory() + "/k9mail/debug.log";
 
     /**
@@ -448,7 +447,7 @@ public class K9 extends Application {
     public static void save(StorageEditor editor) {
         editor.putBoolean("enableDebugLogging", K9.DEBUG);
         editor.putBoolean("enableSensitiveLogging", K9.DEBUG_SENSITIVE);
-        editor.putString("backgroundOperations", K9.backgroundOps.name());
+        editor.putString("backgroundOperations", K9.backgroundOp.name());
         editor.putBoolean("animations", mAnimations);
         editor.putBoolean("gesturesEnabled", mGesturesEnabled);
         editor.putBoolean("useVolumeKeysForNavigation", mUseVolumeKeysForNavigation);
@@ -513,7 +512,7 @@ public class K9 extends Application {
         editor.putInt("pgpInlineDialogCounter", sPgpInlineDialogCounter);
         editor.putInt("pgpSignOnlyDialogCounter", sPgpSignOnlyDialogCounter);
 
-        fontSizes.save(editor);
+        FONT_SIZES.save(editor);
     }
 
     @Override
@@ -560,24 +559,30 @@ public class K9 extends Application {
 
         MessagingController.getInstance(this).addListener(new MessagingListener() {
             private void broadcastIntent(String action, Account account, String folder, Message message) {
-                Uri uri = Uri.parse("email://messages/" + account.getAccountNumber() + "/" + Uri.encode(folder) + "/" + Uri.encode(message.getUid()));
+                Uri uri = Uri.parse("email://messages/" + account.getAccountNumber() + "/"
+                        + Uri.encode(folder) + "/" + Uri.encode(message.getUid()));
                 Intent intent = new Intent(action, uri);
                 intent.putExtra(K9.Intents.EmailReceived.EXTRA_ACCOUNT, account.getDescription());
                 intent.putExtra(K9.Intents.EmailReceived.EXTRA_FOLDER, folder);
                 intent.putExtra(K9.Intents.EmailReceived.EXTRA_SENT_DATE, message.getSentDate());
                 intent.putExtra(K9.Intents.EmailReceived.EXTRA_FROM, Address.toString(message.getFrom()));
-                intent.putExtra(K9.Intents.EmailReceived.EXTRA_TO, Address.toString(message.getRecipients(Message.RecipientType.TO)));
-                intent.putExtra(K9.Intents.EmailReceived.EXTRA_CC, Address.toString(message.getRecipients(Message.RecipientType.CC)));
-                intent.putExtra(K9.Intents.EmailReceived.EXTRA_BCC, Address.toString(message.getRecipients(Message.RecipientType.BCC)));
+                intent.putExtra(K9.Intents.EmailReceived.EXTRA_TO, Address.toString(
+                        message.getRecipients(Message.RecipientType.TO)));
+                intent.putExtra(K9.Intents.EmailReceived.EXTRA_CC, Address.toString(
+                        message.getRecipients(Message.RecipientType.CC)));
+                intent.putExtra(K9.Intents.EmailReceived.EXTRA_BCC, Address.toString(
+                        message.getRecipients(Message.RecipientType.BCC)));
                 intent.putExtra(K9.Intents.EmailReceived.EXTRA_SUBJECT, message.getSubject());
                 intent.putExtra(K9.Intents.EmailReceived.EXTRA_FROM_SELF, account.isAnIdentity(message.getFrom()));
+
                 K9.this.sendBroadcast(intent);
-                if (K9.DEBUG)
+                if (K9.DEBUG) {
                     Log.d(K9.LOG_TAG, "Broadcasted: action=" + action
-                          + " account=" + account.getDescription()
-                          + " folder=" + folder
-                          + " message uid=" + message.getUid()
-                         );
+                            + " account=" + account.getDescription()
+                            + " folder=" + folder
+                            + " message uid=" + message.getUid()
+                    );
+                }
             }
 
             private void updateUnreadWidget() {
@@ -637,7 +642,8 @@ public class K9 extends Application {
      * Using {@code SharedPreferences} should be a lot faster than opening all SQLite databases to
      * get the current database version.
      * </p><p>
-     * See {@link UpgradeDatabases} for a detailed explanation of the database upgrade process.
+     * See {@link com.fsck.k9.activity.UpgradeDatabases} for a detailed explanation of the database
+     * upgrade process.
      * </p>
      *
      * @see #areDatabasesUpToDate()
@@ -728,7 +734,7 @@ public class K9 extends Application {
         }
 
         String lockScreenNotificationVisibility = storage.getString("lockScreenNotificationVisibility", null);
-        if(lockScreenNotificationVisibility != null) {
+        if (lockScreenNotificationVisibility != null) {
             sLockScreenNotificationVisibility = LockScreenNotificationVisibility.valueOf(lockScreenNotificationVisibility);
         }
 
@@ -741,14 +747,14 @@ public class K9 extends Application {
                 Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString());
         sUseBackgroundAsUnreadIndicator = storage.getBoolean("useBackgroundAsUnreadIndicator", true);
         sThreadedViewEnabled = storage.getBoolean("threadedView", true);
-        fontSizes.load(storage);
+        FONT_SIZES.load(storage);
 
         try {
-            setBackgroundOps(BACKGROUND_OPS.valueOf(storage.getString(
+            setBackgroundOps(BackgroundOperation.valueOf(storage.getString(
                     "backgroundOperations",
-                    BACKGROUND_OPS.WHEN_CHECKED_AUTO_SYNC.name())));
+                    BackgroundOperation.WHEN_CHECKED_AUTO_SYNC.name())));
         } catch (Exception e) {
-            setBackgroundOps(BACKGROUND_OPS.WHEN_CHECKED_AUTO_SYNC);
+            setBackgroundOps(BackgroundOperation.WHEN_CHECKED_AUTO_SYNC);
         }
 
         sColorizeMissingContactPictures = storage.getBoolean("colorizeMissingContactPictures", true);
@@ -786,8 +792,8 @@ public class K9 extends Application {
      * component that the application is available and ready
      */
     protected void notifyObservers() {
-        synchronized (observers) {
-            for (final ApplicationAware aware : observers) {
+        synchronized (OBSERVERS) {
+            for (final ApplicationAware aware : OBSERVERS) {
                 if (K9.DEBUG) {
                     Log.v(K9.LOG_TAG, "Initializing observer: " + aware);
                 }
@@ -799,7 +805,7 @@ public class K9 extends Application {
             }
 
             sInitialized = true;
-            observers.clear();
+            OBSERVERS.clear();
         }
     }
 
@@ -810,11 +816,11 @@ public class K9 extends Application {
      *            Never <code>null</code>.
      */
     public static void registerApplicationAware(final ApplicationAware component) {
-        synchronized (observers) {
+        synchronized (OBSERVERS) {
             if (sInitialized) {
                 component.initializeComponent(K9.app);
-            } else if (!observers.contains(component)) {
-                observers.add(component);
+            } else if (!OBSERVERS.contains(component)) {
+                OBSERVERS.add(component);
             }
         }
     }
@@ -893,18 +899,18 @@ public class K9 extends Application {
         }
     }
 
-    public static BACKGROUND_OPS getBackgroundOps() {
-        return backgroundOps;
+    public static BackgroundOperation getBackgroundOps() {
+        return backgroundOp;
     }
 
-    public static boolean setBackgroundOps(BACKGROUND_OPS backgroundOps) {
-        BACKGROUND_OPS oldBackgroundOps = K9.backgroundOps;
-        K9.backgroundOps = backgroundOps;
-        return backgroundOps != oldBackgroundOps;
+    public static boolean setBackgroundOps(BackgroundOperation backgroundOp) {
+        BackgroundOperation oldBackgroundOps = K9.backgroundOp;
+        K9.backgroundOp = backgroundOp;
+        return backgroundOp != oldBackgroundOps;
     }
 
     public static boolean setBackgroundOps(String nbackgroundOps) {
-        return setBackgroundOps(BACKGROUND_OPS.valueOf(nbackgroundOps));
+        return setBackgroundOps(BackgroundOperation.valueOf(nbackgroundOps));
     }
 
     public static boolean gesturesEnabled() {
@@ -1120,7 +1126,7 @@ public class K9 extends Application {
     }
 
     public static FontSizes getFontSizes() {
-        return fontSizes;
+        return FONT_SIZES;
     }
 
     public static boolean measureAccounts() {

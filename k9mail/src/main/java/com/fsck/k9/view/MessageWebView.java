@@ -11,7 +11,6 @@ import android.view.KeyEvent;
 import android.webkit.WebSettings;
 import android.webkit.WebSettings.LayoutAlgorithm;
 import android.webkit.WebSettings.RenderPriority;
-import android.webkit.WebView;
 import android.widget.Toast;
 
 import com.fsck.k9.K9;
@@ -52,7 +51,7 @@ public class MessageWebView extends RigidWebView {
 
 
     /**
-     * Configure a {@link WebView} to display a Message. This method takes into account a user's
+     * Configure a {@link android.webkit.WebView} to display a Message. This method takes into account a user's
      * preferences when configuring the view. This message is used to view a message and to display a message being
      * replied to.
      */

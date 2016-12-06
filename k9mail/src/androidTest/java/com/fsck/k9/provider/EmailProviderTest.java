@@ -84,7 +84,7 @@ public class EmailProviderTest extends ProviderTestCase2<EmailProvider> {
     @Test(expected = IllegalArgumentException.class)
     public void query_forMessagesWithInvalidAccount_throwsIllegalArgumentException() {
         Cursor cursor = this.getProvider().query(
-                Uri.parse("content://"+EmailProvider.AUTHORITY+"/account/1/messages"),
+                Uri.parse("content://" + EmailProvider.AUTHORITY + "/account/1/messages"),
                 new String[]{},
                 "",
                 new String[]{},
@@ -98,8 +98,8 @@ public class EmailProviderTest extends ProviderTestCase2<EmailProvider> {
         account.getUuid();
 
         Cursor cursor = this.getProvider().query(
-                Uri.parse("content://"+EmailProvider.AUTHORITY
-                        + "/account/"+account.getUuid()+"/messages"),
+                Uri.parse("content://" + EmailProvider.AUTHORITY
+                        + "/account/" + account.getUuid() + "/messages"),
                 new String[]{},
                 "",
                 new String[]{},
@@ -134,8 +134,8 @@ public class EmailProviderTest extends ProviderTestCase2<EmailProvider> {
         account.getUuid();
 
         Cursor cursor = this.getProvider().query(
-                Uri.parse("content://"+EmailProvider.AUTHORITY
-                        + "/account/"+account.getUuid()+"/messages"),
+                Uri.parse("content://" + EmailProvider.AUTHORITY
+                        + "/account/" + account.getUuid() + "/messages"),
                 new String[]{
                         EmailProvider.MessageColumns.ID,
                         EmailProvider.MessageColumns.FOLDER_ID,

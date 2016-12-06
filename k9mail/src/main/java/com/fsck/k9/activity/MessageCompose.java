@@ -138,10 +138,10 @@ public class MessageCompose extends K9Activity implements OnClickListener,
     public static final int MSG_SAVED_DRAFT = 4;
     private static final int MSG_DISCARDED_DRAFT = 5;
 
-    private static final int REQUEST_MASK_RECIPIENT_PRESENTER = (1<<8);
-    private static final int REQUEST_MASK_LOADER_HELPER = (1<<9);
-    private static final int REQUEST_MASK_ATTACHMENT_PRESENTER = (1<<10);
-    private static final int REQUEST_MASK_MESSAGE_BUILDER = (1<<11);
+    private static final int REQUEST_MASK_RECIPIENT_PRESENTER = (1 << 8);
+    private static final int REQUEST_MASK_LOADER_HELPER = (1 << 9);
+    private static final int REQUEST_MASK_ATTACHMENT_PRESENTER = (1 << 10);
+    private static final int REQUEST_MASK_MESSAGE_BUILDER = (1 << 11);
 
     /**
      * Regular expression to remove the first localized "Re:" prefix in subjects.
@@ -192,7 +192,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
 
     @Override
     public void onFocusChange(View v, boolean hasFocus) {
-        switch(v.getId()) {
+        switch (v.getId()) {
             case R.id.message_content:
             case R.id.subject:
                 if (hasFocus) {
@@ -375,17 +375,17 @@ public class MessageCompose extends K9Activity implements OnClickListener,
         mSubjectView = (EditText) findViewById(R.id.subject);
         mSubjectView.getInputExtras(true).putBoolean("allowEmoji", true);
 
-        EolConvertingEditText upperSignature = (EolConvertingEditText)findViewById(R.id.upper_signature);
-        EolConvertingEditText lowerSignature = (EolConvertingEditText)findViewById(R.id.lower_signature);
+        EolConvertingEditText upperSignature = (EolConvertingEditText) findViewById(R.id.upper_signature);
+        EolConvertingEditText lowerSignature = (EolConvertingEditText) findViewById(R.id.lower_signature);
 
         QuotedMessageMvpView quotedMessageMvpView = new QuotedMessageMvpView(this);
         quotedMessagePresenter = new QuotedMessagePresenter(this, quotedMessageMvpView, mAccount);
         attachmentPresenter = new AttachmentPresenter(getApplicationContext(), attachmentMvpView, getLoaderManager());
 
-        mMessageContentView = (EolConvertingEditText)findViewById(R.id.message_content);
+        mMessageContentView = (EolConvertingEditText) findViewById(R.id.message_content);
         mMessageContentView.getInputExtras(true).putBoolean("allowEmoji", true);
 
-        mAttachments = (LinearLayout)findViewById(R.id.attachments);
+        mAttachments = (LinearLayout) findViewById(R.id.attachments);
 
         TextWatcher draftNeedsChangingTextWatcher = new SimpleTextWatcher() {
             @Override
@@ -698,7 +698,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
         attachmentPresenter.onRestoreInstanceState(savedInstanceState);
 
         mDraftId = savedInstanceState.getLong(STATE_KEY_DRAFT_ID);
-        mIdentity = (Identity)savedInstanceState.getSerializable(STATE_IDENTITY);
+        mIdentity = (Identity) savedInstanceState.getSerializable(STATE_IDENTITY);
         mIdentityChanged = savedInstanceState.getBoolean(STATE_IDENTITY_CHANGED);
         mInReplyTo = savedInstanceState.getString(STATE_IN_REPLY_TO);
         mReferences = savedInstanceState.getString(STATE_REFERENCES);
@@ -721,7 +721,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
         recipientPresenter.updateCryptoStatus();
         ComposeCryptoStatus cryptoStatus = recipientPresenter.getCurrentCryptoStatus();
         // TODO encrypt drafts for storage
-        if(!isDraft && cryptoStatus.shouldUsePgpMessageBuilder()) {
+        if (!isDraft && cryptoStatus.shouldUsePgpMessageBuilder()) {
             SendErrorState maybeSendErrorState = cryptoStatus.getSendErrorStateOrNull();
             if (maybeSendErrorState != null) {
                 recipientPresenter.showPgpSendError(maybeSendErrorState);
@@ -848,14 +848,16 @@ public class MessageCompose extends K9Activity implements OnClickListener,
         toast.show();
     }
 
-    public void showContactPicker(int requestCode) {
+    public void showContactPicker(int unmaskedRequestCode) {
+        int requestCode = unmaskedRequestCode;
         requestCode |= REQUEST_MASK_RECIPIENT_PRESENTER;
         isInSubActivity = true;
         startActivityForResult(mContacts.contactPickerIntent(), requestCode);
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    protected void onActivityResult(int unmaskedRequestCode, int resultCode, Intent data) {
+        int requestCode = unmaskedRequestCode;
         isInSubActivity = false;
 
         if ((requestCode & REQUEST_MASK_MESSAGE_BUILDER) == REQUEST_MASK_MESSAGE_BUILDER) {
@@ -1523,7 +1525,8 @@ public class MessageCompose extends K9Activity implements OnClickListener,
     }
 
     @Override
-    public void onMessageBuildReturnPendingIntent(PendingIntent pendingIntent, int requestCode) {
+    public void onMessageBuildReturnPendingIntent(PendingIntent pendingIntent, int unmaskedRequestCode) {
+        int requestCode = unmaskedRequestCode;
         requestCode |= REQUEST_MASK_MESSAGE_BUILDER;
         try {
             startIntentSenderForResult(pendingIntent.getIntentSender(), requestCode, null, 0, 0, 0);
@@ -1532,7 +1535,8 @@ public class MessageCompose extends K9Activity implements OnClickListener,
         }
     }
 
-    public void launchUserInteractionPendingIntent(PendingIntent pendingIntent, int requestCode) {
+    public void launchUserInteractionPendingIntent(PendingIntent pendingIntent, int unmaskedRequestCode) {
+        int requestCode = unmaskedRequestCode;
         requestCode |= REQUEST_MASK_RECIPIENT_PRESENTER;
         try {
             startIntentSenderForResult(pendingIntent.getIntentSender(), requestCode, null, 0, 0, 0);
@@ -1591,8 +1595,9 @@ public class MessageCompose extends K9Activity implements OnClickListener,
         }
 
         @Override
-        public void startIntentSenderForMessageLoaderHelper(IntentSender si, int requestCode, Intent fillIntent,
+        public void startIntentSenderForMessageLoaderHelper(IntentSender si, int unmaskedRequestCode, Intent fillIntent,
                 int flagsMask, int flagValues, int extraFlags) {
+            int requestCode = unmaskedRequestCode;
             try {
                 requestCode |= REQUEST_MASK_LOADER_HELPER;
                 startIntentSenderForResult(si, requestCode, fillIntent, flagsMask, flagValues, extraFlags);
@@ -1646,7 +1651,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
     };
 
     AttachmentMvpView attachmentMvpView = new AttachmentMvpView() {
-        private HashMap<Uri,View> attachmentViews = new HashMap<>();
+        private HashMap<Uri, View> attachmentViews = new HashMap<>();
 
         @Override
         public void showWaitingForAttachmentDialog(WaitingAction waitingAction) {
@@ -1683,7 +1688,8 @@ public class MessageCompose extends K9Activity implements OnClickListener,
 
         @Override
         @SuppressLint("InlinedApi")
-        public void showPickAttachmentDialog(int requestCode) {
+        public void showPickAttachmentDialog(int unmaskedRequestCode) {
+            int requestCode = unmaskedRequestCode;
             requestCode |= REQUEST_MASK_ATTACHMENT_PRESENTER;
 
             Intent i = new Intent(Intent.ACTION_GET_CONTENT);

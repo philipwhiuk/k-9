@@ -175,12 +175,12 @@ public class RecipientLoader extends AsyncTaskLoader<List<Recipient>> {
     }
 
 
-    private void fillContactDataFromQuery(String query, List<Recipient> recipients,
+    private void fillContactDataFromQuery(String wildcardQueryText, List<Recipient> recipients,
             Map<String, Recipient> recipientMap) {
 
         ContentResolver contentResolver = getContext().getContentResolver();
 
-        query = "%" + query + "%";
+        String query = "%" + wildcardQueryText + "%";
         Uri queryUri = ContactsContract.CommonDataKinds.Email.CONTENT_URI;
         String selection = Contacts.DISPLAY_NAME_PRIMARY + " LIKE ? " +
                 " OR (" + Email.ADDRESS + " LIKE ? AND " + Data.MIMETYPE + " = '" + Email.CONTENT_ITEM_TYPE + "')";

@@ -53,11 +53,11 @@ import com.fsck.k9.view.ClientCertificateSpinner.OnClientCertificateChangedListe
  */
 public class AccountSetupBasics extends K9Activity
     implements OnClickListener, TextWatcher, OnCheckedChangeListener, OnClientCertificateChangedListener {
-    private final static String EXTRA_ACCOUNT = "com.fsck.k9.AccountSetupBasics.account";
-    private final static int DIALOG_NOTE = 1;
-    private final static String STATE_KEY_PROVIDER =
+    private static final String EXTRA_ACCOUNT = "com.fsck.k9.AccountSetupBasics.account";
+    private static final int DIALOG_NOTE = 1;
+    private static final String STATE_KEY_PROVIDER =
             "com.fsck.k9.AccountSetupBasics.provider";
-    private final static String STATE_KEY_CHECKED_INCOMING =
+    private static final String STATE_KEY_CHECKED_INCOMING =
             "com.fsck.k9.AccountSetupBasics.checkedIncoming";
 
     private EditText mEmailView;
@@ -82,12 +82,12 @@ public class AccountSetupBasics extends K9Activity
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.account_setup_basics);
-        mEmailView = (EditText)findViewById(R.id.account_email);
-        mPasswordView = (EditText)findViewById(R.id.account_password);
-        mClientCertificateCheckBox = (CheckBox)findViewById(R.id.account_client_certificate);
-        mClientCertificateSpinner = (ClientCertificateSpinner)findViewById(R.id.account_client_certificate_spinner);
-        mNextButton = (Button)findViewById(R.id.next);
-        mManualSetupButton = (Button)findViewById(R.id.manual_setup);
+        mEmailView = (EditText) findViewById(R.id.account_email);
+        mPasswordView = (EditText) findViewById(R.id.account_password);
+        mClientCertificateCheckBox = (CheckBox) findViewById(R.id.account_client_certificate);
+        mClientCertificateSpinner = (ClientCertificateSpinner) findViewById(R.id.account_client_certificate_spinner);
+        mNextButton = (Button) findViewById(R.id.next);
+        mManualSetupButton = (Button) findViewById(R.id.manual_setup);
         mShowPasswordCheckBox = (CheckBox) findViewById(R.id.show_password);
         mNextButton.setOnClickListener(this);
         mManualSetupButton.setOnClickListener(this);

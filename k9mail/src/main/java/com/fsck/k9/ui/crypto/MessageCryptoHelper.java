@@ -51,9 +51,7 @@ import org.openintents.openpgp.util.OpenPgpApi.OpenPgpDataSource;
 import org.openintents.openpgp.util.OpenPgpServiceConnection;
 import org.openintents.openpgp.util.OpenPgpUtils;
 import org.openintents.smime.ISMimeService;
-import org.openintents.smime.SMimeDecryptionResult;
 import org.openintents.smime.SMimeError;
-import org.openintents.smime.SMimeSignatureResult;
 import org.openintents.smime.util.SMimeApi;
 import org.openintents.smime.util.SMimeApi.SMimeDataSink;
 import org.openintents.smime.util.SMimeApi.SMimeDataSource;
@@ -231,18 +229,19 @@ public class MessageCryptoHelper {
 
     private void startDecryptingOrVerifyingPart(CryptoPart cryptoPart) {
         if (CryptoMethod.PGP_MIME.equals(cryptoPart.type.method)) {
-            if(!isBoundToPgpProviderService()
+            if (!isBoundToPgpProviderService()
                     && canBindToPgpProviderService()) {
                 connectToPgpProviderService();
-            } else if(isBoundToPgpProviderService()) {
+            } else if (isBoundToPgpProviderService()) {
                 decryptOrVerifyPart(cryptoPart);
             } else {
                 currentCryptoPart = cryptoPart;
                 CryptoResultAnnotation errorPart;
-                if(cryptoPart.type.isEncrypted())
+                if (cryptoPart.type.isEncrypted()) {
                     errorPart = CryptoResultAnnotation.createOpenPgpEncryptedUnavailableAnnotation();
-                else
+                } else {
                     errorPart = CryptoResultAnnotation.createOpenPgpSignedUnavailableAnnotation();
+                }
                 addCryptoResultAnnotationToMessage(errorPart);
                 onCryptoFinished();
             }
@@ -255,10 +254,11 @@ public class MessageCryptoHelper {
             } else {
                 currentCryptoPart = cryptoPart;
                 CryptoResultAnnotation errorPart;
-                if(cryptoPart.type.isEncrypted())
+                if (cryptoPart.type.isEncrypted()) {
                     errorPart = CryptoResultAnnotation.createSMimeEncryptedUnavailableAnnotation();
-                else
+                } else {
                     errorPart = CryptoResultAnnotation.createSMimeSignedUnavailableAnnotation();
+                }
                 addCryptoResultAnnotationToMessage(errorPart);
                 onCryptoFinished();
             }
@@ -272,7 +272,9 @@ public class MessageCryptoHelper {
         return openPgpApi != null;
     }
 
-    private boolean canBindToPgpProviderService() { return openPgpProviderPackage != null; }
+    private boolean canBindToPgpProviderService() {
+        return openPgpProviderPackage != null;
+    }
 
     private void connectToPgpProviderService() {
         openPgpServiceConnection = new OpenPgpServiceConnection(context, openPgpProviderPackage,
@@ -297,7 +299,9 @@ public class MessageCryptoHelper {
         return sMimeApi != null;
     }
 
-    private boolean canBindToSMimeProviderService() { return sMimeProviderPackage != null; }
+    private boolean canBindToSMimeProviderService() {
+        return sMimeProviderPackage != null;
+    }
 
     private void connectToSMimeProviderService() {
         sMimeServiceConnection = new SMimeServiceConnection(context, sMimeProviderPackage,

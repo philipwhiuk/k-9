@@ -14,7 +14,6 @@ import android.util.Log;
 import com.fsck.k9.Account;
 import com.fsck.k9.K9;
 import com.fsck.k9.Preferences;
-import com.fsck.k9.activity.UpgradeDatabases;
 import com.fsck.k9.mail.power.TracingPowerManager;
 import com.fsck.k9.mail.power.TracingPowerManager.TracingWakeLock;
 import com.fsck.k9.mailstore.UnavailableStorageException;
@@ -23,7 +22,7 @@ import com.fsck.k9.mailstore.UnavailableStorageException;
  * Service used to upgrade the accounts' databases and/or track the progress of the upgrade.
  *
  * <p>
- * See {@link UpgradeDatabases} for a detailed explanation of the database upgrade process.
+ * See {@link com.fsck.k9.activity.UpgradeDatabases} for a detailed explanation of the database upgrade process.
  * </p>
  */
 public class DatabaseUpgradeService extends Service {

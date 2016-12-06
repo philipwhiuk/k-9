@@ -374,9 +374,11 @@ public class RecipientPresenter implements OpenPgpApi.PermissionPingCallback, SM
             case NO_CRYPTO:
                 return false;
             case PGP_MIME:
-                return CryptoProviderState.OK.equals(cryptoProviderState) && (openPgpServiceConnection == null || !openPgpServiceConnection.isBound());
+                return CryptoProviderState.OK.equals(cryptoProviderState)
+                        && (openPgpServiceConnection == null || !openPgpServiceConnection.isBound());
             case SMIME:
-                return CryptoProviderState.OK.equals(cryptoProviderState) && (sMimeServiceConnection == null || !sMimeServiceConnection.isBound());
+                return CryptoProviderState.OK.equals(cryptoProviderState)
+                        && (sMimeServiceConnection == null || !sMimeServiceConnection.isBound());
         }
         throw new IllegalArgumentException("All crypto methods should be handled");
     }
@@ -549,8 +551,7 @@ public class RecipientPresenter implements OpenPgpApi.PermissionPingCallback, SM
 
     private static int recipientTypeToRequestCode(RecipientType type) {
         switch (type) {
-            case TO:
-            default: {
+            case TO: {
                 return CONTACT_PICKER_TO;
             }
             case CC: {
@@ -559,13 +560,15 @@ public class RecipientPresenter implements OpenPgpApi.PermissionPingCallback, SM
             case BCC: {
                 return CONTACT_PICKER_BCC;
             }
+            default: {
+                return CONTACT_PICKER_TO;
+            }
         }
     }
 
     private static RecipientType recipientTypeFromRequestCode(int type) {
         switch (type) {
-            case CONTACT_PICKER_TO:
-            default: {
+            case CONTACT_PICKER_TO: {
                 return RecipientType.TO;
             }
             case CONTACT_PICKER_CC: {
@@ -573,6 +576,9 @@ public class RecipientPresenter implements OpenPgpApi.PermissionPingCallback, SM
             }
             case CONTACT_PICKER_BCC: {
                 return RecipientType.BCC;
+            }
+            default: {
+                return RecipientType.TO;
             }
         }
     }
