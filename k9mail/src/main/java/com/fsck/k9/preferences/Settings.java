@@ -1,6 +1,5 @@
 package com.fsck.k9.preferences;
 
-import java.io.UnsupportedEncodingException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -282,7 +281,7 @@ public class Settings {
      * negligible.
      * </p>
      */
-    public static abstract class SettingsDescription {
+    public abstract static class SettingsDescription {
         /**
          * The setting's default value (internal representation).
          */
@@ -386,7 +385,7 @@ public class Settings {
          * @return A set of setting names that were removed during the upgrade process or
          *         {@code null} if none were removed.
          */
-        public Set<String> upgrade(Map<String, Object> settings);
+        Set<String> upgrade(Map<String, Object> settings);
     }
 
 

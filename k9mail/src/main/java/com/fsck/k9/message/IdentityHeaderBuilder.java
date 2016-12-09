@@ -12,8 +12,6 @@ import com.fsck.k9.activity.MessageReference;
 import com.fsck.k9.mail.MessagingException;
 import com.fsck.k9.mail.internet.TextBody;
 
-import java.io.UnsupportedEncodingException;
-
 
 public class IdentityHeaderBuilder {
     private InsertableHtmlContent quotedHtmlContent;

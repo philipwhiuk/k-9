@@ -44,7 +44,6 @@ import com.fsck.k9.mailstore.LocalFolder.DataLocation;
 import com.fsck.k9.mailstore.LocalFolder.MoreMessages;
 import com.fsck.k9.mailstore.LockableDatabase.DbCallback;
 import com.fsck.k9.mailstore.LockableDatabase.WrappedException;
-import com.fsck.k9.mailstore.StorageManager.StorageProvider;
 import com.fsck.k9.message.extractors.AttachmentCounter;
 import com.fsck.k9.message.extractors.MessageFulltextCreator;
 import com.fsck.k9.message.extractors.MessagePreviewCreator;
@@ -175,7 +174,7 @@ public class LocalStore extends Store implements Serializable {
     /**
      * local://localhost/path/to/database/uuid.db
      * This constructor is only used by {@link LocalStore#getInstance(Account, Context)}
-     * @throws UnavailableStorageException if not {@link StorageProvider#isReady(Context)}
+     * @throws UnavailableStorageException if not {@link com.fsck.k9.mailstore.StorageManager.StorageProvider#isReady(Context)}
      */
     private LocalStore(final Account account, final Context context) throws MessagingException {
         mAccount = account;
@@ -198,7 +197,7 @@ public class LocalStore extends Store implements Serializable {
      * Get an instance of a local mail store.
      *
      * @throws UnavailableStorageException
-     *          if not {@link StorageProvider#isReady(Context)}
+     *          if not {@link com.fsck.k9.mailstore.StorageManager.StorageProvider#isReady(Context)}
      */
     public static LocalStore getInstance(Account account, Context context)
             throws MessagingException {
@@ -277,8 +276,9 @@ public class LocalStore extends Store implements Serializable {
     }
 
     public void compact() throws MessagingException {
-        if (K9.DEBUG)
+        if (K9.DEBUG) {
             Log.i(K9.LOG_TAG, "Before compaction size = " + getSize());
+        }
 
         database.execute(false, new DbCallback<Void>() {
             @Override
@@ -287,14 +287,16 @@ public class LocalStore extends Store implements Serializable {
                 return null;
             }
         });
-        if (K9.DEBUG)
+        if (K9.DEBUG) {
             Log.i(K9.LOG_TAG, "After compaction size = " + getSize());
+        }
     }
 
 
     public void clear() throws MessagingException {
-        if (K9.DEBUG)
+        if (K9.DEBUG) {
             Log.i(K9.LOG_TAG, "Before prune size = " + getSize());
+        }
 
         deleteAllMessageDataFromDisk();
         if (K9.DEBUG) {
@@ -370,9 +372,9 @@ public class LocalStore extends Store implements Serializable {
     public List<LocalFolder> getPersonalNamespaces(boolean forceListAll) throws MessagingException {
         final List<LocalFolder> folders = new LinkedList<>();
         try {
-            database.execute(false, new DbCallback < List <? extends Folder >> () {
+            database.execute(false, new DbCallback<List<? extends Folder>>() {
                 @Override
-                public List <? extends Folder > doDbWork(final SQLiteDatabase db) throws WrappedException {
+                public List<? extends Folder> doDbWork(final SQLiteDatabase db) throws WrappedException {
                     Cursor cursor = null;
 
                     try {
@@ -776,7 +778,8 @@ public class LocalStore extends Store implements Serializable {
                     }
                     folder.refresh(name, prefHolder);   // Recover settings from Preferences
 
-                    db.execSQL("INSERT INTO folders (name, visible_limit, top_group, display_class, poll_class, notify_class, push_class, integrate) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", new Object[] {
+                    db.execSQL("INSERT INTO folders (name, visible_limit, top_group, display_class, " +
+                            "poll_class, notify_class, push_class, integrate) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", new Object[] {
                                    name,
                                    visibleLimit,
                                    prefHolder.inTopGroup ? 1 : 0,

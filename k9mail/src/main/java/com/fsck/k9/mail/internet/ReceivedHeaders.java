@@ -4,14 +4,12 @@ import android.util.Log;
 
 import com.fsck.k9.K9;
 import com.fsck.k9.mail.Message;
-import com.fsck.k9.mail.MessagingException;
 
-import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Processes ReceivedHeaders to extract information
+ * Processes received headers to extract information
  */
 public class ReceivedHeaders {
     public static final String RECEIVED = "Received";
@@ -27,33 +25,35 @@ public class ReceivedHeaders {
         if (headers.length == 0) {
             return SecureTransportState.UNKNOWN;
         }
-        for(String header: headers) {
+        for (String header: headers) {
             String fromAddress = "", toAddress = "", sslVersion = null, cipher, bits;
             header = header.trim();
 
             Matcher matcher = fromPattern.matcher(header);
-            if(matcher.find())
+            if (matcher.find()) {
                 fromAddress = matcher.group(1);
+            }
 
             matcher = byPattern.matcher(header);
-            if(matcher.find())
+            if (matcher.find()) {
                 toAddress = matcher.group(1);
+            }
 
             matcher = usingPattern.matcher(header);
-            if(matcher.find()) {
+            if (matcher.find()) {
                 sslVersion = matcher.group(1);
                 cipher = matcher.group(2);
                 bits = matcher.group(3);
             } else {
                 matcher = usingMSPattern.matcher(header);
-                if(matcher.find()) {
+                if (matcher.find()) {
                     sslVersion = matcher.group(1);
                     cipher = matcher.group(2);
                 }
             }
 
             if (fromAddress.equals("localhost") || fromAddress.equals("127.0.0.1") ||
-                    toAddress.equals("localhost") || toAddress.equals("127.0.0.1") || fromAddress.equals(toAddress) ) {
+                    toAddress.equals("localhost") || toAddress.equals("127.0.0.1") || fromAddress.equals(toAddress)) {
                 //Loopback and self is considered secure
                 continue;
             }

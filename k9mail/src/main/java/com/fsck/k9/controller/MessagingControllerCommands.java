@@ -45,7 +45,7 @@ public class MessagingControllerCommands {
     }
 
 
-    public static abstract class PendingCommand {
+    public abstract static class PendingCommand {
         public transient long databaseId;
 
         public abstract String getCommandName();

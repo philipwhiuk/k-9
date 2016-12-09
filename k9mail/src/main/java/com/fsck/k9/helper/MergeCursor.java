@@ -425,6 +425,9 @@ public class MergeCursor implements Cursor {
         }
     }
 
+    /**
+     * @deprecated TODO: Why??
+     */
     @Deprecated
     @Override
     public boolean requery() {

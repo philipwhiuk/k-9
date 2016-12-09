@@ -119,7 +119,8 @@ public class TimePickerPreference extends DialogPreference implements
      */
     @Override
     public void setDefaultValue(final Object defaultValue) {
-        // BUG this method is never called if you use the 'android:defaultValue' attribute in your XML preference file, not sure why it isn't
+        // BUG this method is never called if you use the 'android:defaultValue'
+        // attribute in your XML preference file, not sure why it isn't
 
         super.setDefaultValue(defaultValue);
 

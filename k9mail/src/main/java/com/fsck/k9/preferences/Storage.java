@@ -70,7 +70,8 @@ public class Storage {
                         }
 
                         if (newUserInfo != null) {
-                            URI newUri = new URI(uri.getScheme(), newUserInfo, uri.getHost(), uri.getPort(), uri.getPath(), uri.getQuery(), uri.getFragment());
+                            URI newUri = new URI(uri.getScheme(), newUserInfo, uri.getHost(), uri.getPort(),
+                                    uri.getPath(), uri.getQuery(), uri.getFragment());
                             String newTransportUriStr = Base64.encode(newUri.toString());
                             writeValue(mDb, uuid + ".transportUri", newTransportUriStr);
                         }
@@ -114,7 +115,8 @@ public class Storage {
                         }
 
                         if (newUserInfo != null) {
-                            URI newUri = new URI(uri.getScheme(), newUserInfo, uri.getHost(), uri.getPort(), uri.getPath(), uri.getQuery(), uri.getFragment());
+                            URI newUri = new URI(uri.getScheme(), newUserInfo, uri.getHost(), uri.getPort(),
+                                    uri.getPath(), uri.getQuery(), uri.getFragment());
                             String newStoreUriStr = Base64.encode(newUri.toString());
                             writeValue(mDb, uuid + ".storeUri", newStoreUriStr);
                         }

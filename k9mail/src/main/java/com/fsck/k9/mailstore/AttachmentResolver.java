@@ -28,7 +28,7 @@ import com.fsck.k9.message.extractors.AttachmentInfoExtractor;
  * the underlying part structure.
  */
 public class AttachmentResolver {
-    Map<String,Uri> contentIdToAttachmentUriMap;
+    Map<String, Uri> contentIdToAttachmentUriMap;
 
 
     private AttachmentResolver(Map<String, Uri> contentIdToAttachmentUriMap) {
@@ -48,9 +48,9 @@ public class AttachmentResolver {
     }
 
     @VisibleForTesting
-    static Map<String,Uri> buildCidToAttachmentUriMap(AttachmentInfoExtractor attachmentInfoExtractor,
+    static Map<String, Uri> buildCidToAttachmentUriMap(AttachmentInfoExtractor attachmentInfoExtractor,
             Part rootPart) {
-        HashMap<String,Uri> result = new HashMap<>();
+        HashMap<String, Uri> result = new HashMap<>();
 
         Stack<Part> partsToCheck = new Stack<>();
         partsToCheck.push(rootPart);

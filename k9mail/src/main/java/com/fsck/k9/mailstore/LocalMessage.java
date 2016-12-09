@@ -532,7 +532,7 @@ public class LocalMessage extends MimeMessage {
     protected void copy(MimeMessage destination) {
         super.copy(destination);
         if (destination instanceof LocalMessage) {
-            ((LocalMessage)destination).mReference = mReference;
+            ((LocalMessage) destination).mReference = mReference;
         }
     }
 

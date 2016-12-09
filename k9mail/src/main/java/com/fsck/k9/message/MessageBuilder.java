@@ -488,14 +488,14 @@ public abstract class MessageBuilder {
     /** This method builds the message asynchronously, calling *exactly one* of the methods
      * on the callback on the UI thread after it finishes. The callback may thread-safely
      * be detached and reattached intermittently. */
-    final public void buildAsync(Callback callback) {
+    public final void buildAsync(Callback callback) {
         synchronized (callbackLock) {
             asyncCallback = callback;
             queuedMimeMessage = null;
             queuedException = null;
             queuedPendingIntent = null;
         }
-        new AsyncTask<Void,Void,Void>() {
+        new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... params) {
                 buildMessageInternal();
@@ -509,7 +509,7 @@ public abstract class MessageBuilder {
         }.execute();
     }
 
-    final public void onActivityResult(final int requestCode, int resultCode, final Intent data, Callback callback) {
+    public final void onActivityResult(final int requestCode, int resultCode, final Intent data, Callback callback) {
         synchronized (callbackLock) {
             asyncCallback = callback;
             queuedMimeMessage = null;
@@ -520,7 +520,7 @@ public abstract class MessageBuilder {
             asyncCallback.onMessageBuildCancel();
             return;
         }
-        new AsyncTask<Void,Void,Void>() {
+        new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... params) {
                 buildMessageOnActivityResult(requestCode, data);
@@ -537,13 +537,13 @@ public abstract class MessageBuilder {
     /** This method is called in a worker thread, and should build the actual message. To deliver
      * its computation result, it must call *exactly one* of the queueMessageBuild* methods before
      * it finishes. */
-    abstract protected void buildMessageInternal();
+    protected abstract void buildMessageInternal();
 
-    abstract protected void buildMessageOnActivityResult(int requestCode, Intent data);
+    protected abstract void buildMessageOnActivityResult(int requestCode, Intent data);
 
     /** This method may be used to temporarily detach the callback. If a result is delivered
      * while the callback is detached, it will be delivered upon reattachment. */
-    final public void detachCallback() {
+    public final void detachCallback() {
         synchronized (callbackLock) {
             asyncCallback = null;
         }
@@ -552,7 +552,7 @@ public abstract class MessageBuilder {
     /** This method attaches a new callback, and must only be called after a previous one was
      * detached. If the computation finished while the callback was detached, it will be
      * delivered immediately upon reattachment. */
-    final public void reattachCallback(Callback callback) {
+    public final void reattachCallback(Callback callback) {
         synchronized (callbackLock) {
             if (asyncCallback != null) {
                 throw new IllegalStateException("need to detach callback before new one can be attached!");
@@ -562,26 +562,26 @@ public abstract class MessageBuilder {
         }
     }
 
-    final protected void queueMessageBuildSuccess(MimeMessage message) {
+    protected final void queueMessageBuildSuccess(MimeMessage message) {
         synchronized (callbackLock) {
             queuedMimeMessage = message;
         }
     }
 
-    final protected void queueMessageBuildException(MessagingException exception) {
+    protected final void queueMessageBuildException(MessagingException exception) {
         synchronized (callbackLock) {
             queuedException = exception;
         }
     }
 
-    final protected void queueMessageBuildPendingIntent(PendingIntent pendingIntent, int requestCode) {
+    protected final void queueMessageBuildPendingIntent(PendingIntent pendingIntent, int requestCode) {
         synchronized (callbackLock) {
             queuedPendingIntent = pendingIntent;
             queuedRequestCode = requestCode;
         }
     }
 
-    final protected void deliverResult() {
+    protected final void deliverResult() {
         synchronized (callbackLock) {
             if (asyncCallback == null) {
                 Log.d(K9.LOG_TAG, "Keeping message builder result in queue for later delivery");

@@ -16,7 +16,6 @@ import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.support.annotation.VisibleForTesting;
 import android.util.Log;
 
@@ -177,8 +176,7 @@ public class SettingsImporter {
             boolean globalSettings, List<String> accountUuids, boolean overwrite)
     throws SettingsImportExportException {
 
-        try
-        {
+        try {
             boolean globalSettingsImported = false;
             List<AccountDescriptionPair> importedAccounts = new ArrayList<AccountDescriptionPair>();
             List<AccountDescription> errorneousAccounts = new ArrayList<AccountDescription>();
@@ -649,7 +647,7 @@ public class SettingsImporter {
     }
 
     /**
-     * Write to an {@link SharedPreferences.Editor} while logging what is written if debug logging
+     * Write to an {@link android.content.SharedPreferences.Editor} while logging what is written if debug logging
      * is enabled.
      *
      * @param editor
@@ -691,7 +689,7 @@ public class SettingsImporter {
             Imported imported = null;
             int eventType = xpp.getEventType();
             while (eventType != XmlPullParser.END_DOCUMENT) {
-                if(eventType == XmlPullParser.START_TAG) {
+                if (eventType == XmlPullParser.START_TAG) {
                     if (SettingsExporter.ROOT_ELEMENT.equals(xpp.getName())) {
                         imported = parseRoot(xpp, globalSettings, accountUuids, overview);
                     } else {
@@ -749,7 +747,7 @@ public class SettingsImporter {
         while (!(eventType == XmlPullParser.END_TAG &&
                  SettingsExporter.ROOT_ELEMENT.equals(xpp.getName()))) {
 
-            if(eventType == XmlPullParser.START_TAG) {
+            if (eventType == XmlPullParser.START_TAG) {
                 String element = xpp.getName();
                 if (SettingsExporter.GLOBAL_ELEMENT.equals(element)) {
                     if (overview || globalSettings) {
@@ -837,7 +835,7 @@ public class SettingsImporter {
         int eventType = xpp.next();
         while (!(eventType == XmlPullParser.END_TAG && endTag.equals(xpp.getName()))) {
 
-            if(eventType == XmlPullParser.START_TAG) {
+            if (eventType == XmlPullParser.START_TAG) {
                 String element = xpp.getName();
                 if (SettingsExporter.VALUE_ELEMENT.equals(element)) {
                     String key = xpp.getAttributeValue(null, SettingsExporter.KEY_ATTRIBUTE);
@@ -872,7 +870,7 @@ public class SettingsImporter {
         while (!(eventType == XmlPullParser.END_TAG &&
                  SettingsExporter.ACCOUNTS_ELEMENT.equals(xpp.getName()))) {
 
-            if(eventType == XmlPullParser.START_TAG) {
+            if (eventType == XmlPullParser.START_TAG) {
                 String element = xpp.getName();
                 if (SettingsExporter.ACCOUNT_ELEMENT.equals(element)) {
                     if (accounts == null) {
@@ -921,7 +919,7 @@ public class SettingsImporter {
             while (!(eventType == XmlPullParser.END_TAG &&
                      SettingsExporter.ACCOUNT_ELEMENT.equals(xpp.getName()))) {
 
-                if(eventType == XmlPullParser.START_TAG) {
+                if (eventType == XmlPullParser.START_TAG) {
                     String element = xpp.getName();
                     if (SettingsExporter.NAME_ELEMENT.equals(element)) {
                         account.name = getText(xpp);
@@ -982,7 +980,7 @@ public class SettingsImporter {
 
         int eventType = xpp.next();
         while (!(eventType == XmlPullParser.END_TAG && endTag.equals(xpp.getName()))) {
-            if(eventType == XmlPullParser.START_TAG) {
+            if (eventType == XmlPullParser.START_TAG) {
                 String element = xpp.getName();
                 if (SettingsExporter.HOST_ELEMENT.equals(element)) {
                     server.host = getText(xpp);
@@ -1019,7 +1017,7 @@ public class SettingsImporter {
         while (!(eventType == XmlPullParser.END_TAG &&
                  SettingsExporter.IDENTITIES_ELEMENT.equals(xpp.getName()))) {
 
-            if(eventType == XmlPullParser.START_TAG) {
+            if (eventType == XmlPullParser.START_TAG) {
                 String element = xpp.getName();
                 if (SettingsExporter.IDENTITY_ELEMENT.equals(element)) {
                     if (identities == null) {
@@ -1046,7 +1044,7 @@ public class SettingsImporter {
         while (!(eventType == XmlPullParser.END_TAG &&
                  SettingsExporter.IDENTITY_ELEMENT.equals(xpp.getName()))) {
 
-            if(eventType == XmlPullParser.START_TAG) {
+            if (eventType == XmlPullParser.START_TAG) {
                 String element = xpp.getName();
                 if (SettingsExporter.NAME_ELEMENT.equals(element)) {
                     identity.name = getText(xpp);
@@ -1074,7 +1072,7 @@ public class SettingsImporter {
         while (!(eventType == XmlPullParser.END_TAG &&
                  SettingsExporter.FOLDERS_ELEMENT.equals(xpp.getName()))) {
 
-            if(eventType == XmlPullParser.START_TAG) {
+            if (eventType == XmlPullParser.START_TAG) {
                 String element = xpp.getName();
                 if (SettingsExporter.FOLDER_ELEMENT.equals(element)) {
                     if (folders == null) {

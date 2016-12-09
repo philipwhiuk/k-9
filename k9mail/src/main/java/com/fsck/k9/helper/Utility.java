@@ -22,7 +22,6 @@ import com.fsck.k9.mail.Address;
 
 import org.apache.james.mime4j.util.MimeUtil;
 
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -411,11 +410,7 @@ public class Utility {
             return false;
         }
         final NetworkInfo netInfo = connectivityManager.getActiveNetworkInfo();
-        if (netInfo != null && netInfo.getState() == NetworkInfo.State.CONNECTED) {
-            return true;
-        } else {
-            return false;
-        }
+        return netInfo != null && netInfo.getState() == NetworkInfo.State.CONNECTED;
     }
 
     private static final Pattern MESSAGE_ID = Pattern.compile("<" +

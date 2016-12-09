@@ -150,7 +150,7 @@ public class AttachmentTempFileProvider extends FileProvider {
             return;
         }
 
-        new AsyncTask<Void,Void,Void>() {
+        new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... voids) {
                 deleteOldTemporaryFiles(context);

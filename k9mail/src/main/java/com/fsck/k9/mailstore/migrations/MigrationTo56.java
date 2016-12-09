@@ -57,11 +57,11 @@ public class MigrationTo56 {
     }
 
     private static boolean columnExists(SQLiteDatabase db, String table, String columnName) {
-        Cursor columnCursor  = db.rawQuery("PRAGMA table_info("+table+")", null);
+        Cursor columnCursor  = db.rawQuery("PRAGMA table_info(" + table + ")", null);
         columnCursor.moveToFirst();
         boolean foundColumn = false;
         while (!columnCursor.isAfterLast()) {
-            if(columnCursor.getString(1).equals(columnName)) {
+            if (columnCursor.getString(1).equals(columnName)) {
                 foundColumn = true;
                 break;
             }
@@ -131,7 +131,7 @@ public class MigrationTo56 {
 
             return MessagingControllerCommands.createMoveOrCopyBulk(srcFolder, destFolder, isCopy, uidMap);
         } else {
-            List<String> uids = new ArrayList<>(command.arguments.length -4);
+            List<String> uids = new ArrayList<>(command.arguments.length - 4);
             uids.addAll(Arrays.asList(command.arguments).subList(4, command.arguments.length));
 
             return MessagingControllerCommands.createMoveOrCopyBulk(srcFolder, destFolder, isCopy, uids);
@@ -172,7 +172,7 @@ public class MigrationTo56 {
         boolean newState = Boolean.parseBoolean(command.arguments[1]);
         Flag flag = Flag.valueOf(command.arguments[2]);
 
-        List<String> uids = new ArrayList<>(command.arguments.length -3);
+        List<String> uids = new ArrayList<>(command.arguments.length - 3);
         uids.addAll(Arrays.asList(command.arguments).subList(3, command.arguments.length));
 
         return MessagingControllerCommands.createSetFlag(folder, newState, flag, uids);
@@ -228,7 +228,7 @@ public class MigrationTo56 {
                 if (l > 9) {
                     l -= 7;
                 }
-                bytes[length] = (byte)((h << 4) | l);
+                bytes[length] = (byte) ((h << 4) | l);
                 i += 2;
             } else if (ch == '+') {
                 bytes[length] = ' ';

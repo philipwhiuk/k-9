@@ -185,7 +185,7 @@ public class EmailProviderTest extends ProviderTestCase2<EmailProvider> {
 
         Cursor cursor = this.getProvider().query(
                 Uri.parse("content://" + EmailProvider.AUTHORITY
-                        + "/account/" + account.getUuid()+"/messages"),
+                        + "/account/" + account.getUuid() + "/messages"),
                 new String[]{
                         EmailProvider.MessageColumns.ID,
                         EmailProvider.MessageColumns.FOLDER_ID,

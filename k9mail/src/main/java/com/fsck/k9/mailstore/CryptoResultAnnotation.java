@@ -120,7 +120,9 @@ public final class CryptoResultAnnotation {
     }
 
     public static CryptoResultAnnotation createSMimeResultAnnotation(SMimeDecryptionResult decryptionResult,
-                                                                     SMimeSignatureResult signatureResult, PendingIntent pendingIntent, MimeBodyPart replacementPart) {
+                                                                     SMimeSignatureResult signatureResult,
+                                                                     PendingIntent pendingIntent,
+                                                                     MimeBodyPart replacementPart) {
         return new CryptoResultAnnotation(CryptoError.SMIME_OK, replacementPart, null, null, null, null,
                 decryptionResult, signatureResult, pendingIntent, null);
     }

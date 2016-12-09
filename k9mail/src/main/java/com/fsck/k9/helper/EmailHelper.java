@@ -2,7 +2,9 @@ package com.fsck.k9.helper;
 
 
 public final class EmailHelper {
-    private EmailHelper() {}
+    private EmailHelper() {
+
+    }
 
     public static String getDomainFromEmailAddress(String email) {
         int separatorIndex = email.lastIndexOf('@');

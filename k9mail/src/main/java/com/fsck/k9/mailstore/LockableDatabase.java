@@ -288,7 +288,8 @@ public class LockableDatabase {
                     // not doing endTransaction in the same 'finally' block of unlockRead() because endTransaction() may throw an exception
                     mDb.endTransaction();
                     if (debug) {
-                        Log.v(K9.LOG_TAG, "LockableDatabase: Transaction ended, took " + Long.toString(System.currentTimeMillis() - begin) + "ms / " + new Exception().getStackTrace()[1].toString());
+                        Log.v(K9.LOG_TAG, "LockableDatabase: Transaction ended, took " +
+                                Long.toString(System.currentTimeMillis() - begin) + "ms / " + new Exception().getStackTrace()[1].toString());
                     }
                 }
             }
@@ -458,8 +459,9 @@ public class LockableDatabase {
             try {
                 mDb.close();
             } catch (Exception e) {
-                if (K9.DEBUG)
+                if (K9.DEBUG) {
                     Log.d(K9.LOG_TAG, "Exception caught in DB close: " + e.getMessage());
+                }
             }
             final StorageManager storageManager = getStorageManager();
             try {
@@ -480,8 +482,9 @@ public class LockableDatabase {
                     }
                 }
             } catch (Exception e) {
-                if (K9.DEBUG)
+                if (K9.DEBUG) {
                     Log.d(K9.LOG_TAG, "Exception caught in clearing attachments: " + e.getMessage());
+                }
             }
             try {
                 deleteDatabase(storageManager.getDatabase(uUid, mStorageProviderId));

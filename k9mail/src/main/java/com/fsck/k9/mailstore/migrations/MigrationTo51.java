@@ -209,7 +209,7 @@ class MigrationTo51 {
                 "internal_date INTEGER, " +
                 "message_id TEXT, " +
                 "preview TEXT, " +
-                "mime_type TEXT, "+
+                "mime_type TEXT, " +
                 "normalized_subject_hash INTEGER, " +
                 "empty INTEGER default 0, " +
                 "read INTEGER default 0, " +
@@ -544,7 +544,7 @@ class MigrationTo51 {
         extraFlags.add(Flag.X_MIGRATED_FROM_V50);
 
         String flagsString = migrationsHelper.serializeFlags(extraFlags);
-        db.execSQL("UPDATE messages SET flags = ? WHERE id = ?", new Object[] { flagsString, messageId } );
+        db.execSQL("UPDATE messages SET flags = ? WHERE id = ?", new Object[] { flagsString, messageId });
     }
 
     private static MimeStructureState insertBodyAsMultipartAlternative(SQLiteDatabase db,
@@ -693,9 +693,9 @@ class MigrationTo51 {
             isStateAdvanced = true;
 
             if (rootPartId == null) {
-                return new MimeStructureState(newPartId, null, -1, nextOrder+1);
+                return new MimeStructureState(newPartId, null, -1, nextOrder + 1);
             }
-            return new MimeStructureState(rootPartId, prevParentId, parentId, nextOrder+1);
+            return new MimeStructureState(rootPartId, prevParentId, parentId, nextOrder + 1);
         }
 
         public MimeStructureState nextMultipartChild(long newPartId) {
@@ -705,9 +705,9 @@ class MigrationTo51 {
             isStateAdvanced = true;
 
             if (rootPartId == null) {
-                return new MimeStructureState(newPartId, parentId, newPartId, nextOrder+1);
+                return new MimeStructureState(newPartId, parentId, newPartId, nextOrder + 1);
             }
-            return new MimeStructureState(rootPartId, parentId, newPartId, nextOrder+1);
+            return new MimeStructureState(rootPartId, parentId, newPartId, nextOrder + 1);
         }
 
         public void applyValues(ContentValues cv) {

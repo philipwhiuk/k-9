@@ -2,9 +2,6 @@ package com.fsck.k9.fragment;
 
 import android.database.Cursor;
 
-import com.fsck.k9.fragment.MessageListFragment;
-import com.fsck.k9.mail.Message;
-
 import java.util.Comparator;
 import java.util.List;
 

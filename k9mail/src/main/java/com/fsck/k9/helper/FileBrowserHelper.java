@@ -37,11 +37,11 @@ public class FileBrowserHelper {
          * the user has entered a path
          * @param path the path as String
          */
-        public void onPathEntered(String path);
+        void onPathEntered(String path);
         /**
          * the user has cancel the inputtext dialog
          */
-        public void onCancel();
+        void onCancel();
     }
     /**
      * factory method
@@ -49,7 +49,7 @@ public class FileBrowserHelper {
      */
     private FileBrowserHelper() {
     }
-    public synchronized static FileBrowserHelper getInstance() {
+    public static synchronized FileBrowserHelper getInstance() {
         if (sInstance == null) {
             sInstance = new FileBrowserHelper();
         }
@@ -144,8 +144,9 @@ public class FileBrowserHelper {
         alert.setMessage(c.getString(R.string.attachment_save_desc));
         final EditText input = new EditText(c);
         input.setInputType(InputType.TYPE_CLASS_TEXT);
-        if (startPath != null)
+        if (startPath != null) {
             input.setText(startPath.toString());
+        }
         alert.setView(input);
 
         alert.setPositiveButton(c.getString(R.string.okay_action), new DialogInterface.OnClickListener() {

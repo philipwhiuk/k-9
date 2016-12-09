@@ -1,7 +1,6 @@
 package com.fsck.k9.mailstore;
 
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -24,7 +23,6 @@ import com.fsck.k9.mail.Message;
 import com.fsck.k9.mail.MessagingException;
 import com.fsck.k9.mail.Part;
 import com.fsck.k9.mail.internet.MessageExtractor;
-import com.fsck.k9.mail.internet.UnsupportedContentTransferEncodingException;
 import com.fsck.k9.mail.internet.Viewable;
 import com.fsck.k9.message.extractors.AttachmentInfoExtractor;
 import com.fsck.k9.message.extractors.ICalendarInfoExtractor;
@@ -274,7 +272,7 @@ public class MessageViewInfoExtractor {
     private StringBuilder buildText(Viewable viewable, boolean prependDivider) {
         StringBuilder text = new StringBuilder();
         if (viewable instanceof Textual) {
-            Part part = ((Textual)viewable).getPart();
+            Part part = ((Textual) viewable).getPart();
             addTextDivider(text, part, prependDivider);
 
             String t = null;

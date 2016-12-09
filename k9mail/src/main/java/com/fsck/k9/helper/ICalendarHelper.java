@@ -8,7 +8,6 @@ import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 
 import com.fsck.k9.K9;
-import com.fsck.k9.mail.Address;
 
 import biweekly.property.Attendee;
 import biweekly.property.Organizer;
@@ -39,11 +38,11 @@ public class ICalendarHelper {
      *
      * @param attendee An {@link biweekly.property.Attendee}
      * @param contacts A {@link Contacts} instance or {@code null}.
-     * @return A "friendly" name for this {@link Address}.
+     * @return A "friendly" name for this {@link Attendee}.
      */
     //TODO: Should this use separate settings for name vs email?
     public static CharSequence toFriendly(Attendee attendee, Contacts contacts) {
-        return toFriendly(attendee,contacts,
+        return toFriendly(attendee, contacts,
                 K9.showCorrespondentNames(),
                 K9.changeContactNameColor(),
                 K9.getContactNameColor());
@@ -51,7 +50,7 @@ public class ICalendarHelper {
 
     //TODO: Should this use separate settings for name vs email?
     public static CharSequence toFriendly(Organizer organizer, Contacts contacts) {
-        return toFriendly(organizer,contacts,
+        return toFriendly(organizer, contacts,
                 K9.showCorrespondentNames(),
                 K9.changeContactNameColor(),
                 K9.getContactNameColor());

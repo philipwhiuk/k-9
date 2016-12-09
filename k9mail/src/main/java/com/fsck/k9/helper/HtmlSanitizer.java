@@ -26,7 +26,9 @@ public class HtmlSanitizer {
     }
 
     @VisibleForTesting
-    HtmlSanitizer() {}
+    HtmlSanitizer() {
+
+    }
 
 
     public String sanitize(String html) {

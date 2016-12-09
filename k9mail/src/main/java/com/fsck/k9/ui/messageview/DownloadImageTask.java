@@ -25,7 +25,7 @@ import com.fsck.k9.provider.AttachmentProvider.AttachmentProviderColumns;
 import org.apache.commons.io.IOUtils;
 
 /**
- * @deprecated
+ * @deprecated TODO: Why?
  */
 @Deprecated
 class DownloadImageTask extends AsyncTask<String, Void, String> {

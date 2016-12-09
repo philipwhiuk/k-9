@@ -152,7 +152,7 @@ public class PgpMessageBuilder extends MessageBuilder {
                 pgpApiIntent.putExtra(OpenPgpApi.EXTRA_KEY_IDS, encryptKeyIds);
             }
 
-            if(!isDraft()) {
+            if (!isDraft()) {
                 String[] encryptRecipientAddresses = cryptoStatus.getRecipientAddresses();
                 boolean hasRecipientAddresses = encryptRecipientAddresses != null && encryptRecipientAddresses.length > 0;
                 if (!hasRecipientAddresses) {

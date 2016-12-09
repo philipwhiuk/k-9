@@ -118,8 +118,7 @@ public class LocalFolder extends Folder<LocalMessage> implements Serializable {
         return mFolderId;
     }
 
-    public String getAccountUuid()
-    {
+    public String getAccountUuid() {
         return getAccount().getUuid();
     }
 
@@ -398,7 +397,7 @@ public class LocalFolder extends Folder<LocalMessage> implements Serializable {
         //don't purge messages while a Search is active since it might throw away search results
         if (!Search.isActive()) {
             if (mVisibleLimit == 0) {
-                return ;
+                return;
             }
             open(OPEN_MODE_RW);
             List<? extends Message> messages = getMessages(null, false);
@@ -948,7 +947,7 @@ public class LocalFolder extends Folder<LocalMessage> implements Serializable {
             throw new MessagingException("moveMessages called with non-LocalFolder");
         }
 
-        final LocalFolder lDestFolder = (LocalFolder)destFolder;
+        final LocalFolder lDestFolder = (LocalFolder) destFolder;
 
         final Map<String, String> uidMap = new HashMap<>();
 
@@ -959,7 +958,7 @@ public class LocalFolder extends Folder<LocalMessage> implements Serializable {
                     try {
                         lDestFolder.open(OPEN_MODE_RW);
                         for (Message message : msgs) {
-                            LocalMessage lMessage = (LocalMessage)message;
+                            LocalMessage lMessage = (LocalMessage) message;
 
                             String oldUID = message.getUid();
 
@@ -1069,7 +1068,8 @@ public class LocalFolder extends Folder<LocalMessage> implements Serializable {
     }
 
     /**
-     * Convenience transaction wrapper for storing a message and set it as fully downloaded. Implemented mainly to speed up DB transaction commit.
+     * Convenience transaction wrapper for storing a message and set it as fully downloaded.
+     * Implemented mainly to speed up DB transaction commit.
      *
      * @param message Message to store. Never <code>null</code>.
      * @param runnable What to do before setting {@link Flag#X_DOWNLOADED_FULL}. Never <code>null</code>.
@@ -1772,7 +1772,7 @@ public class LocalFolder extends Folder<LocalMessage> implements Serializable {
     @Override
     public boolean equals(Object o) {
         if (o instanceof LocalFolder) {
-            return ((LocalFolder)o).mName.equals(mName);
+            return ((LocalFolder) o).mName.equals(mName);
         }
         return super.equals(o);
     }
@@ -1876,8 +1876,9 @@ public class LocalFolder extends Folder<LocalMessage> implements Serializable {
                 return null;
             }
         });
-        if (K9.DEBUG)
+        if (K9.DEBUG) {
             Log.d(K9.LOG_TAG, "Updated last UID for folder " + mName + " to " + lastUid);
+        }
         mLastUid = lastUid;
     }
 

@@ -1,7 +1,13 @@
 package com.fsck.k9.helper;
 
-import android.text.*;
+import android.text.Annotation;
+import android.text.Editable;
+import android.text.Html;
 import android.text.Html.TagHandler;
+import android.text.Spannable;
+import android.text.Spanned;
+import android.text.TextUtils;
+
 import com.fsck.k9.K9;
 
 import org.xml.sax.XMLReader;
@@ -192,15 +198,15 @@ public class HtmlConverter {
      * represented as 0xfffc. When displayed, these show up as undisplayed squares. These constants
      * define the object character and the replacement character.
      */
-    private static final char PREVIEW_OBJECT_CHARACTER = (char)0xfffc;
-    private static final char PREVIEW_OBJECT_REPLACEMENT = (char)0x20;  // space
+    private static final char PREVIEW_OBJECT_CHARACTER = (char) 0xfffc;
+    private static final char PREVIEW_OBJECT_REPLACEMENT = (char) 0x20;  // space
 
     /**
      * toHtml() converts non-breaking spaces into the UTF-8 non-breaking space, which doesn't get
      * rendered properly in some clients. Replace it with a simple space.
      */
-    private static final char NBSP_CHARACTER = (char)0x00a0;    // utf-8 non-breaking space
-    private static final char NBSP_REPLACEMENT = (char)0x20;    // space
+    private static final char NBSP_CHARACTER = (char) 0x00a0;    // utf-8 non-breaking space
+    private static final char NBSP_REPLACEMENT = (char) 0x20;    // space
 
     // Number of extra bytes to allocate in a string buffer for htmlification.
     private static final int TEXT_TO_HTML_EXTRA_BUFFER_LENGTH = 512;
@@ -293,7 +299,7 @@ public class HtmlConverter {
         }
     }
 
-    private static final int MAX_SMART_HTMLIFY_MESSAGE_LENGTH = 1024 * 256 ;
+    private static final int MAX_SMART_HTMLIFY_MESSAGE_LENGTH = 1024 * 256;
 
     /**
      * Naively convert a text string into an HTML document.
@@ -322,16 +328,16 @@ public class HtmlConverter {
         for (int index = 0; index < text.length(); index++) {
             char c = text.charAt(index);
             switch (c) {
-            case '\n':
-                // pine treats <br> as two newlines, but <br/> as one newline.  Use <br/> so our messages aren't
-                // doublespaced.
-                buff.append("<br />");
-                break;
-            case '\r':
-                break;
-            default:
-                buff.append(c);
-            }//switch
+                case '\n':
+                    // pine treats <br> as two newlines, but <br/> as one newline.  Use <br/> so our messages aren't
+                    // doublespaced.
+                    buff.append("<br />");
+                    break;
+                case '\r':
+                    break;
+                default:
+                    buff.append(c);
+            }
         }
 
         buff.append(htmlifyMessageFooter());
@@ -476,7 +482,7 @@ public class HtmlConverter {
             buff.append(HTML_NEWLINE);
             break;
         default:
-            buff.append((char)c);
+            buff.append((char) c);
             break;
         }
     }
@@ -515,7 +521,7 @@ public class HtmlConverter {
      * @return Hex color string with prepended #.
      */
     protected static String getQuoteColor(final int level) {
-        switch(level) {
+        switch (level) {
             case 1:
                 return QUOTE_COLOR_LEVEL_1;
             case 2:
@@ -565,8 +571,9 @@ public class HtmlConverter {
     private static boolean hasEmoji(String html) {
         for (int i = 0; i < html.length(); ++i) {
             char c = html.charAt(i);
-            if (c >= 0xDBB8 && c < 0xDBBC)
+            if (c >= 0xDBB8 && c < 0xDBBC) {
                 return true;
+            }
         }
         return false;
     }
@@ -580,11 +587,13 @@ public class HtmlConverter {
         for (int i = 0; i < html.length(); i = html.offsetByCodePoints(i, 1)) {
             int codePoint = html.codePointAt(i);
             String emoji = getEmojiForCodePoint(codePoint);
-            if (emoji != null)
-                buff.append("<img src=\"file:///android_asset/emoticons/").append(emoji).append(".gif\" alt=\"").append(emoji).append("\" />");
-            else
+            if (emoji != null) {
+                buff.append("<img src=\"file:///android_asset/emoticons/").append(emoji)
+                    .append(".gif\" alt=\"").append(emoji).append("\" />");
+            }
+            else {
                 buff.appendCodePoint(codePoint);
-
+            }
         }
         return buff.toString();
     }

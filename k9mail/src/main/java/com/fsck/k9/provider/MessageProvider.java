@@ -48,7 +48,6 @@ import com.fsck.k9.controller.MessagingController;
 import com.fsck.k9.controller.MessagingListener;
 import com.fsck.k9.helper.MessageHelper;
 import com.fsck.k9.mail.Flag;
-import com.fsck.k9.mail.Message;
 import com.fsck.k9.mail.MessagingException;
 import com.fsck.k9.mailstore.LocalFolder;
 import com.fsck.k9.mailstore.LocalMessage;
@@ -158,7 +157,7 @@ public class MessageProvider extends ContentProvider {
 
     /**
      * Extracts the {@link LocalMessage#getId() ID} from the given
-     * {@link MessageInfoHolder}. The underlying {@link Message} is expected to
+     * {@link MessageInfoHolder}. The underlying {@link com.fsck.k9.mail.Message} is expected to
      * be a {@link LocalMessage}.
      */
     public static class IdExtractor implements FieldExtractor<MessageInfoHolder, Long> {

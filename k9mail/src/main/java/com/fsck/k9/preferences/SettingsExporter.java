@@ -82,8 +82,7 @@ public class SettingsExporter {
 
         OutputStream os = null;
         String filename = null;
-        try
-        {
+        try {
             File dir = new File(Environment.getExternalStorageDirectory() + File.separator + context.getPackageName());
             if (!dir.mkdirs()) {
                 Log.d(K9.LOG_TAG, "Unable to create directory: " + dir.getAbsolutePath());

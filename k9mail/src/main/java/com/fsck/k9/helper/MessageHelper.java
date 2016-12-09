@@ -35,7 +35,7 @@ public class MessageHelper {
 
     private static MessageHelper sInstance;
 
-    public synchronized static MessageHelper getInstance(final Context context) {
+    public static synchronized MessageHelper getInstance(final Context context) {
         if (sInstance == null) {
             sInstance = new MessageHelper(context);
         }
@@ -127,7 +127,7 @@ public class MessageHelper {
      * @return A "friendly" name for this {@link Address}.
      */
     public static CharSequence toFriendly(Address address, Contacts contacts) {
-        return toFriendly(address,contacts,
+        return toFriendly(address, contacts,
                 K9.showCorrespondentNames(),
                 K9.changeContactNameColor(),
                 K9.getContactNameColor());

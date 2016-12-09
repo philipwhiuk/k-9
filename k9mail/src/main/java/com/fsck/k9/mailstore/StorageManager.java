@@ -36,7 +36,7 @@ public class StorageManager {
      * online later).
      * </p>
      */
-    public static interface StorageProvider {
+    public interface StorageProvider {
 
         /**
          * Retrieve the uniquely identifier for the current implementation.
@@ -135,7 +135,7 @@ public class StorageManager {
      * Interface for components wanting to be notified of storage availability
      * events.
      */
-    public static interface StorageListener {
+    public interface StorageListener {
         /**
          * Invoked on storage mount (with read/write access).
          *
@@ -686,7 +686,8 @@ public class StorageManager {
             }
         }
 
-        // XXX we should reset mail service ONLY if there are accounts using the storage (this is not done in a regular listener because it has to be invoked afterward)
+        // XXX we should reset mail service ONLY if there are accounts using the storage
+        // (this is not done in a regular listener because it has to be invoked afterward)
         K9.setServicesEnabled(context);
     }
 

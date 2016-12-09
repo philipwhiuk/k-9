@@ -30,7 +30,7 @@ abstract class BinaryAttachmentBody implements Body {
             if (MimeUtil.isBase64Encoding(mEncoding)) {
                 out = new Base64OutputStream(out);
                 closeStream = true;
-            } else if (MimeUtil.isQuotedPrintableEncoded(mEncoding)){
+            } else if (MimeUtil.isQuotedPrintableEncoded(mEncoding)) {
                 out = new QuotedPrintableOutputStream(out, false);
                 closeStream = true;
             }
