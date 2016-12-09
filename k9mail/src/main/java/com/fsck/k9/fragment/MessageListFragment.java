@@ -1598,7 +1598,7 @@ public class MessageListFragment extends Fragment implements OnItemClickListener
                 mHandler.updateFooter(mContext.getString(R.string.remote_search_downloading_limited,
                         maxResults, numResults));
             } else {
-                mHandler.updateFooter(mContext.getString(R.string.remote_search_downloading, numResults));
+                mHandler.updateFooter(mContext.getString(R.plurals.remote_search_downloading, numResults));
             }
             mFragmentListener.setMessageListProgress(Window.PROGRESS_START);
         }

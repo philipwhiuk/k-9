@@ -38,7 +38,7 @@ dependencies {
     compile 'com.squareup.moshi:moshi:1.2.0'
     compile 'net.sf.biweekly:biweekly:0.6.0'
 
-    androidTestCompile 'com.android.support.test.espresso:espresso-core:2.2.1'
+    androidTestCompile 'com.android.support.test.espresso:espresso-core:2.2.2'
 
     testCompile "org.robolectric:robolectric:${robolectricVersion}"
     testCompile "junit:junit:${junitVersion}"

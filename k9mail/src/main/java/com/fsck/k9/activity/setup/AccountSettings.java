@@ -749,14 +749,14 @@ public class AccountSettings extends K9PreferenceActivity {
                 if (CryptoMethod.PGP_MIME.toString().equals(value) && !mHasOpenPgp) {
                     Toast.makeText(AccountSettings.this,
                             getString(R.string.account_settings_crypto_mode_pgpmime_unavailable),
-                            Toast.LENGTH_SHORT);
+                            Toast.LENGTH_SHORT).show();
                     updateCryptoDefaultMethod(CryptoMethod.NO_CRYPTO);
                 }
 
                 if (CryptoMethod.SMIME.toString().equals(value) && !mHasSMime) {
                     Toast.makeText(AccountSettings.this,
                             getString(R.string.account_settings_crypto_mode_smime_unavailable),
-                            Toast.LENGTH_SHORT);
+                            Toast.LENGTH_SHORT).show();
                     updateCryptoDefaultMethod(CryptoMethod.NO_CRYPTO);
                 }
 

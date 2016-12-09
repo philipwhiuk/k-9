@@ -182,7 +182,8 @@
                     android:singleLine="true"
                     android:layout_height="wrap_content"
                     android:layout_width="fill_parent"
-                    android:contentDescription="@string/account_setup_incoming_imap_path_prefix_label" />
+                    android:contentDescription="@string/account_setup_incoming_imap_path_prefix_label"
+                    android:inputType="text" />
             </LinearLayout>
             <LinearLayout android:layout_width="fill_parent"
                 android:layout_height="wrap_content" android:id="@+id/imap_folder_setup_section"
@@ -240,7 +241,6 @@
                     android:textColor="?android:attr/textColorPrimary" />
                 <EditText
                     android:id="@+id/webdav_path_prefix"
-                    android:hint="@string/account_setup_incoming_webdav_path_prefix_hint"
                     android:singleLine="true"
                     android:layout_height="wrap_content"
                     android:layout_width="fill_parent"

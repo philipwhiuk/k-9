@@ -61,6 +61,8 @@ public class ICalendarRequestView extends ICalendarView implements View.OnClickL
 
     @Override
     protected void onFinishInflate() {
+        super.onFinishInflate();
+
         summaryView = (TextView) findViewById(R.id.summary);
         summaryLabel = (TextView) findViewById(R.id.summary_label);
         organizerView = (TextView) findViewById(R.id.organizer);
