@@ -68,13 +68,15 @@ public class MessageExtractorTest {
         MessageExtractor.getTextFromPart(part);
     }
 
-    @Test(expected = UnsupportedContentTransferEncodingException.class)
-    public void getTextFromPart_withUnknownEncoding_shouldThrowException() throws Exception {
+    @Test
+    public void getTextFromPart_withUnknownEncoding_shouldReturnNull() throws Exception {
         part.setHeader(MimeHeader.HEADER_CONTENT_TYPE, "text/plain");
         BinaryMemoryBody body = new BinaryMemoryBody("Sample text body".getBytes(), "unknown encoding");
         part.setBody(body);
 
-        MessageExtractor.getTextFromPart(part);
+        String result = MessageExtractor.getTextFromPart(part);
+        
+        assertNull(result);
     }
 
     @Test

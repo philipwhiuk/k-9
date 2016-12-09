@@ -119,12 +119,13 @@ public class MessageTopView extends LinearLayout {
                 containerView, false);
         containerView.addView(messageContainerView);
 
-        messageContainerView.displayMessageViewContainer(messageViewInfo, new OnRenderingFinishedListener() {
+        boolean hideUnsignedTextDivider = !account.getCryptoSupportSignOnly();
+        view.displayMessageViewContainer(messageViewInfo, new OnRenderingFinishedListener() {
             @Override
             public void onLoadFinished() {
                 displayViewOnLoadFinished(true);
             }
-        }, automaticallyLoadPictures, iCalendarCallback, attachmentCallback);
+        }, automaticallyLoadPictures, hideUnsignedTextDivider, iCalendarCallback, attachmentCallback);
 
         if (messageContainerView.hasHiddenExternalImages()) {
             showShowPicturesButton();

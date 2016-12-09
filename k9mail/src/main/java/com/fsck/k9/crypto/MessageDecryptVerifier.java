@@ -9,6 +9,7 @@ import java.util.Stack;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 import android.text.TextUtils;
 
 import com.fsck.k9.mail.Body;
@@ -189,18 +190,22 @@ public class MessageDecryptVerifier {
         return isPgpEncrypted || isPgpSigned;
     }
 
-    private static boolean isPartPgpInlineEncryptedOrSigned(@NonNull Part part) {
+    @VisibleForTesting
+    static boolean isPartPgpInlineEncryptedOrSigned(Part part) {
         if (!part.isMimeType(CryptoMimeTypes.TEXT_PLAIN) && !part.isMimeType(CryptoMimeTypes.APPLICATION_PGP)) {
             return false;
         }
         String text = null;
         try {
             text = MessageExtractor.getTextFromPart(part, TEXT_LENGTH_FOR_INLINE_CHECK);
-        } catch (MessagingException | IOException | UnsupportedContentTransferEncodingException e) {
+        } catch (MessagingException | IOException e) {
             return false;
         }
-        return !TextUtils.isEmpty(text) &&
-                (text.startsWith(PGP_INLINE_START_MARKER) || text.startsWith(PGP_INLINE_SIGNED_START_MARKER));
+        if (TextUtils.isEmpty(text)) {
+            return false;
+        }
+        text = text.trim();
+        return text.startsWith(PGP_INLINE_START_MARKER) || text.startsWith(PGP_INLINE_SIGNED_START_MARKER);
     }
 
     public static boolean isPartPgpInlineEncrypted(@Nullable Part part) {
@@ -210,10 +215,15 @@ public class MessageDecryptVerifier {
         if (!part.isMimeType(CryptoMimeTypes.TEXT_PLAIN) && !part.isMimeType(CryptoMimeTypes.APPLICATION_PGP)) {
             return false;
         }
+
         try {
             String text = MessageExtractor.getTextFromPart(part, TEXT_LENGTH_FOR_INLINE_CHECK);
-            return !TextUtils.isEmpty(text) && text.startsWith(PGP_INLINE_START_MARKER);
-        } catch (MessagingException | IOException | UnsupportedContentTransferEncodingException e) {
+            if (TextUtils.isEmpty(text)) {
+                return false;
+            }
+            text = text.trim();
+            return text.startsWith(PGP_INLINE_START_MARKER);
+        } catch (MessagingException | IOException e) {
             return false;
         }
     }
