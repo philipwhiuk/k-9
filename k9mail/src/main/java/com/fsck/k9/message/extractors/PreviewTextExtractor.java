@@ -27,7 +27,7 @@ class PreviewTextExtractor {
             String plainText = convertFromHtmlIfNecessary(textPart, text);
 
             return stripTextForPreview(plainText);
-        } catch (MessagingException | IOException | UnsupportedContentTransferEncodingException e) {
+        } catch (MessagingException | IOException e) {
             throw new PreviewExtractionException("Couldn't get text from part", e);
         }
     }

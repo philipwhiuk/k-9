@@ -302,7 +302,8 @@ public class MessageViewInfoExtractorTest {
         // Extract text
         List<Part> outputNonViewableParts = new ArrayList<>();
         ArrayList<Viewable> outputViewableParts = new ArrayList<>();
-        MessageExtractor.findViewablesAndAttachments(message, outputViewableParts, outputNonViewableParts);
+        ArrayList<ICalPart> outputICalendarParts = new ArrayList<>();
+        MessageExtractor.findViewablesAndAttachments(message, outputViewableParts, outputNonViewableParts, outputICalendarParts);
 
         String expectedExtractedText = "Subject: (No subject)\r\n" +
                 "\r\n" +

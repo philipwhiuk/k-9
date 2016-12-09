@@ -1259,7 +1259,7 @@ public class LocalFolder extends Folder<LocalMessage> implements Serializable {
             String error = null;
             try {
                 fulltext = fulltextCreator.createFulltext(message);
-            } catch (MessagingException | IOException | UnsupportedContentTransferEncodingException e) {
+            } catch (MessagingException | IOException e) {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 ObjectOutputStream oos = new ObjectOutputStream(baos);
                 oos.writeObject(e);

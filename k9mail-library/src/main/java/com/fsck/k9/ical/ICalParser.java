@@ -20,7 +20,7 @@ public class ICalParser {
         String iCalText;
         try {
             iCalText = MessageExtractor.getTextFromPart(part.getPart());
-        } catch (MessagingException | IOException | UnsupportedContentTransferEncodingException e) {
+        } catch (MessagingException | IOException e) {
             Log.e(LOG_TAG, "Unable to parse iCalendar in part:" + part, e);
             return null;
         }

@@ -31,8 +31,6 @@ import com.fsck.k9.view.ThemeUtils;
 import com.fsck.k9.view.ToolableViewAnimator;
 import org.openintents.openpgp.OpenPgpError;
 
-import static com.fsck.k9.R.id.view;
-
 
 public class MessageTopView extends LinearLayout {
 
@@ -119,8 +117,8 @@ public class MessageTopView extends LinearLayout {
                 containerView, false);
         containerView.addView(messageContainerView);
 
-        boolean hideUnsignedTextDivider = !account.getCryptoSupportSignOnly();
-        view.displayMessageViewContainer(messageViewInfo, new OnRenderingFinishedListener() {
+        boolean hideUnsignedTextDivider = !account.getOpenPgpSupportSignOnly();
+        messageContainerView.displayMessageViewContainer(messageViewInfo, new OnRenderingFinishedListener() {
             @Override
             public void onLoadFinished() {
                 displayViewOnLoadFinished(true);
