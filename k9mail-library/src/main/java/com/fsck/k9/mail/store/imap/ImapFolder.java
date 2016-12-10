@@ -502,6 +502,11 @@ class ImapFolder extends Folder<ImapMessage> {
     }
 
     @Override
+    public String getRemoteName() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public ImapMessage getMessage(String uid) throws MessagingException {
         return new ImapMessage(uid, this);
     }

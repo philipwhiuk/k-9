@@ -224,6 +224,11 @@ class WebDavFolder extends Folder<WebDavMessage> {
     }
 
     @Override
+    public String getRemoteName() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public WebDavMessage getMessage(String uid) throws MessagingException {
         return new WebDavMessage(uid, this);
     }

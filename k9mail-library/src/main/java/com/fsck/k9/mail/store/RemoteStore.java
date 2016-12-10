@@ -140,4 +140,6 @@ public abstract class RemoteStore extends Store {
             throw new IllegalArgumentException("Not a valid store URI");
         }
     }
+
+    public abstract boolean syncByDeltas();
 }

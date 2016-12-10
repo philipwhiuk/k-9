@@ -15,6 +15,7 @@ public abstract class Folder<T extends Message> {
     private long lastChecked = 0;
     private long lastPush = 0;
 
+    //TODO: Remove
     public static final int OPEN_MODE_RW = 0;
     public static final int OPEN_MODE_RO = 1;
 
@@ -25,6 +26,10 @@ public abstract class Folder<T extends Message> {
 
     public enum FolderType {
         HOLDS_FOLDERS, HOLDS_MESSAGES,
+    }
+
+    public enum OpenMode {
+        READ_WRITE, READ_ONLY,
     }
 
     /**
@@ -141,6 +146,8 @@ public abstract class Folder<T extends Message> {
     }
 
     public abstract void delete(boolean recurse) throws MessagingException;
+
+    public abstract String getRemoteName();
 
     public abstract String getName();
 

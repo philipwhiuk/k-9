@@ -262,6 +262,11 @@ public class Pop3Store extends RemoteStore {
     }
 
     @Override
+    public boolean syncByDeltas() {
+        return false;
+    }
+
+    @Override
     public Folder getFolder(String name) {
         Folder folder = mFolders.get(name);
         if (folder == null) {
@@ -994,6 +999,11 @@ public class Pop3Store extends RemoteStore {
 
         @Override
         public void delete(boolean recurse) throws MessagingException {
+        }
+
+        @Override
+        public String getRemoteName() {
+            throw new UnsupportedOperationException();
         }
 
         @Override

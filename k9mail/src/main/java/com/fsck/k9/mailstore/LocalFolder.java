@@ -1770,6 +1770,11 @@ public class LocalFolder extends Folder<LocalMessage> implements Serializable {
     }
 
     @Override
+    public String getRemoteName() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (o instanceof LocalFolder) {
             return ((LocalFolder) o).mName.equals(mName);

@@ -1175,4 +1175,9 @@ public class WebDavStore extends RemoteStore {
             }
         }
     }
+
+    @Override
+    public boolean syncByDeltas() {
+        return false;
+    }
 }
