@@ -55,9 +55,9 @@ public class Serializer {
         this(true);
     }
 
-    public Serializer(boolean startDocument, boolean _logging) {
+    public Serializer(boolean startDocument, boolean logging) {
         this(true);
-        logging = _logging;
+        this.logging = logging;
     }
 
     public Serializer(boolean startDocument) {
@@ -180,9 +180,10 @@ public class Serializer {
         return this;
     }
 
-    void writeInteger(OutputStream out, int i) throws IOException {
+    void writeInteger(OutputStream out, int integer) throws IOException {
         byte[] buf = new byte[5];
         int idx = 0;
+        int i = integer;
 
         do {
             buf[idx++] = (byte) (i & 0x7f);

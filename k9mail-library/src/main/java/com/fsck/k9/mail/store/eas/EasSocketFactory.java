@@ -1,6 +1,5 @@
 package com.fsck.k9.mail.store.eas;
 
-import com.fsck.k9.mail.ssl.DefaultTrustedSocketFactory;
 import com.fsck.k9.mail.ssl.TrustManagerFactory;
 
 import org.apache.http.conn.ConnectTimeoutException;

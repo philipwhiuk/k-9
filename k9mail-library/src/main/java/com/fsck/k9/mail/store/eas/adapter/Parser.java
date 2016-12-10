@@ -70,7 +70,7 @@ public abstract class Parser {
     private String[] tagTable;
 
     // An array of tag tables, as defined in EasTags
-    static private String[][] tagTables = new String[24][];
+    private static String[][] tagTables = new String[24][];
 
     // The stack of names of tags being processed; used when debug = true
     private String[] nameArray = new String[32];
