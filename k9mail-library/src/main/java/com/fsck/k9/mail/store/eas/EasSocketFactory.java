@@ -1,11 +1,11 @@
-package com.fsck.k9.mail.store.webdav;
+package com.fsck.k9.mail.store.eas;
 
 import com.fsck.k9.mail.ssl.DefaultTrustedSocketFactory;
+import com.fsck.k9.mail.ssl.TrustManagerFactory;
+
 import org.apache.http.conn.ConnectTimeoutException;
 import org.apache.http.conn.scheme.LayeredSocketFactory;
 import org.apache.http.params.HttpParams;
-
-import com.fsck.k9.mail.ssl.TrustManagerFactory;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -21,16 +21,14 @@ import javax.net.ssl.TrustManager;
 
 /*
  * TODO: find out what's going on here and document it.
+ * TODO: Same code as WebDav currently. Move to common HTTP package if still the case
  * Using two socket factories looks suspicious.
- * TODO: Same code as EAS currently. Move to common HTTP package if still the case
- * TODO: Use TrustedSocketFactory
- * TODO: Stop using deprecated Apache HTTP code
  */
-public class WebDavSocketFactory implements LayeredSocketFactory {
+public class EasSocketFactory implements LayeredSocketFactory {
     private SSLSocketFactory mSocketFactory;
     private org.apache.http.conn.ssl.SSLSocketFactory mSchemeSocketFactory;
 
-    public WebDavSocketFactory(String host, int port) throws NoSuchAlgorithmException, KeyManagementException {
+    public EasSocketFactory(String host, int port) throws NoSuchAlgorithmException, KeyManagementException {
         SSLContext sslContext = SSLContext.getInstance("TLS");
         sslContext.init(null, new TrustManager[] {
                 TrustManagerFactory.get(host, port)
@@ -67,7 +65,6 @@ public class WebDavSocketFactory implements LayeredSocketFactory {
                 port,
                 autoClose
         );
-        DefaultTrustedSocketFactory.setSniHost(mSocketFactory, sslSocket, host);
         //hostnameVerifier.verify(host, sslSocket);
         // verifyHostName() didn't blowup - good!
         return sslSocket;

@@ -19,33 +19,59 @@ public abstract class Store {
 
     public abstract void checkSettings() throws MessagingException;
 
+    /**
+     * @return whether the store is capable of copying messages
+     */
     public boolean isCopyCapable() {
         return false;
     }
 
+    /**
+     * @return whether the store is capable of moving messages
+     */
     public boolean isMoveCapable() {
         return false;
     }
 
+    /**
+     * @return whether the store is capable of push
+     */
     public boolean isPushCapable() {
         return false;
     }
 
+    /**
+     * @return whether the store is capable of sending messages
+     */
     public boolean isSendCapable() {
         return false;
     }
 
+    /**
+     * @return whether the store is capable of expunging messages
+     */
     public boolean isExpungeCapable() {
         return false;
     }
 
+    /**
+     * @return whether the store is capable of marking messages as read
+     */
     public boolean isSeenFlagSupported() {
         return true;
     }
 
+    /**
+     * Send a series of messages
+     */
     public void sendMessages(List<? extends Message> messages) throws MessagingException { }
 
+    /**
+     * @return an interface for pushing messages.
+     */
     public Pusher getPusher(PushReceiver receiver) {
         return null;
     }
+
+    public abstract boolean syncByDeltas();
 }

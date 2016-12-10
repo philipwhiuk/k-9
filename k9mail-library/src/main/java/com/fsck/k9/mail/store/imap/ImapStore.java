@@ -400,6 +400,11 @@ public class ImapStore extends RemoteStore {
         return new ImapPusher(this, receiver);
     }
 
+    @Override
+    public boolean syncByDeltas() {
+        return false;
+    }
+
 
     private class StoreImapSettings implements ImapSettings {
         @Override
