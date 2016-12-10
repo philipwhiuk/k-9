@@ -56,7 +56,7 @@ public class Serializer {
     }
 
     public Serializer(boolean startDocument, boolean logging) {
-        this(true);
+        this(startDocument);
         this.logging = logging;
     }
 
