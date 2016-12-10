@@ -531,6 +531,11 @@ public class LocalStore extends Store implements Serializable {
     }
 
     @Override
+    public boolean syncByDeltas() {
+        return false;
+    }
+
+    @Override
     public boolean isCopyCapable() {
         return true;
     }
