@@ -350,7 +350,7 @@ public abstract class Parser {
      * @return the type of data retrieved
      * @throws IOException
      */
-    private final int getNext(boolean asInt) throws IOException {
+    private int getNext(boolean asInt) throws IOException {
         int savedEndTag = endTag;
         if (type == END) {
             depth--;
@@ -395,7 +395,8 @@ public abstract class Parser {
                 //log("</" + name + '>');
             }
             // Retrieve the now-current startTag from our stack
-            startTag = endTag = startTagArray[depth];
+            endTag = startTagArray[depth];
+            startTag = endTag;
             break;
 
         case Wbxml.STR_I:

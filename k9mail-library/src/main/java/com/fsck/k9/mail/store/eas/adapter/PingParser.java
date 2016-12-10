@@ -30,8 +30,9 @@ public class PingParser extends Parser {
     public boolean parse() throws IOException {
         int status;
         boolean res = false;
-        if (nextTag(START_DOCUMENT) != Tags.PING_PING)
+        if (nextTag(START_DOCUMENT) != Tags.PING_PING) {
             throw new IOException();
+        }
         while (nextTag(START_DOCUMENT) != END_DOCUMENT) {
             if (tag == Tags.PING_STATUS) {
                 status = getValueInt();
@@ -41,8 +42,9 @@ public class PingParser extends Parser {
                 }
             } else if (tag == Tags.PING_FOLDERS) {
                 foldersParser();
-            } else
+            } else {
                 skipTag();
+            }
         }
         return res;
     }

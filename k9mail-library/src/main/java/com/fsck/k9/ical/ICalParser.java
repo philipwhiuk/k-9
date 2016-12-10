@@ -4,7 +4,6 @@ import android.util.Log;
 
 import com.fsck.k9.mail.MessagingException;
 import com.fsck.k9.mail.internet.MessageExtractor;
-import com.fsck.k9.mail.internet.UnsupportedContentTransferEncodingException;
 
 import java.io.IOException;
 

@@ -383,10 +383,10 @@ public class EasEmailSyncParser extends AbstractSyncParser {
         Boolean read;
         Boolean flag;
 
-        ServerChange(String _serverId, Boolean _read, Boolean _flag) {
-            serverId = _serverId;
-            read = _read;
-            flag = _flag;
+        ServerChange(String serverId, Boolean read, Boolean flag) {
+            this.serverId = serverId;
+            this.read = read;
+            this.flag = flag;
         }
     }
 
@@ -439,8 +439,9 @@ public class EasEmailSyncParser extends AbstractSyncParser {
             } else if (tag == Tags.SYNC_CHANGE) {
                 changeParser(changedEmails);
 //                this.emailSyncAdapter.incrementChangeCount();
-            } else
+            } else {
                 skipTag();
+            }
         }
     }
 
@@ -456,8 +457,9 @@ public class EasEmailSyncParser extends AbstractSyncParser {
 //                } else if (tag == Tags.SYNC_CHANGE) {
 //                    changeParser(changedEmails);
 //                    incrementChangeCount();
-            } else
+            } else {
                 skipTag();
+            }
         }
     }
 

@@ -478,7 +478,7 @@ public class Tags {
     public static final int BASE_NATIVE_BODY_TYPE = BASE_PAGE + 0x16;
     public static final int BASE_CONTENT_TYPE = BASE_PAGE + 0x17;
 
-    static public String[][] pages = {
+    public static String[][] pages = {
         {
             // 0x00 AirSync
             "Sync", "Responses", "Add", "Change", "Delete", "Fetch", "SyncKey", "ClientId",

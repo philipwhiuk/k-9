@@ -101,8 +101,9 @@ public class Serializer {
     }
 
     public void checkPendingTag(boolean degenerated) throws IOException {
-        if (pendingTag == NOT_PENDING)
+        if (pendingTag == NOT_PENDING) {
             return;
+        }
 
         int page = pendingTag >> Tags.PAGE_SHIFT;
         int tag = pendingTag & Tags.PAGE_MASK;
@@ -184,7 +185,7 @@ public class Serializer {
         int idx = 0;
 
         do {
-            buf[idx++] = (byte)(i & 0x7f);
+            buf[idx++] = (byte) (i & 0x7f);
             i = i >> 7;
         } while (i != 0);
 

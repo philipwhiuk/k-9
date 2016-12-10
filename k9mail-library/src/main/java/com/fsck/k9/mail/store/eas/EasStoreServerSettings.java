@@ -7,7 +7,9 @@ import com.fsck.k9.mail.ServerSettings;
 import java.util.Map;
 
 public class EasStoreServerSettings extends ServerSettings {
-    public EasStoreServerSettings(Type type, String host, int port, ConnectionSecurity connectionSecurity, AuthType authenticationType, String username, String password, String clientCertificateAlias, Map<String, String> extra) {
+    public EasStoreServerSettings(Type type, String host, int port, ConnectionSecurity connectionSecurity,
+                                  AuthType authenticationType, String username, String password,
+                                  String clientCertificateAlias, Map<String, String> extra) {
         super(type, host, port, connectionSecurity, authenticationType, username, password, clientCertificateAlias, extra);
     }
 

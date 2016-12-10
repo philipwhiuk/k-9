@@ -474,7 +474,7 @@ public class ProvisionParser extends Parser {
             case PASSWORD_MODE_STRONG:
                 return DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC;
             default:
-                return DevicePolicyManager .PASSWORD_QUALITY_UNSPECIFIED;
+                return DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
             }
         }
 
@@ -512,7 +512,7 @@ public class ProvisionParser extends Parser {
         @Override
         public boolean equals(Object o) {
             if (o instanceof PolicySet) {
-                PolicySet other = (PolicySet)o;
+                PolicySet other = (PolicySet) o;
                 return (this.mMinPasswordLength == other.mMinPasswordLength)
                        && (this.mPasswordMode == other.mPasswordMode)
                        && (this.mMaxPasswordFails == other.mMaxPasswordFails)

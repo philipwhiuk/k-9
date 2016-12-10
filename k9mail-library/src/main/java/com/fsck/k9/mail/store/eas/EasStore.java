@@ -9,8 +9,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -31,20 +29,9 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpOptions;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.conn.ClientConnectionManager;
-import org.apache.http.conn.params.ConnManagerParams;
-import org.apache.http.conn.params.ConnPerRoute;
-import org.apache.http.conn.routing.HttpRoute;
-import org.apache.http.conn.scheme.PlainSocketFactory;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
-import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.params.HttpParams;
 import android.os.PowerManager;
 import android.text.TextUtils;
 import android.util.Base64;
@@ -64,7 +51,6 @@ import com.fsck.k9.mail.ServerSettings;
 import com.fsck.k9.mail.filter.EOLConvertingOutputStream;
 import com.fsck.k9.mail.internet.MimeMessage;
 import com.fsck.k9.mail.power.TracingPowerManager;
-import com.fsck.k9.mail.ssl.TrustedSocketFactory;
 import com.fsck.k9.mail.store.RemoteStore;
 import com.fsck.k9.mail.store.StoreConfig;
 import com.fsck.k9.mail.store.eas.adapter.EasEmailSyncParser;
@@ -677,7 +663,7 @@ public class EasStore extends RemoteStore {
     }
 
     @Override
-    public List <? extends Folder > getPersonalNamespaces(boolean forceListAll) throws MessagingException {
+    public List<? extends Folder> getPersonalNamespaces(boolean forceListAll) throws MessagingException {
         if (forceListAll || getStoreSyncKey().equals(INITIAL_SYNC_KEY)) {
             if (forceListAll) {
                 // Reset the sync key so the Exchange server will return the entire folder list
@@ -737,8 +723,8 @@ public class EasStore extends RemoteStore {
         }
     }
 
-    private List <? extends Folder > getInitialFolderList() throws MessagingException {
-        LinkedList<EasFolder> folderList = new LinkedList<EasFolder>();
+    private List<? extends Folder> getInitialFolderList() throws MessagingException {
+        LinkedList<EasFolder> folderList = new LinkedList<>();
 
         try {
             Serializer s = new Serializer();
@@ -751,7 +737,7 @@ public class EasStore extends RemoteStore {
                 int code = resp.getStatusLine().getStatusCode();
                 if (code == HttpStatus.SC_OK) {
                     HttpEntity entity = resp.getEntity();
-                    int len = (int)entity.getContentLength();
+                    int len = (int) entity.getContentLength();
                     if (len != 0) {
                         InputStream is = entity.getContent();
                         // Returns true if we need to sync again
@@ -792,7 +778,7 @@ public class EasStore extends RemoteStore {
             mFolderList.clear();
 
             for (Folder folder : folderList) {
-                EasFolder easFolder = (EasFolder)folder;
+                EasFolder easFolder = (EasFolder) folder;
                 mFolderList.put(easFolder.getRemoteName(), easFolder);
                 easFolder.setSyncKey(syncKeys.get(easFolder.getRemoteName()));
             }
@@ -1049,6 +1035,11 @@ public class EasStore extends RemoteStore {
             mSyncKey = key;
         }
 
+        /**
+         * @deprecated Use #open(OpenMode)
+         * @param mode READ_ONLY or READ_WRITE
+         * @throws MessagingException
+         */
         @Override
         @Deprecated
         public void open(int mode) throws MessagingException {
@@ -1363,12 +1354,13 @@ public class EasStore extends RemoteStore {
         }
 
         //TODO: Remove?
-        public void fetch(Message[] messages, FetchProfile fp, MessageRetrievalListener listener)
+        public void fetch(Message[] providedMessages, FetchProfile fp, MessageRetrievalListener listener)
         throws MessagingException {
-            if (messages == null ||
-                    messages.length == 0) {
+            if (providedMessages == null ||
+                    providedMessages.length == 0) {
                 return;
             }
+            Message[] messages = providedMessages;
 
             for (int i = 0, count = messages.length; i < count; i++) {
                 if (!(messages[i] instanceof EasMessage)) {
@@ -1432,7 +1424,7 @@ public class EasStore extends RemoteStore {
                     }
                     s.end();
                 }
-            } .send(this);
+            }.send(this);
         }
 
         private void deleteServerMessages(final String[] uids) throws MessagingException {
@@ -1449,13 +1441,13 @@ public class EasStore extends RemoteStore {
                     }
                     s.end();
                 }
-            } .send(this);
+            }.send(this);
         }
 
         @Override
         public boolean equals(Object o) {
             if (o instanceof EasFolder) {
-                return mServerId.equals(((EasFolder)o).mServerId);
+                return mServerId.equals(((EasFolder) o).mServerId);
             }
             return false;
         }
@@ -1564,7 +1556,7 @@ public class EasStore extends RemoteStore {
 
         public EasPusher(EasStore store, PushReceiver receiver) {
             mStore = store;
-            receiver = receiver;
+            this.receiver = receiver;
 
             TracingPowerManager pm = TracingPowerManager.getPowerManager(receiver.getContext());
             //TODO: Description
@@ -1665,8 +1657,10 @@ public class EasStore extends RemoteStore {
                                 }
                                 delayTime.set(delayTimeInt);
                                 if (idleFailureCount.incrementAndGet() > IDLE_FAILURE_COUNT_LIMIT) {
-                                    Log.e(K9MailLib.LOG_TAG, "Disabling pusher for " + getLogId() + " after " + idleFailureCount.get() + " consecutive errors");
-                                    receiver.pushError("Push disabled for " + getLogId() + " after " + idleFailureCount.get() + " consecutive errors", e);
+                                    Log.e(K9MailLib.LOG_TAG, "Disabling pusher for " + getLogId() + " after "
+                                        + idleFailureCount.get() + " consecutive errors");
+                                    receiver.pushError("Push disabled for " + getLogId() + " after "
+                                        + idleFailureCount.get() + " consecutive errors", e);
                                     stop.set(true);
                                 }
                             }
@@ -1697,8 +1691,9 @@ public class EasStore extends RemoteStore {
         }
 
         public void stop() {
-            if (K9MailLib.isDebug())
+            if (K9MailLib.isDebug()) {
                 Log.i(K9MailLib.LOG_TAG, "Requested stop of EAS pusher");
+            }
             stop.set(true);
         }
 

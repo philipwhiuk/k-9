@@ -52,7 +52,7 @@ public class FolderSyncParser extends Parser {
     public static final int JOURNAL_TYPE = 11;
     public static final int USER_MAILBOX_TYPE = 12;
 
-    public static final List<Integer> mValidFolderTypes = Arrays.asList(INBOX_TYPE, DRAFTS_TYPE,
+    public static final List<Integer> VALID_FOLDER_TYPES = Arrays.asList(INBOX_TYPE, DRAFTS_TYPE,
             DELETED_TYPE, SENT_TYPE, USER_MAILBOX_TYPE);
     // OUTBOX_TYPE is not included because K-9 uses its own special outbox. Adding the remote folder
     // causes duplicate folder names.
@@ -144,7 +144,7 @@ public class FolderSyncParser extends Parser {
                 skipTag();
             }
         }
-        if (mValidFolderTypes.contains(type)) {
+        if (VALID_FOLDER_TYPES.contains(type)) {
             EasStore.EasFolder folder = easStore.new EasFolder(name, serverId, type);
             folderList.add(folder);
             
