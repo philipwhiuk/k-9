@@ -65,7 +65,6 @@ public class EasSocketFactory implements LayeredSocketFactory {
                 port,
                 autoClose
         );
-        DefaultTrustedSocketFactory.setSniHost(mSocketFactory, sslSocket, host);
         //hostnameVerifier.verify(host, sslSocket);
         // verifyHostName() didn't blowup - good!
         return sslSocket;

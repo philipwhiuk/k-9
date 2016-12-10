@@ -91,8 +91,6 @@ public class EasStore extends RemoteStore {
     // IOException is thrown.  After a small added allowance, our watch dog alarm goes off (allowing
     // us to detect a silently dropped connection).  The allowance is defined below.
     private static final int COMMAND_TIMEOUT = 30 * 1000;
-    // Connection timeout is the time given to connect to the server before reporting an IOException.
-    private static final int CONNECTION_TIMEOUT = 20 * 1000;
 
     // This needs to be long enough to send the longest reasonable message, without being so long
     // as to effectively "hang" sending of mail. The standard 30 second timeout isn't long enough
@@ -249,14 +247,15 @@ public class EasStore extends RemoteStore {
     private String mPassword;
     private ConnectionSecurity mConnectionSecurity;
     private boolean mSecure;
+    private EasHttpClientFactory mEasHttpClientFactory;
     private HttpClient mHttpClient = null;
     private String mAuthString = null;
     private String mCmdString = null;
 
     private HashMap<String, EasFolder> mFolderList = new HashMap<String, EasFolder>();
 
-    public EasStore(StoreConfig storeConfig, TrustedSocketFactory trustedSocketFactory) throws MessagingException {
-        super(storeConfig, trustedSocketFactory);
+    public EasStore(StoreConfig storeConfig, EasHttpClientFactory easHttpClientFactory) throws MessagingException {
+        super(storeConfig, null);
 
         EasStoreServerSettings settings;
         try {
@@ -264,7 +263,8 @@ public class EasStore extends RemoteStore {
         } catch (IllegalArgumentException e) {
             throw new MessagingException("Error while decoding store URI", e);
         }
-        
+
+        mEasHttpClientFactory = easHttpClientFactory;
         mHost = settings.host;
         mPort = settings.port;
         mUsername = settings.username;
@@ -949,11 +949,10 @@ public class EasStore extends RemoteStore {
         return true;
     }
 
-    //TODO: Move to transport
-//    @Override
-    public void sendMessages(Message[] messages) throws MessagingException {
-        for (int i = 0; i < messages.length; i++) {
-            Message message = messages[i];
+    @Override
+    public void sendMessages(List<? extends Message> messages) throws MessagingException {
+        for (int i = 0; i < messages.size(); i++) {
+            Message message = messages.get(i);
 
             try {
                 ByteArrayOutputStream out = new ByteArrayOutputStream(message.getSize());
@@ -988,37 +987,7 @@ public class EasStore extends RemoteStore {
 
     private void setupHttpClient() throws MessagingException {
         if (mHttpClient == null) {
-            HttpParams params = new BasicHttpParams();
-
-            // Disable automatic redirects on the http client.
-            params.setBooleanParameter("http.protocol.handle-redirects", false);
-
-            HttpConnectionParams.setConnectionTimeout(params, CONNECTION_TIMEOUT);
-            HttpConnectionParams.setSocketBufferSize(params, 8192);
-            
-            ConnManagerParams.setMaxConnectionsPerRoute(params, new ConnPerRoute() {
-                @Override
-                public int getMaxForRoute(HttpRoute route) {
-                    // We will allow up to 4 connections to the Exchange server.
-                    return 4;
-                }
-            });
-
-            SchemeRegistry reg = new SchemeRegistry();
-            try {
-                reg.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
-                reg.register(new Scheme("https", new EasSocketFactory(mHost, 443), 443));
-            } catch (NoSuchAlgorithmException nsa) {
-                Log.e(K9MailLib.LOG_TAG, "NoSuchAlgorithmException in getHttpClient: " + nsa);
-                throw new MessagingException("NoSuchAlgorithmException in getHttpClient: " + nsa);
-            } catch (KeyManagementException kme) {
-                Log.e(K9MailLib.LOG_TAG, "KeyManagementException in getHttpClient: " + kme);
-                throw new MessagingException("KeyManagementException in getHttpClient: " + kme);
-            }
-
-            // Create a thread-safe connection manager so that this class can be used from multiple threads.
-            ClientConnectionManager cm = new ThreadSafeClientConnManager(params, reg);
-            mHttpClient = new DefaultHttpClient(cm, params);
+            mHttpClient = mEasHttpClientFactory.createNewHttpClient(mHost);
         }
     }
 
@@ -1028,6 +997,10 @@ public class EasStore extends RemoteStore {
             // response is fully consumed so that the connection can be re-used.
             response.getEntity().consumeContent();
         }
+    }
+
+    public HttpClient getHttpClient() {
+        return mHttpClient;
     }
 
     /*************************************************************************

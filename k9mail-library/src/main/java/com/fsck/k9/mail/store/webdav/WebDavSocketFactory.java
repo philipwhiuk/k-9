@@ -21,8 +21,10 @@ import javax.net.ssl.TrustManager;
 
 /*
  * TODO: find out what's going on here and document it.
- * TODO: Same code as EAS currently. Move to common HTTP package if still the case
  * Using two socket factories looks suspicious.
+ * TODO: Same code as EAS currently. Move to common HTTP package if still the case
+ * TODO: Use TrustedSocketFactory
+ * TODO: Stop using deprecated Apache HTTP code
  */
 public class WebDavSocketFactory implements LayeredSocketFactory {
     private SSLSocketFactory mSocketFactory;

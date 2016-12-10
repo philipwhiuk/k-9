@@ -10,6 +10,9 @@ import com.fsck.k9.mail.Store;
 import com.fsck.k9.mail.oauth.OAuth2TokenProvider;
 import com.fsck.k9.mail.ssl.DefaultTrustedSocketFactory;
 import com.fsck.k9.mail.ssl.TrustedSocketFactory;
+import com.fsck.k9.mail.store.eas.EasHttpClientFactory;
+import com.fsck.k9.mail.store.eas.EasStore;
+import com.fsck.k9.mail.store.ews.EwsStore;
 import com.fsck.k9.mail.store.imap.ImapStore;
 import com.fsck.k9.mail.store.pop3.Pop3Store;
 import com.fsck.k9.mail.store.webdav.WebDavHttpClient;
@@ -64,6 +67,10 @@ public abstract class RemoteStore extends Store {
             } else if (uri.startsWith("webdav")) {
                 store = new WebDavStore(storeConfig,
                             new WebDavHttpClient.WebDavHttpClientFactory());
+            } else if (uri.startsWith("eas")) {
+                store = new EasStore(storeConfig, new EasHttpClientFactory());
+            } else if (uri.startsWith("ews")) {
+                store = new EwsStore(storeConfig, new DefaultTrustedSocketFactory(context));
             }
 
             if (store != null) {
@@ -128,6 +135,8 @@ public abstract class RemoteStore extends Store {
      * @see com.fsck.k9.mail.store.imap.ImapStore#createUri(com.fsck.k9.mail.ServerSettings)
      * @see com.fsck.k9.mail.store.pop3.Pop3Store#createUri(com.fsck.k9.mail.ServerSettings)
      * @see com.fsck.k9.mail.store.webdav.WebDavStore#createUri(com.fsck.k9.mail.ServerSettings)
+     * @see com.fsck.k9.mail.store.eas.EasStore#createUri(com.fsck.k9.mail.ServerSettings)
+     * @see com.fsck.k9.mail.store.ews.EwsStore#createUri(com.fsck.k9.mail.ServerSettings)
      */
     public static String createStoreUri(ServerSettings server) {
         if (Type.IMAP == server.type) {
@@ -136,10 +145,12 @@ public abstract class RemoteStore extends Store {
             return Pop3Store.createUri(server);
         } else if (Type.WebDAV == server.type) {
             return WebDavStore.createUri(server);
+        } else if (Type.EAS == server.type) {
+            return EasStore.createUri(server);
+        } else if (Type.EWS == server.type) {
+            return EwsStore.createUri(server);
         } else {
             throw new IllegalArgumentException("Not a valid store URI");
         }
     }
-
-    public abstract boolean syncByDeltas();
 }
