@@ -49,7 +49,7 @@ public class MessageExtractor {
     }
 
     public static String getTextFromPart(@NonNull Part part, long textSizeLimit)
-            throws MessagingException, IOException, UnsupportedContentTransferEncodingException {
+            throws MessagingException, IOException {
         if (part.getBody() != null) {
             final Body body = part.getBody();
             if (body instanceof TextBody) {
@@ -60,7 +60,7 @@ public class MessageExtractor {
                     part.isMimeType("application/pgp")) {
                 return getTextFromTextPart(part, body, mimeType, textSizeLimit);
             } else {
-                throw new MessagingException("Provided non-text part: " + part);
+                throw new MessagingException("Provided non-text part: " + mimeType);
             }
         } else {
             return "";
