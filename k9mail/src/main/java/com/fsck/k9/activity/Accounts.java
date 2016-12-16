@@ -837,6 +837,21 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
         return true;
     }
 
+<<<<<<< HEAD
+=======
+    private static String[][] USED_LIBRARIES = new String[][] {
+        new String[] {"jutf7", "http://jutf7.sourceforge.net/"},
+        new String[] {"JZlib", "http://www.jcraft.com/jzlib/"},
+        new String[] {"Commons IO", "http://commons.apache.org/io/"},
+        new String[] {"Mime4j", "http://james.apache.org/mime4j/"},
+        new String[] {"HtmlCleaner", "http://htmlcleaner.sourceforge.net/"},
+        new String[] {"ckChangeLog", "https://github.com/cketti/ckChangeLog"},
+        new String[] {"HoloColorPicker", "https://github.com/LarsWerkman/HoloColorPicker"},
+        new String[] {"Glide", "https://github.com/bumptech/glide"},
+        new String[] {"TokenAutoComplete", "https://github.com/splitwise/TokenAutoComplete/"},
+    };
+
+>>>>>>> upstream-master
     private void onAbout() {
         K9AboutDialogBuilder.create(this).show();
     }

@@ -187,7 +187,7 @@ public class MimeMessage extends Message {
     }
 
     @Override
-    public int getSize() {
+    public long getSize() {
         return mSize;
     }
 

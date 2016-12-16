@@ -147,7 +147,7 @@ public abstract class Message implements Part, Body {
 
     public abstract boolean hasAttachments();
 
-    public abstract int getSize();
+    public abstract long getSize();
 
     public void delete(String trashFolderName) throws MessagingException {
 

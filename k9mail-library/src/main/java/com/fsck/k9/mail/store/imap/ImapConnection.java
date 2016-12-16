@@ -375,6 +375,7 @@ class ImapConnection {
         switch (settings.getAuthType()) {
             case XOAUTH2:
                 if (oauthTokenProvider == null) {
+<<<<<<< HEAD
                     throw new AuthenticationFailedException("No OAuthToken Provider available.");
                 }
                 if (hasCapability(Capabilities.AUTH_XOAUTH2)
@@ -382,6 +383,13 @@ class ImapConnection {
                     authXoauth2withSASLIR();
                 } else {
                     throw new AuthenticationFailedException("Server doesn't support SASL XOAUTH2.");
+=======
+                    throw new MessagingException("No OAuthToken Provider available.");
+                } else if (hasCapability(Capabilities.AUTH_XOAUTH2) && hasCapability(Capabilities.SASL_IR)) {
+                    authXoauth2withSASLIR();
+                } else {
+                    throw new MessagingException("Server doesn't support SASL XOAUTH2.");
+>>>>>>> upstream-master
                 }
                 break;
             case CRAM_MD5: {
@@ -435,6 +443,24 @@ class ImapConnection {
         }
     }
 
+<<<<<<< HEAD
+=======
+    private void authXoauth2withSASLIR() throws IOException, MessagingException {
+        retryXoauth2WithNewToken = true;
+        try {
+            attemptXOAuth2();
+        } catch (NegativeImapResponseException e) {
+            oauthTokenProvider.invalidateToken(settings.getUsername());
+
+            if (!retryXoauth2WithNewToken) {
+                handlePermanentXoauth2Failure(e);
+            } else {
+                handleTemporaryXoauth2Failure(e);
+            }
+        }
+    }
+
+>>>>>>> upstream-master
     private void handlePermanentXoauth2Failure(NegativeImapResponseException e) throws AuthenticationFailedException {
         Log.v(LOG_TAG, "Permanent failure during XOAUTH2", e);
         throw new AuthenticationFailedException(e.getMessage(), e);
@@ -459,6 +485,7 @@ class ImapConnection {
     }
 
     private void attemptXOAuth2() throws MessagingException, IOException {
+<<<<<<< HEAD
         String token = oauthTokenProvider.getToken(settings.getUsername(),
                 OAuth2TokenProvider.OAUTH2_TIMEOUT);
         String tag = sendSaslIrCommand(Commands.AUTHENTICATE_XOAUTH2,
@@ -474,16 +501,39 @@ class ImapConnection {
                 }
             })
         );
+=======
+        String token = oauthTokenProvider.getToken(settings.getUsername(), OAuth2TokenProvider.OAUTH2_TIMEOUT);
+        String authString = Authentication.computeXoauth(settings.getUsername(), token);
+        String tag = sendSaslIrCommand(Commands.AUTHENTICATE_XOAUTH2, authString, true);
+
+        List<ImapResponse> responses = responseParser.readStatusResponse(tag, Commands.AUTHENTICATE_XOAUTH2, getLogId(),
+                new UntaggedHandler() {
+                    @Override
+                    public void handleAsyncUntaggedResponse(ImapResponse response) throws IOException {
+                        handleXOAuthUntaggedResponse(response);
+                    }
+                });
+        
+        extractCapabilities(responses);
+>>>>>>> upstream-master
     }
 
     private void handleXOAuthUntaggedResponse(ImapResponse response) throws IOException {
         if (response.isString(0)) {
+<<<<<<< HEAD
             retryXoauth2WithNewToken = XOAuth2ChallengeParser.shouldRetry(
                     response.getString(0), settings.getHost());
         }
 
         if (response.isContinuationRequested()) {
             outputStream.write("\r\n".getBytes("US-ASCII"));
+=======
+            retryXoauth2WithNewToken = XOAuth2ChallengeParser.shouldRetry(response.getString(0), settings.getHost());
+        }
+
+        if (response.isContinuationRequested()) {
+            outputStream.write("\r\n".getBytes());
+>>>>>>> upstream-master
             outputStream.flush();
         }
     }
@@ -774,14 +824,22 @@ class ImapConnection {
 
             String tag = Integer.toString(nextCommandTag++);
             String commandToSend = tag + " " + command + " " + initialClientResponse + "\r\n";
+<<<<<<< HEAD
             outputStream.write(commandToSend.getBytes("US-ASCII"));
+=======
+            outputStream.write(commandToSend.getBytes());
+>>>>>>> upstream-master
             outputStream.flush();
 
             if (K9MailLib.isDebug() && DEBUG_PROTOCOL_IMAP) {
                 if (sensitive && !K9MailLib.isDebugSensitive()) {
                     Log.v(LOG_TAG, getLogId() + ">>> [Command Hidden, Enable Sensitive Debug Logging To Show]");
                 } else {
+<<<<<<< HEAD
                     Log.v(LOG_TAG,  getLogId() + ">>> " + tag + " " + command + " " + initialClientResponse);
+=======
+                    Log.v(LOG_TAG, getLogId() + ">>> " + tag + " " + command + " " + initialClientResponse);
+>>>>>>> upstream-master
                 }
             }
 

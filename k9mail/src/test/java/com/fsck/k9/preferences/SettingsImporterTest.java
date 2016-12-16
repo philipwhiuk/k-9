@@ -14,7 +14,10 @@ import org.robolectric.annotation.Config;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+<<<<<<< HEAD
 import java.util.Collection;
+=======
+>>>>>>> upstream-master
 import java.util.List;
 import java.util.UUID;
 
@@ -33,9 +36,13 @@ public class SettingsImporterTest {
 
     private void deletePreExistingAccounts() {
         Preferences preferences = Preferences.getPreferences(RuntimeEnvironment.application);
+<<<<<<< HEAD
         Collection<Account> availableAccounts =
                 preferences.getAvailableAccounts();
         for(Account account: availableAccounts) {
+=======
+        for (Account account: preferences.getAccounts()) {
+>>>>>>> upstream-master
             preferences.deleteAccount(account);
         }
     }
@@ -44,6 +51,10 @@ public class SettingsImporterTest {
     public void importSettings_throwsExceptionOnBlankFile() throws SettingsImportExportException {
         InputStream inputStream = new StringInputStream("");
         List<String> accountUuids = new ArrayList<>();
+<<<<<<< HEAD
+=======
+
+>>>>>>> upstream-master
         SettingsImporter.importSettings(RuntimeEnvironment.application, inputStream, true, accountUuids, true);
     }
 
@@ -51,6 +62,10 @@ public class SettingsImporterTest {
     public void importSettings_throwsExceptionOnMissingFormat() throws SettingsImportExportException {
         InputStream inputStream = new StringInputStream("<k9settings version=\"1\"></k9settings>");
         List<String> accountUuids = new ArrayList<>();
+<<<<<<< HEAD
+=======
+
+>>>>>>> upstream-master
         SettingsImporter.importSettings(RuntimeEnvironment.application, inputStream, true, accountUuids, true);
     }
 
@@ -58,6 +73,10 @@ public class SettingsImporterTest {
     public void importSettings_throwsExceptionOnInvalidFormat() throws SettingsImportExportException {
         InputStream inputStream = new StringInputStream("<k9settings version=\"1\" format=\"A\"></k9settings>");
         List<String> accountUuids = new ArrayList<>();
+<<<<<<< HEAD
+=======
+
+>>>>>>> upstream-master
         SettingsImporter.importSettings(RuntimeEnvironment.application, inputStream, true, accountUuids, true);
     }
 
@@ -65,6 +84,10 @@ public class SettingsImporterTest {
     public void importSettings_throwsExceptionOnNonPositiveFormat() throws SettingsImportExportException {
         InputStream inputStream = new StringInputStream("<k9settings version=\"1\" format=\"0\"></k9settings>");
         List<String> accountUuids = new ArrayList<>();
+<<<<<<< HEAD
+=======
+
+>>>>>>> upstream-master
         SettingsImporter.importSettings(RuntimeEnvironment.application, inputStream, true, accountUuids, true);
     }
 
@@ -72,6 +95,10 @@ public class SettingsImporterTest {
     public void importSettings_throwsExceptionOnMissingVersion() throws SettingsImportExportException {
         InputStream inputStream = new StringInputStream("<k9settings format=\"1\"></k9settings>");
         List<String> accountUuids = new ArrayList<>();
+<<<<<<< HEAD
+=======
+
+>>>>>>> upstream-master
         SettingsImporter.importSettings(RuntimeEnvironment.application, inputStream, true, accountUuids, true);
     }
 
@@ -79,6 +106,10 @@ public class SettingsImporterTest {
     public void importSettings_throwsExceptionOnInvalidVersion() throws SettingsImportExportException {
         InputStream inputStream = new StringInputStream("<k9settings format=\"1\" version=\"A\"></k9settings>");
         List<String> accountUuids = new ArrayList<>();
+<<<<<<< HEAD
+=======
+
+>>>>>>> upstream-master
         SettingsImporter.importSettings(RuntimeEnvironment.application, inputStream, true, accountUuids, true);
     }
 
@@ -86,6 +117,10 @@ public class SettingsImporterTest {
     public void importSettings_throwsExceptionOnNonPositiveVersion() throws SettingsImportExportException {
         InputStream inputStream = new StringInputStream("<k9settings format=\"1\" version=\"0\"></k9settings>");
         List<String> accountUuids = new ArrayList<>();
+<<<<<<< HEAD
+=======
+
+>>>>>>> upstream-master
         SettingsImporter.importSettings(RuntimeEnvironment.application, inputStream, true, accountUuids, true);
     }
 
@@ -96,7 +131,13 @@ public class SettingsImporterTest {
                 "<accounts><account uuid=\""+validUUID+"\"><name>Account</name></account></accounts></k9settings>");
         List<String> accountUuids = new ArrayList<>();
         accountUuids.add("1");
+<<<<<<< HEAD
         SettingsImporter.Imported results = SettingsImporter.parseSettings(inputStream, true, accountUuids, true);
+=======
+
+        SettingsImporter.Imported results = SettingsImporter.parseSettings(inputStream, true, accountUuids, true);
+
+>>>>>>> upstream-master
         assertEquals(1, results.accounts.size());
         assertEquals("Account", results.accounts.get(validUUID).name);
         assertEquals(validUUID, results.accounts.get(validUUID).uuid);
@@ -112,7 +153,13 @@ public class SettingsImporterTest {
                 "</account></accounts></k9settings>");
         List<String> accountUuids = new ArrayList<>();
         accountUuids.add(validUUID);
+<<<<<<< HEAD
         SettingsImporter.Imported results = SettingsImporter.parseSettings(inputStream, true, accountUuids, false);
+=======
+
+        SettingsImporter.Imported results = SettingsImporter.parseSettings(inputStream, true, accountUuids, false);
+
+>>>>>>> upstream-master
         assertEquals("Account", results.accounts.get(validUUID).name);
         assertEquals(validUUID, results.accounts.get(validUUID).uuid);
         assertEquals(AuthType.CRAM_MD5, results.accounts.get(validUUID).incoming.authenticationType);

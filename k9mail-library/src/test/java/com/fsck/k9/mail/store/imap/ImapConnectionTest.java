@@ -15,12 +15,14 @@ import com.fsck.k9.mail.ConnectionSecurity;
 import com.fsck.k9.mail.K9MailLib;
 import com.fsck.k9.mail.MessagingException;
 import com.fsck.k9.mail.XOAuth2ChallengeParserTest;
+<<<<<<< HEAD
 import com.fsck.k9.mail.filter.Base64;
+=======
+import com.fsck.k9.mail.helpers.TestTrustedSocketFactory;
+>>>>>>> upstream-master
 import com.fsck.k9.mail.oauth.OAuth2TokenProvider;
 import com.fsck.k9.mail.ssl.TrustedSocketFactory;
 import com.fsck.k9.mail.store.imap.mockserver.MockImapServer;
-import com.fsck.k9.mail.helpers.TestTrustedSocketFactory;
-
 import okio.ByteString;
 import org.junit.Before;
 import org.junit.Test;
@@ -50,6 +52,10 @@ public class ImapConnectionTest {
     private static final String PASSWORD = "123456";
     private static final int SOCKET_CONNECT_TIMEOUT = 10000;
     private static final int SOCKET_READ_TIMEOUT = 10000;
+    private static final String XOAUTH_STRING = ByteString.encodeUtf8(
+            "user=" + USERNAME + "\001auth=Bearer token\001\001").base64();
+    private static final String XOAUTH_STRING_RETRY = ByteString.encodeUtf8(
+            "user=" + USERNAME + "\001auth=Bearer token2\001\001").base64();
 
 
 
@@ -99,7 +105,7 @@ public class ImapConnectionTest {
         server.output("* OK [CAPABILITY IMAP4 IMAP4REV1 AUTH=PLAIN]");
         server.expect("1 AUTHENTICATE PLAIN");
         server.output("+");
-        server.expect(ByteString.encodeUtf8("\000" + USERNAME+ "\000" + PASSWORD).base64());
+        server.expect(ByteString.encodeUtf8("\000" + USERNAME + "\000" + PASSWORD).base64());
         server.output("1 OK Success");
         server.expect("2 LIST \"\" \"\"");
         server.output("* LIST () \"/\" foo/bar");
@@ -120,7 +126,7 @@ public class ImapConnectionTest {
         preAuthenticationDialog(server, "AUTH=PLAIN");
         server.expect("2 AUTHENTICATE PLAIN");
         server.output("+");
-        server.expect(ByteString.encodeUtf8("\000" + USERNAME+ "\000" + PASSWORD).base64());
+        server.expect(ByteString.encodeUtf8("\000" + USERNAME + "\000" + PASSWORD).base64());
         server.output("2 OK Success");
         simplePostAuthenticationDialog(server);
         ImapConnection imapConnection = startServerAndCreateImapConnection(server);
@@ -181,7 +187,7 @@ public class ImapConnectionTest {
         preAuthenticationDialog(server, "AUTH=PLAIN");
         server.expect("2 AUTHENTICATE PLAIN");
         server.output("+");
-        server.expect(ByteString.encodeUtf8("\000" + USERNAME+ "\000" + PASSWORD).base64());
+        server.expect(ByteString.encodeUtf8("\000" + USERNAME + "\000" + PASSWORD).base64());
         server.output("2 NO Login Failure");
         server.expect("3 LOGIN \"" + USERNAME + "\" \"" + PASSWORD + "\"");
         server.output("3 OK LOGIN completed");
@@ -202,7 +208,7 @@ public class ImapConnectionTest {
         preAuthenticationDialog(server, "AUTH=PLAIN");
         server.expect("2 AUTHENTICATE PLAIN");
         server.output("+");
-        server.expect(ByteString.encodeUtf8("\000" + USERNAME+ "\000" + PASSWORD).base64());
+        server.expect(ByteString.encodeUtf8("\000" + USERNAME + "\000" + PASSWORD).base64());
         server.output("2 NO Login Failure");
         server.expect("3 LOGIN \"" + USERNAME + "\" \"" + PASSWORD + "\"");
         server.output("3 NO Go away");
@@ -301,6 +307,7 @@ public class ImapConnectionTest {
 
     @Test
     public void open_authXoauthWithSaslIr() throws Exception {
+<<<<<<< HEAD
         setupWifiInternetConnection();
         settings.setAuthType(AuthType.XOAUTH2);
         when(oAuth2TokenProvider.getToken("user", OAuth2TokenProvider.OAUTH2_TIMEOUT))
@@ -310,6 +317,13 @@ public class ImapConnectionTest {
         server.expect("2 AUTHENTICATE XOAUTH2 "+ByteString.encodeUtf8(
                 "user=user\001auth=Bearer token\001\001"
         ).base64());
+=======
+        settings.setAuthType(AuthType.XOAUTH2);
+        when(oAuth2TokenProvider.getToken("user", OAuth2TokenProvider.OAUTH2_TIMEOUT)).thenReturn("token");
+        MockImapServer server = new MockImapServer();
+        preAuthenticationDialog(server, "SASL-IR AUTH=XOAUTH AUTH=XOAUTH2");
+        server.expect("2 AUTHENTICATE XOAUTH2 " + XOAUTH_STRING);
+>>>>>>> upstream-master
         server.output("2 OK Success");
         simplePostAuthenticationDialog(server);
         ImapConnection imapConnection = startServerAndCreateImapConnection(server);
@@ -323,15 +337,23 @@ public class ImapConnectionTest {
     @Test
     public void open_authXoauthWithSaslIrThrowsExeptionOn401Response() throws Exception {
         settings.setAuthType(AuthType.XOAUTH2);
+<<<<<<< HEAD
         setupWifiInternetConnection();
+=======
+>>>>>>> upstream-master
         when(oAuth2TokenProvider.getToken("user", OAuth2TokenProvider.OAUTH2_TIMEOUT))
                 .thenReturn("token").thenReturn("token2");
         MockImapServer server = new MockImapServer();
         preAuthenticationDialog(server, "SASL-IR AUTH=XOAUTH AUTH=XOAUTH2");
+<<<<<<< HEAD
         server.expect("2 AUTHENTICATE XOAUTH2 "+ByteString.encodeUtf8(
                 "user=user\001auth=Bearer token\001\001"
         ).base64());
         server.output("+ "+ XOAuth2ChallengeParserTest.STATUS_401_RESPONSE);
+=======
+        server.expect("2 AUTHENTICATE XOAUTH2 " + XOAUTH_STRING);
+        server.output("+ " + XOAuth2ChallengeParserTest.STATUS_401_RESPONSE);
+>>>>>>> upstream-master
         server.expect("");
         server.output("2 NO SASL authentication failed");
         ImapConnection imapConnection = startServerAndCreateImapConnection(server);
@@ -349,11 +371,15 @@ public class ImapConnectionTest {
     @Test
     public void open_authXoauthWithSaslIrInvalidatesAndRetriesNewTokenOn400Response() throws Exception {
         settings.setAuthType(AuthType.XOAUTH2);
+<<<<<<< HEAD
         setupWifiInternetConnection();
+=======
+>>>>>>> upstream-master
         when(oAuth2TokenProvider.getToken("user", OAuth2TokenProvider.OAUTH2_TIMEOUT))
                 .thenReturn("token").thenReturn("token2");
         MockImapServer server = new MockImapServer();
         preAuthenticationDialog(server, "SASL-IR AUTH=XOAUTH AUTH=XOAUTH2");
+<<<<<<< HEAD
         server.expect("2 AUTHENTICATE XOAUTH2 "+ByteString.encodeUtf8(
                 "user=user\001auth=Bearer token\001\001"
         ).base64());
@@ -363,6 +389,13 @@ public class ImapConnectionTest {
         server.expect("3 AUTHENTICATE XOAUTH2 "+ByteString.encodeUtf8(
                 "user=user\001auth=Bearer token2\001\001"
         ).base64());
+=======
+        server.expect("2 AUTHENTICATE XOAUTH2 " + XOAUTH_STRING);
+        server.output("+ " + XOAuth2ChallengeParserTest.STATUS_400_RESPONSE);
+        server.expect("");
+        server.output("2 NO SASL authentication failed");
+        server.expect("3 AUTHENTICATE XOAUTH2 " + XOAUTH_STRING_RETRY);
+>>>>>>> upstream-master
         server.output("3 OK Success");
         simplePostAuthenticationDialog(server, "4");
         ImapConnection imapConnection = startServerAndCreateImapConnection(server);
@@ -380,11 +413,15 @@ public class ImapConnectionTest {
     @Test
     public void open_authXoauthWithSaslIrInvalidatesAndRetriesNewTokenOnInvalidJsonResponse() throws Exception {
         settings.setAuthType(AuthType.XOAUTH2);
+<<<<<<< HEAD
         setupWifiInternetConnection();
+=======
+>>>>>>> upstream-master
         when(oAuth2TokenProvider.getToken("user", OAuth2TokenProvider.OAUTH2_TIMEOUT))
                 .thenReturn("token").thenReturn("token2");
         MockImapServer server = new MockImapServer();
         preAuthenticationDialog(server, "SASL-IR AUTH=XOAUTH AUTH=XOAUTH2");
+<<<<<<< HEAD
         server.expect("2 AUTHENTICATE XOAUTH2 "+ByteString.encodeUtf8(
                 "user=user\001auth=Bearer token\001\001"
         ).base64());
@@ -394,6 +431,13 @@ public class ImapConnectionTest {
         server.expect("3 AUTHENTICATE XOAUTH2 "+ByteString.encodeUtf8(
                 "user=user\001auth=Bearer token2\001\001"
         ).base64());
+=======
+        server.expect("2 AUTHENTICATE XOAUTH2 " + XOAUTH_STRING);
+        server.output("+ " + XOAuth2ChallengeParserTest.INVALID_RESPONSE);
+        server.expect("");
+        server.output("2 NO SASL authentication failed");
+        server.expect("3 AUTHENTICATE XOAUTH2 " + XOAUTH_STRING_RETRY);
+>>>>>>> upstream-master
         server.output("3 OK Success");
         simplePostAuthenticationDialog(server, "4");
         ImapConnection imapConnection = startServerAndCreateImapConnection(server);
@@ -411,11 +455,15 @@ public class ImapConnectionTest {
     @Test
     public void open_authXoauthWithSaslIrInvalidatesAndRetriesNewTokenOnMissingStatusJsonResponse() throws Exception {
         settings.setAuthType(AuthType.XOAUTH2);
+<<<<<<< HEAD
         setupWifiInternetConnection();
+=======
+>>>>>>> upstream-master
         when(oAuth2TokenProvider.getToken("user", OAuth2TokenProvider.OAUTH2_TIMEOUT))
                 .thenReturn("token").thenReturn("token2");
         MockImapServer server = new MockImapServer();
         preAuthenticationDialog(server, "SASL-IR AUTH=XOAUTH AUTH=XOAUTH2");
+<<<<<<< HEAD
         server.expect("2 AUTHENTICATE XOAUTH2 "+ByteString.encodeUtf8(
                 "user=user\001auth=Bearer token\001\001"
         ).base64());
@@ -425,6 +473,13 @@ public class ImapConnectionTest {
         server.expect("3 AUTHENTICATE XOAUTH2 "+ByteString.encodeUtf8(
                 "user=user\001auth=Bearer token2\001\001"
         ).base64());
+=======
+        server.expect("2 AUTHENTICATE XOAUTH2 " + XOAUTH_STRING);
+        server.output("+ " + XOAuth2ChallengeParserTest.MISSING_STATUS_RESPONSE);
+        server.expect("");
+        server.output("2 NO SASL authentication failed");
+        server.expect("3 AUTHENTICATE XOAUTH2 " + XOAUTH_STRING_RETRY);
+>>>>>>> upstream-master
         server.output("3 OK Success");
         simplePostAuthenticationDialog(server, "4");
         ImapConnection imapConnection = startServerAndCreateImapConnection(server);
@@ -441,12 +496,16 @@ public class ImapConnectionTest {
 
     @Test
     public void open_authXoauthWithSaslIrWithOldTokenThrowsExceptionIfRetryFails() throws Exception {
+<<<<<<< HEAD
         setupWifiInternetConnection();
+=======
+>>>>>>> upstream-master
         settings.setAuthType(AuthType.XOAUTH2);
         when(oAuth2TokenProvider.getToken("user", OAuth2TokenProvider.OAUTH2_TIMEOUT))
                 .thenReturn("token").thenReturn("token2");
         MockImapServer server = new MockImapServer();
         preAuthenticationDialog(server, "SASL-IR AUTH=XOAUTH AUTH=XOAUTH2");
+<<<<<<< HEAD
         server.expect("2 AUTHENTICATE XOAUTH2 "+ByteString.encodeUtf8(
                 "user=user\001auth=Bearer token\001\001"
         ).base64());
@@ -456,6 +515,13 @@ public class ImapConnectionTest {
         server.expect("3 AUTHENTICATE XOAUTH2 "+ByteString.encodeUtf8(
                 "user=user\001auth=Bearer token2\001\001"
         ).base64());
+=======
+        server.expect("2 AUTHENTICATE XOAUTH2 " + XOAUTH_STRING);
+        server.output("+ r3j3krj3irj3oir3ojo");
+        server.expect("");
+        server.output("2 NO SASL authentication failed");
+        server.expect("3 AUTHENTICATE XOAUTH2 " + XOAUTH_STRING_RETRY);
+>>>>>>> upstream-master
         server.output("+ 433ba3a3a");
         server.expect("");
         server.output("3 NO SASL authentication failed");
@@ -475,14 +541,21 @@ public class ImapConnectionTest {
     @Test
     public void open_authXoauthWithSaslIrParsesCapabilities() throws Exception {
         settings.setAuthType(AuthType.XOAUTH2);
+<<<<<<< HEAD
         setupWifiInternetConnection();
+=======
+>>>>>>> upstream-master
         when(oAuth2TokenProvider.getToken("user", OAuth2TokenProvider.OAUTH2_TIMEOUT))
                 .thenReturn("token");
         MockImapServer server = new MockImapServer();
         preAuthenticationDialog(server, "SASL-IR AUTH=XOAUTH AUTH=XOAUTH2");
+<<<<<<< HEAD
         server.expect("2 AUTHENTICATE XOAUTH2 "+ByteString.encodeUtf8(
                 "user=user\001auth=Bearer token\001\001"
         ).base64());
+=======
+        server.expect("2 AUTHENTICATE XOAUTH2 " + XOAUTH_STRING);
+>>>>>>> upstream-master
         server.output("2 OK [CAPABILITY IMAP4REV1 IDLE XM-GM-EXT-1]");
         simplePostAuthenticationDialog(server);
         ImapConnection imapConnection = startServerAndCreateImapConnection(server);
@@ -587,7 +660,10 @@ public class ImapConnectionTest {
     public void open_withInvalidHostname_shouldThrow() throws Exception {
         settings.setHost("host name");
         settings.setPort(143);
+<<<<<<< HEAD
         setupWifiInternetConnection();
+=======
+>>>>>>> upstream-master
         ImapConnection imapConnection = createImapConnection(
                 settings, socketFactory, connectivityManager, oAuth2TokenProvider);
 
