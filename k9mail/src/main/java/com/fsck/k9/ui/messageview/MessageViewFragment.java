@@ -474,7 +474,8 @@ public class MessageViewFragment extends Fragment implements ConfirmationDialogF
     }
 
     private void displayMessageSubject(String subject) {
-        if (mFragmentListener != null) {
+        if (mFragmentListener != null && mMessageView != null) {
+            mFragmentListener.messageHeaderViewAvailable(mMessageView.getMessageHeaderView());
             mFragmentListener.displayMessageSubject(subject);
         }
     }
