@@ -24,10 +24,12 @@ import com.fsck.k9.mail.Message;
 import com.fsck.k9.mail.MessagingException;
 import com.fsck.k9.mail.Multipart;
 import com.fsck.k9.mail.Part;
+import com.fsck.k9.mail.internet.Viewable.Flowed;
 import org.apache.commons.io.input.BoundedInputStream;
 
 import static com.fsck.k9.mail.internet.CharsetSupport.fixupCharset;
 import static com.fsck.k9.mail.internet.MimeUtility.getHeaderParameter;
+import static com.fsck.k9.mail.internet.MimeUtility.isFormatFlowed;
 import static com.fsck.k9.mail.internet.MimeUtility.isSameMimeType;
 import static com.fsck.k9.mail.internet.Viewable.Alternative;
 import static com.fsck.k9.mail.internet.Viewable.Html;
@@ -199,13 +201,17 @@ public class MessageExtractor {
                 return;
             }
             String mimeType = part.getMimeType();
+            Viewable viewable;
             if (isSameMimeType(mimeType, "text/plain")) {
-                Text text = new Text(part);
-                outputViewableParts.add(text);
+                if (isFormatFlowed(part.getContentType())) {
+                    viewable = new Flowed(part);
+                } else {
+                    viewable = new Text(part);
+                }
             } else {
-                Html html = new Html(part);
-                outputViewableParts.add(html);
+                viewable = new Html(part);
             }
+            outputViewableParts.add(viewable);
         } else if (isSameMimeType(part.getMimeType(), ICalParser.MIME_TYPE)) {
             if (skipSavingViewableParts) {
                 return;

@@ -199,7 +199,7 @@ public class AlternateRecipientAdapter extends BaseAdapter {
         int cryptoStatusColor = ThemeUtils.getStyledColor(context, cryptoStatusColorAttr);
         drawable.setColorFilter(cryptoStatusColor, Mode.SRC_ATOP);
 
-        holder.itemCryptoStatus.setImageDrawable(drawable);
+        holder.itemCryptoStatusIcon.setImageDrawable(drawable);
         holder.itemCryptoStatus.setVisibility(View.VISIBLE);
     }
 
@@ -212,7 +212,8 @@ public class AlternateRecipientAdapter extends BaseAdapter {
         public final View headerRemove;
         public final TextView itemAddress;
         public final TextView itemAddressLabel;
-        public final ImageView itemCryptoStatus;
+        public final View itemCryptoStatus;
+        public final ImageView itemCryptoStatusIcon;
 
 
         public RecipientTokenHolder(View view) {
@@ -226,7 +227,8 @@ public class AlternateRecipientAdapter extends BaseAdapter {
 
             itemAddress = (TextView) view.findViewById(R.id.alternate_address);
             itemAddressLabel = (TextView) view.findViewById(R.id.alternate_address_label);
-            itemCryptoStatus = (ImageView) view.findViewById(R.id.alternate_crypto_status);
+            itemCryptoStatus = view.findViewById(R.id.alternate_crypto_status);
+            itemCryptoStatusIcon = (ImageView) view.findViewById(R.id.alternate_crypto_status_icon);
         }
 
         public void setShowAsHeader(boolean isHeader) {

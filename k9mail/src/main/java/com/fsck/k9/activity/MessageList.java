@@ -1438,6 +1438,8 @@ public class MessageList extends K9Activity implements MessageListFragmentListen
     public void displayMessageSubject(String subject) {
         if (mDisplayMode == DisplayMode.MESSAGE_VIEW) {
             mActionBarSubject.setText(subject);
+        } else {
+            mActionBarSubject.showSubjectInMessageHeader();
         }
     }
 

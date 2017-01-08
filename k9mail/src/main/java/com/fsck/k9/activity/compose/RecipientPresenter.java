@@ -584,7 +584,9 @@ public class RecipientPresenter implements OpenPgpApi.PermissionPingCallback, SM
     }
 
     public void onNonRecipientFieldFocused() {
-        hideEmptyExtendedRecipientFields();
+        if (!account.isAlwaysShowCcBcc()) {
+            hideEmptyExtendedRecipientFields();
+        }
     }
 
     public void onClickCryptoStatus() {
