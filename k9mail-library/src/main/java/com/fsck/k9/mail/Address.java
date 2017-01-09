@@ -167,6 +167,9 @@ public class Address implements Serializable {
             if (mPersonal != null && other.mPersonal != null && !mPersonal.equals(other.mPersonal)) {
                 return false;
             }
+            if (mAddress == null) {
+                return other.mAddress == null;
+            }
             return mAddress.equals(other.mAddress);
         }
         return super.equals(o);
