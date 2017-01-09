@@ -837,8 +837,6 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
         return true;
     }
 
-<<<<<<< HEAD
-=======
     private static String[][] USED_LIBRARIES = new String[][] {
         new String[] {"jutf7", "http://jutf7.sourceforge.net/"},
         new String[] {"JZlib", "http://www.jcraft.com/jzlib/"},
@@ -851,7 +849,6 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
         new String[] {"TokenAutoComplete", "https://github.com/splitwise/TokenAutoComplete/"},
     };
 
->>>>>>> upstream-master
     private void onAbout() {
         K9AboutDialogBuilder.create(this).show();
     }

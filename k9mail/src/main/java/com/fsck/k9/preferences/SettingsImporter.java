@@ -16,10 +16,6 @@ import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
 import android.content.Context;
-<<<<<<< HEAD
-=======
-import android.content.SharedPreferences;
->>>>>>> upstream-master
 import android.support.annotation.VisibleForTesting;
 import android.util.Log;
 

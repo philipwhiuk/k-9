@@ -1,14 +1,5 @@
 package com.fsck.k9.activity;
 
-<<<<<<< HEAD
-import com.fsck.k9.Account;
-import com.fsck.k9.K9;
-import com.fsck.k9.Preferences;
-import com.fsck.k9.R;
-import com.fsck.k9.service.DatabaseUpgradeService;
-=======
->>>>>>> upstream-master
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -21,8 +12,6 @@ import com.fsck.k9.Account;
 import com.fsck.k9.K9;
 import com.fsck.k9.Preferences;
 import com.fsck.k9.R;
-import com.fsck.k9.controller.MessagingController;
-import com.fsck.k9.mailstore.LocalStore;
 import com.fsck.k9.service.DatabaseUpgradeService;
 
 
@@ -57,11 +46,7 @@ import com.fsck.k9.service.DatabaseUpgradeService;
  * Currently we make no attempts to stop the background code (e.g. {@link com.fsck.k9.controller.MessagingController}) from
  * opening the accounts' databases. If this happens the upgrade is performed in one of the
  * background threads and not by {@link DatabaseUpgradeService}. But this is not a problem. Due to
-<<<<<<< HEAD
  * the locking in {@link com.fsck.k9.mailstore.LocalStore#getInstance(Account, Context)} the upgrade
-=======
- * the locking in {@link LocalStore#getInstance(Account, Context)} the upgrade
->>>>>>> upstream-master
  * service will block in the {@link Account#getLocalStore()} call and from the outside (especially
  * for this activity) it will appear as if {@link DatabaseUpgradeService} is performing the upgrade.
  * </p>
