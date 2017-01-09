@@ -941,7 +941,7 @@ public class EasStore extends RemoteStore {
             Message message = messages.get(i);
 
             try {
-                ByteArrayOutputStream out = new ByteArrayOutputStream(message.getSize());
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
 
                 EOLConvertingOutputStream msgOut = new EOLConvertingOutputStream(new BufferedOutputStream(out, 1024));
                 message.writeTo(msgOut);
