@@ -65,8 +65,9 @@ public class Migrations {
             case 54:
                 MigrationTo55.createFtsSearchTable(db, migrationsHelper);
             case 55:
-                MigrationTo56.migratePendingCommands(db);
-
+                MigrationTo56.cleanUpFtsTable(db);
+            case 56:
+                MigrationTo57.migratePendingCommands(db);
         }
     }
 }

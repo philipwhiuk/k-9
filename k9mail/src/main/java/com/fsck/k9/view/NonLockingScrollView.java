@@ -100,10 +100,10 @@ public class NonLockingScrollView extends ScrollView {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        setOnHierarchyChangeListenerRecursivelyAndExcludeChildrenFromInterceptions();
+        setupDelegationOfTouchAndHierarchyChangeEvents();
     }
     
-    private void setOnHierarchyChangeListenerRecursivelyAndExcludeChildrenFromInterceptions() {
+    private void setupDelegationOfTouchAndHierarchyChangeEvents() {
         OnHierarchyChangeListener listener = new HierarchyTreeChangeListener();
         setOnHierarchyChangeListener(listener);
         for (int i = 0, childCount = getChildCount(); i < childCount; i++) {

@@ -153,7 +153,7 @@ public class LocalStore extends Store implements Serializable {
      */
     private static final int THREAD_FLAG_UPDATE_BATCH_SIZE = 500;
 
-    public static final int DB_VERSION = 56;
+    public static final int DB_VERSION = 57;
 
 
     public static String getColumnNameForFlag(Flag flag) {
@@ -336,6 +336,10 @@ public class LocalStore extends Store implements Serializable {
                 // Don't delete deleted messages. They are essentially placeholders for UIDs of messages that have
                 // been deleted locally.
                 db.delete("messages", "deleted = 0", null);
+
+                // We don't need the search data now either
+                db.delete("messages_fulltext", null, null);
+
                 return null;
             }
         });
