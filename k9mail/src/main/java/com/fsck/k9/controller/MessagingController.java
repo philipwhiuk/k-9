@@ -2097,7 +2097,7 @@ public class MessagingController {
     private void processPendingSetFlag(PendingSetFlag command, Account account) throws MessagingException {
         String folder = command.folder;
 
-        if (account.getErrorFolderName().equals(folder)) {
+        if (account.getErrorFolderName().equals(folder) || account.getOutboxFolderName().equals(folder)) {
             return;
         }
 
