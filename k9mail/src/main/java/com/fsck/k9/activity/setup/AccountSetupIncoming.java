@@ -85,6 +85,7 @@ public class AccountSetupIncoming extends K9Activity implements OnClickListener 
     private CheckBox mSubscribedFoldersOnly;
     private AuthTypeAdapter mAuthTypeAdapter;
     private ConnectionSecurity[] mConnectionSecurityChoices = ConnectionSecurity.values();
+    private TextView serverLabelView;
 
     public static void actionIncomingSettings(Activity context, Account account, boolean makeDefault) {
         Intent i = new Intent(context, AccountSetupIncoming.class);
@@ -108,28 +109,7 @@ public class AccountSetupIncoming extends K9Activity implements OnClickListener 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.account_setup_incoming);
-
-        mUsernameView = (EditText) findViewById(R.id.account_username);
-        mPasswordView = (EditText) findViewById(R.id.account_password);
-        mClientCertificateSpinner = (ClientCertificateSpinner) findViewById(R.id.account_client_certificate_spinner);
-        mClientCertificateLabelView = (TextView) findViewById(R.id.account_client_certificate_label);
-        mPasswordLabelView = (TextView) findViewById(R.id.account_password_label);
-        TextView serverLabelView = (TextView) findViewById(R.id.account_server_label);
-        mServerView = (EditText) findViewById(R.id.account_server);
-        mPortView = (EditText) findViewById(R.id.account_port);
-        mSecurityTypeView = (Spinner) findViewById(R.id.account_security_type);
-        mSecurityStatusView = (ToolableViewAnimator) findViewById(R.id.account_security_status);
-        mAuthTypeView = (Spinner) findViewById(R.id.account_auth_type);
-        mImapAutoDetectNamespaceView = (CheckBox) findViewById(R.id.imap_autodetect_namespace);
-        mImapPathPrefixView = (EditText) findViewById(R.id.imap_path_prefix);
-        mWebdavPathPrefixView = (EditText) findViewById(R.id.webdav_path_prefix);
-        mWebdavAuthPathView = (EditText) findViewById(R.id.webdav_auth_path);
-        mWebdavMailboxPathView = (EditText) findViewById(R.id.webdav_mailbox_path);
-        mNextButton = (Button) findViewById(R.id.next);
-        mCompressionMobile = (CheckBox) findViewById(R.id.compression_mobile);
-        mCompressionWifi = (CheckBox) findViewById(R.id.compression_wifi);
-        mCompressionOther = (CheckBox) findViewById(R.id.compression_other);
-        mSubscribedFoldersOnly = (CheckBox) findViewById(R.id.subscribed_folders_only);
+        findViewsFromLayout();
 
         mNextButton.setOnClickListener(this);
 
@@ -169,137 +149,181 @@ public class AccountSetupIncoming extends K9Activity implements OnClickListener 
         boolean editSettings = Intent.ACTION_EDIT.equals(getIntent().getAction());
 
         try {
-            ServerSettings settings = RemoteStore.decodeStoreUri(mAccount.getStoreUri());
-
-            if (savedInstanceState == null) {
-                // The first item is selected if settings.authenticationType is null or is not in mAuthTypeAdapter
-                mCurrentAuthTypeViewPosition = mAuthTypeAdapter.getAuthPosition(settings.authenticationType);
-            } else {
-                mCurrentAuthTypeViewPosition = savedInstanceState.getInt(STATE_AUTH_TYPE_POSITION);
-            }
-            mAuthTypeView.setSelection(mCurrentAuthTypeViewPosition, false);
-            updateViewFromAuthType();
-
-            if (settings.username != null) {
-                mUsernameView.setText(settings.username);
-            }
-
-            if (settings.password != null) {
-                mPasswordView.setText(settings.password);
-            }
-
-            if (settings.clientCertificateAlias != null) {
-                mClientCertificateSpinner.setAlias(settings.clientCertificateAlias);
-            }
-
-            mStoreType = settings.type;
-            if (Type.POP3 == settings.type) {
-                serverLabelView.setText(R.string.account_setup_incoming_pop_server_label);
-                findViewById(R.id.imap_path_prefix_section).setVisibility(View.GONE);
-                findViewById(R.id.webdav_advanced_header).setVisibility(View.GONE);
-                findViewById(R.id.webdav_mailbox_alias_section).setVisibility(View.GONE);
-                findViewById(R.id.webdav_owa_path_section).setVisibility(View.GONE);
-                findViewById(R.id.webdav_auth_path_section).setVisibility(View.GONE);
-                findViewById(R.id.compression_section).setVisibility(View.GONE);
-                findViewById(R.id.compression_label).setVisibility(View.GONE);
-                mSubscribedFoldersOnly.setVisibility(View.GONE);
-            } else if (Type.IMAP == settings.type) {
-                serverLabelView.setText(R.string.account_setup_incoming_imap_server_label);
-
-                ImapStoreSettings imapSettings = (ImapStoreSettings) settings;
-
-                mImapAutoDetectNamespaceView.setChecked(imapSettings.autoDetectNamespace);
-                if (imapSettings.pathPrefix != null) {
-                    mImapPathPrefixView.setText(imapSettings.pathPrefix);
-                }
-
-                findViewById(R.id.webdav_advanced_header).setVisibility(View.GONE);
-                findViewById(R.id.webdav_mailbox_alias_section).setVisibility(View.GONE);
-                findViewById(R.id.webdav_owa_path_section).setVisibility(View.GONE);
-                findViewById(R.id.webdav_auth_path_section).setVisibility(View.GONE);
-
-                if (!editSettings) {
-                    findViewById(R.id.imap_folder_setup_section).setVisibility(View.GONE);
-                }
-            } else if (Type.WebDAV == settings.type) {
-                serverLabelView.setText(R.string.account_setup_incoming_webdav_server_label);
-                mConnectionSecurityChoices = new ConnectionSecurity[] {
-                        ConnectionSecurity.NONE,
-                        ConnectionSecurity.SSL_TLS_REQUIRED };
-
-                // Hide the unnecessary fields
-                findViewById(R.id.imap_path_prefix_section).setVisibility(View.GONE);
-                findViewById(R.id.account_auth_type_label).setVisibility(View.GONE);
-                findViewById(R.id.account_auth_type).setVisibility(View.GONE);
-                findViewById(R.id.compression_section).setVisibility(View.GONE);
-                findViewById(R.id.compression_label).setVisibility(View.GONE);
-                mSubscribedFoldersOnly.setVisibility(View.GONE);
-
-                WebDavStoreSettings webDavSettings = (WebDavStoreSettings) settings;
-
-                if (webDavSettings.path != null) {
-                    mWebdavPathPrefixView.setText(webDavSettings.path);
-                }
-
-                if (webDavSettings.authPath != null) {
-                    mWebdavAuthPathView.setText(webDavSettings.authPath);
-                }
-
-                if (webDavSettings.mailboxPath != null) {
-                    mWebdavMailboxPathView.setText(webDavSettings.mailboxPath);
-                }
-            } else {
-                throw new Exception("Unknown account type: " + mAccount.getStoreUri());
-            }
-
-            if (!editSettings) {
-                mAccount.setDeletePolicy(AccountCreator.getDefaultDeletePolicy(settings.type));
-            }
-
-            // Note that mConnectionSecurityChoices is configured above based on server type
-            ConnectionSecurityAdapter securityTypesAdapter =
-                    ConnectionSecurityAdapter.get(this, mConnectionSecurityChoices);
-            mSecurityTypeView.setAdapter(securityTypesAdapter);
-
-            // Select currently configured security type
-            if (savedInstanceState == null) {
-                mCurrentSecurityTypeViewPosition = securityTypesAdapter.getConnectionSecurityPosition(settings.connectionSecurity);
-            } else {
-
-                /*
-                 * Restore the spinner state now, before calling
-                 * setOnItemSelectedListener(), thus avoiding a call to
-                 * onItemSelected(). Then, when the system restores the state
-                 * (again) in onRestoreInstanceState(), The system will see that
-                 * the new state is the same as the current state (set here), so
-                 * once again onItemSelected() will not be called.
-                 */
-                mCurrentSecurityTypeViewPosition = savedInstanceState.getInt(STATE_SECURITY_TYPE_POSITION);
-            }
-            mSecurityTypeView.setSelection(mCurrentSecurityTypeViewPosition, false);
-            updateSelectedSecurityStatus(false);
-
-            updateAuthPlainTextFromSecurityType(settings.connectionSecurity);
-
-            mCompressionMobile.setChecked(mAccount.useCompression(NetworkType.MOBILE));
-            mCompressionWifi.setChecked(mAccount.useCompression(NetworkType.WIFI));
-            mCompressionOther.setChecked(mAccount.useCompression(NetworkType.OTHER));
-
-            if (settings.host != null) {
-                mServerView.setText(settings.host);
-            }
-
-            if (settings.port != -1) {
-                mPortView.setText(String.format("%d", settings.port));
-            } else {
-                updatePortFromSecurityType();
-            }
-            mCurrentPortViewSetting = mPortView.getText().toString();
-
-            mSubscribedFoldersOnly.setChecked(mAccount.subscribedFoldersOnly());
+            populateFields(savedInstanceState, editSettings);
         } catch (Exception e) {
             failure(e);
         }
+    }
+
+    private void populateFields(Bundle savedInstanceState, boolean editSettings) throws Exception {
+        ServerSettings settings = RemoteStore.decodeStoreUri(mAccount.getStoreUri());
+
+        if (savedInstanceState == null) {
+            // The first item is selected if settings.authenticationType is null or is not in mAuthTypeAdapter
+            mCurrentAuthTypeViewPosition = mAuthTypeAdapter.getAuthPosition(settings.authenticationType);
+        } else {
+            mCurrentAuthTypeViewPosition = savedInstanceState.getInt(STATE_AUTH_TYPE_POSITION);
+        }
+        mAuthTypeView.setSelection(mCurrentAuthTypeViewPosition, false);
+        updateViewFromAuthType();
+
+        if (settings.username != null) {
+            mUsernameView.setText(settings.username);
+        }
+
+        if (settings.password != null) {
+            mPasswordView.setText(settings.password);
+        }
+
+        if (settings.clientCertificateAlias != null) {
+            mClientCertificateSpinner.setAlias(settings.clientCertificateAlias);
+        }
+
+        mStoreType = settings.type;
+        if (Type.POP3 == settings.type) {
+            populatePop3Fields();
+        } else if (Type.IMAP == settings.type) {
+            populateImapFields(settings, editSettings);
+        } else if (Type.WebDAV == settings.type) {
+            populateWebDavFields(settings);
+        } else {
+            throw new Exception("Unknown account type: " + mAccount.getStoreUri());
+        }
+
+        if (!editSettings) {
+            mAccount.setDeletePolicy(AccountCreator.getDefaultDeletePolicy(settings.type));
+        }
+
+        populateSecurityFields(savedInstanceState, settings);
+
+        mCompressionMobile.setChecked(mAccount.useCompression(NetworkType.MOBILE));
+        mCompressionWifi.setChecked(mAccount.useCompression(NetworkType.WIFI));
+        mCompressionOther.setChecked(mAccount.useCompression(NetworkType.OTHER));
+
+        if (settings.host != null) {
+            mServerView.setText(settings.host);
+        }
+
+        if (settings.port != -1) {
+            mPortView.setText(String.format("%d", settings.port));
+        } else {
+            updatePortFromSecurityType();
+        }
+        mCurrentPortViewSetting = mPortView.getText().toString();
+
+        mSubscribedFoldersOnly.setChecked(mAccount.subscribedFoldersOnly());
+    }
+
+    private void populatePop3Fields() {
+        serverLabelView.setText(R.string.account_setup_incoming_pop_server_label);
+        findViewById(R.id.imap_path_prefix_section).setVisibility(View.GONE);
+        findViewById(R.id.webdav_advanced_header).setVisibility(View.GONE);
+        findViewById(R.id.webdav_mailbox_alias_section).setVisibility(View.GONE);
+        findViewById(R.id.webdav_owa_path_section).setVisibility(View.GONE);
+        findViewById(R.id.webdav_auth_path_section).setVisibility(View.GONE);
+        findViewById(R.id.compression_section).setVisibility(View.GONE);
+        findViewById(R.id.compression_label).setVisibility(View.GONE);
+        mSubscribedFoldersOnly.setVisibility(View.GONE);
+    }
+
+    private void populateImapFields(ServerSettings settings, boolean editSettings) {
+        serverLabelView.setText(R.string.account_setup_incoming_imap_server_label);
+
+        ImapStoreSettings imapSettings = (ImapStoreSettings) settings;
+
+        mImapAutoDetectNamespaceView.setChecked(imapSettings.autoDetectNamespace);
+        if (imapSettings.pathPrefix != null) {
+            mImapPathPrefixView.setText(imapSettings.pathPrefix);
+        }
+
+        findViewById(R.id.webdav_advanced_header).setVisibility(View.GONE);
+        findViewById(R.id.webdav_mailbox_alias_section).setVisibility(View.GONE);
+        findViewById(R.id.webdav_owa_path_section).setVisibility(View.GONE);
+        findViewById(R.id.webdav_auth_path_section).setVisibility(View.GONE);
+
+        if (!editSettings) {
+            findViewById(R.id.imap_folder_setup_section).setVisibility(View.GONE);
+        }
+    }
+
+    private void populateWebDavFields(ServerSettings settings) {
+        serverLabelView.setText(R.string.account_setup_incoming_webdav_server_label);
+        mConnectionSecurityChoices = new ConnectionSecurity[] {
+                ConnectionSecurity.NONE,
+                ConnectionSecurity.SSL_TLS_REQUIRED };
+
+        // Hide the unnecessary fields
+        findViewById(R.id.imap_path_prefix_section).setVisibility(View.GONE);
+        findViewById(R.id.account_auth_type_label).setVisibility(View.GONE);
+        findViewById(R.id.account_auth_type).setVisibility(View.GONE);
+        findViewById(R.id.compression_section).setVisibility(View.GONE);
+        findViewById(R.id.compression_label).setVisibility(View.GONE);
+        mSubscribedFoldersOnly.setVisibility(View.GONE);
+
+        WebDavStoreSettings webDavSettings = (WebDavStoreSettings) settings;
+
+        if (webDavSettings.path != null) {
+            mWebdavPathPrefixView.setText(webDavSettings.path);
+        }
+
+        if (webDavSettings.authPath != null) {
+            mWebdavAuthPathView.setText(webDavSettings.authPath);
+        }
+
+        if (webDavSettings.mailboxPath != null) {
+            mWebdavMailboxPathView.setText(webDavSettings.mailboxPath);
+        }
+    }
+
+    private void populateSecurityFields(Bundle savedInstanceState, ServerSettings settings) {
+        // Note that mConnectionSecurityChoices is configured based on server type
+        ConnectionSecurityAdapter securityTypesAdapter =
+                ConnectionSecurityAdapter.get(this, mConnectionSecurityChoices);
+        mSecurityTypeView.setAdapter(securityTypesAdapter);
+
+        // Select currently configured security type
+        if (savedInstanceState == null) {
+            mCurrentSecurityTypeViewPosition = securityTypesAdapter.getConnectionSecurityPosition(settings.connectionSecurity);
+        } else {
+
+            /*
+             * Restore the spinner state now, before calling
+             * setOnItemSelectedListener(), thus avoiding a call to
+             * onItemSelected(). Then, when the system restores the state
+             * (again) in onRestoreInstanceState(), The system will see that
+             * the new state is the same as the current state (set here), so
+             * once again onItemSelected() will not be called.
+             */
+            mCurrentSecurityTypeViewPosition = savedInstanceState.getInt(STATE_SECURITY_TYPE_POSITION);
+        }
+        mSecurityTypeView.setSelection(mCurrentSecurityTypeViewPosition, false);
+        updateSelectedSecurityStatus(false);
+
+        updateAuthPlainTextFromSecurityType(settings.connectionSecurity);
+    }
+
+    private void findViewsFromLayout() {
+        mUsernameView = (EditText) findViewById(R.id.account_username);
+        mPasswordView = (EditText) findViewById(R.id.account_password);
+        mClientCertificateSpinner = (ClientCertificateSpinner) findViewById(R.id.account_client_certificate_spinner);
+        mClientCertificateLabelView = (TextView) findViewById(R.id.account_client_certificate_label);
+        mPasswordLabelView = (TextView) findViewById(R.id.account_password_label);
+        serverLabelView = (TextView) findViewById(R.id.account_server_label);
+        mServerView = (EditText) findViewById(R.id.account_server);
+        mPortView = (EditText) findViewById(R.id.account_port);
+        mSecurityTypeView = (Spinner) findViewById(R.id.account_security_type);
+        mSecurityStatusView = (ToolableViewAnimator) findViewById(R.id.account_security_status);
+        mAuthTypeView = (Spinner) findViewById(R.id.account_auth_type);
+        mImapAutoDetectNamespaceView = (CheckBox) findViewById(R.id.imap_autodetect_namespace);
+        mImapPathPrefixView = (EditText) findViewById(R.id.imap_path_prefix);
+        mWebdavPathPrefixView = (EditText) findViewById(R.id.webdav_path_prefix);
+        mWebdavAuthPathView = (EditText) findViewById(R.id.webdav_auth_path);
+        mWebdavMailboxPathView = (EditText) findViewById(R.id.webdav_mailbox_path);
+        mNextButton = (Button) findViewById(R.id.next);
+        mCompressionMobile = (CheckBox) findViewById(R.id.compression_mobile);
+        mCompressionWifi = (CheckBox) findViewById(R.id.compression_wifi);
+        mCompressionOther = (CheckBox) findViewById(R.id.compression_other);
+        mSubscribedFoldersOnly = (CheckBox) findViewById(R.id.subscribed_folders_only);
     }
 
     private void updateSelectedSecurityStatus(boolean animate) {
@@ -440,7 +464,6 @@ public class AccountSetupIncoming extends K9Activity implements OnClickListener 
         boolean hasConnectionSecurity = (connectionSecurity != ConnectionSecurity.NONE);
 
         if (isAuthTypeExternal && !hasConnectionSecurity) {
-
             // Notify user of an invalid combination of AuthType.EXTERNAL & ConnectionSecurity.NONE
             String toastText = getString(R.string.account_setup_incoming_invalid_setting_combo_notice,
                     getString(R.string.account_setup_incoming_auth_type_label),
