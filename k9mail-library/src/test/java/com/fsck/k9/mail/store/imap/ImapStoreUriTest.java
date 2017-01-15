@@ -19,10 +19,6 @@ public class ImapStoreUriTest {
     @Test
     public void testDecodeStoreUriImapNoAuth() {
         String uri = "imap://user:pass@server/";
-<<<<<<< HEAD
-=======
-        
->>>>>>> upstream-master
         ServerSettings settings = RemoteStore.decodeStoreUri(uri);
 
         assertEquals(AuthType.PLAIN, settings.authenticationType);
@@ -34,10 +30,6 @@ public class ImapStoreUriTest {
     @Test
     public void testDecodeStoreUriImapNoPassword() {
         String uri = "imap://user:@server/";
-<<<<<<< HEAD
-=======
-        
->>>>>>> upstream-master
         ServerSettings settings = RemoteStore.decodeStoreUri(uri);
 
         assertEquals(AuthType.PLAIN, settings.authenticationType);
@@ -49,10 +41,7 @@ public class ImapStoreUriTest {
     @Test
     public void testDecodeStoreUriImapPlainNoPassword() {
         String uri = "imap://PLAIN:user:@server/";
-<<<<<<< HEAD
-=======
-        
->>>>>>> upstream-master
+
         ServerSettings settings = RemoteStore.decodeStoreUri(uri);
 
         assertEquals(AuthType.PLAIN, settings.authenticationType);
@@ -64,10 +53,7 @@ public class ImapStoreUriTest {
     @Test
     public void testDecodeStoreUriImapExternalAuth() {
         String uri = "imap://EXTERNAL:user:clientCertAlias@server/";
-<<<<<<< HEAD
-=======
-        
->>>>>>> upstream-master
+
         ServerSettings settings = RemoteStore.decodeStoreUri(uri);
 
         assertEquals(AuthType.EXTERNAL, settings.authenticationType);
@@ -80,10 +66,7 @@ public class ImapStoreUriTest {
     @Test
     public void testDecodeStoreUriImapXOAuth2() {
         String uri = "imap://XOAUTH2:user:@server/";
-<<<<<<< HEAD
-=======
-        
->>>>>>> upstream-master
+
         ServerSettings settings = RemoteStore.decodeStoreUri(uri);
 
         assertEquals(AuthType.XOAUTH2, settings.authenticationType);
@@ -108,10 +91,7 @@ public class ImapStoreUriTest {
     @Test
     public void testDecodeStoreUriImapTLS() {
         String uri = "imap+ssl+://PLAIN:user:pass@server/";
-<<<<<<< HEAD
-=======
-        
->>>>>>> upstream-master
+
         ServerSettings settings = RemoteStore.decodeStoreUri(uri);
 
         assertEquals(ConnectionSecurity.SSL_TLS_REQUIRED, settings.connectionSecurity);
@@ -121,10 +101,6 @@ public class ImapStoreUriTest {
         assertEquals("server", settings.host);
     }
 
-<<<<<<< HEAD
-
-=======
->>>>>>> upstream-master
     @Test
     public void testDecodeStoreUriImapAllExtras() {
         String uri = "imap://PLAIN:user:pass@server:143/0%7CcustomPathPrefix";
