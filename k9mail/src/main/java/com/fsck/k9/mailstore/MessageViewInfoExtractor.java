@@ -17,6 +17,7 @@ import com.fsck.k9.K9;
 import com.fsck.k9.R;
 import com.fsck.k9.helper.HtmlConverter;
 import com.fsck.k9.helper.HtmlSanitizer;
+import com.fsck.k9.ical.ICalPart;
 import com.fsck.k9.mail.Address;
 import com.fsck.k9.mail.Flag;
 import com.fsck.k9.mail.Message;
@@ -27,6 +28,7 @@ import com.fsck.k9.mail.internet.Viewable;
 import com.fsck.k9.mail.internet.Viewable.Flowed;
 import com.fsck.k9.mailstore.util.FlowedMessageUtils;
 import com.fsck.k9.message.extractors.AttachmentInfoExtractor;
+import com.fsck.k9.message.extractors.ICalendarInfoExtractor;
 import com.fsck.k9.ui.crypto.MessageCryptoAnnotations;
 import com.fsck.k9.ui.crypto.MessageCryptoSplitter;
 import com.fsck.k9.ui.crypto.MessageCryptoSplitter.CryptoMessageParts;
@@ -50,21 +52,25 @@ public class MessageViewInfoExtractor {
 
     private final Context context;
     private final AttachmentInfoExtractor attachmentInfoExtractor;
+    private final ICalendarInfoExtractor iCalendarInfoExtractor;
     private final HtmlSanitizer htmlSanitizer;
 
 
     public static MessageViewInfoExtractor getInstance() {
         Context context = Globals.getContext();
         AttachmentInfoExtractor attachmentInfoExtractor = AttachmentInfoExtractor.getInstance();
+        ICalendarInfoExtractor iCalendarInfoExtractor = ICalendarInfoExtractor.getInstance();
         HtmlSanitizer htmlSanitizer = HtmlSanitizer.getInstance();
-        return new MessageViewInfoExtractor(context, attachmentInfoExtractor, htmlSanitizer);
+        return new MessageViewInfoExtractor(context, attachmentInfoExtractor, iCalendarInfoExtractor, htmlSanitizer);
     }
 
     @VisibleForTesting
     MessageViewInfoExtractor(Context context, AttachmentInfoExtractor attachmentInfoExtractor,
-            HtmlSanitizer htmlSanitizer) {
+                             ICalendarInfoExtractor iCalendarInfoExtractor,
+                             HtmlSanitizer htmlSanitizer) {
         this.context = context;
         this.attachmentInfoExtractor = attachmentInfoExtractor;
+        this.iCalendarInfoExtractor = iCalendarInfoExtractor;
         this.htmlSanitizer = htmlSanitizer;
     }
 
@@ -90,36 +96,45 @@ public class MessageViewInfoExtractor {
         }
 
         List<AttachmentViewInfo> attachmentInfos = new ArrayList<>();
+        List<ICalendarViewInfo> iCalendarInfos = new ArrayList<>();
         ViewableExtractedText viewable = extractViewableAndAttachments(
-                Collections.singletonList(rootPart), attachmentInfos);
+                Collections.singletonList(rootPart), attachmentInfos, iCalendarInfos);
 
         List<AttachmentViewInfo> extraAttachmentInfos = new ArrayList<>();
         String extraViewableText = null;
+
         if (extraParts != null) {
             ViewableExtractedText extraViewable =
-                    extractViewableAndAttachments(extraParts, extraAttachmentInfos);
+                    extractViewableAndAttachments(extraParts, extraAttachmentInfos,
+                            new ArrayList<ICalendarViewInfo>());
             extraViewableText = extraViewable.text;
         }
+
 
         AttachmentResolver attachmentResolver = AttachmentResolver.createFromPart(rootPart);
 
         boolean isMessageIncomplete = !message.isSet(Flag.X_DOWNLOADED_FULL) ||
                 MessageExtractor.hasMissingParts(message);
 
-        return MessageViewInfo.createWithExtractedContent(message, isMessageIncomplete, rootPart, viewable.html,
-                attachmentInfos, cryptoResultAnnotation, attachmentResolver, extraViewableText, extraAttachmentInfos);
+        return MessageViewInfo.createWithExtractedContent(
+                message, isMessageIncomplete, rootPart, viewable.html,
+                attachmentInfos, iCalendarInfos,
+                cryptoResultAnnotation, attachmentResolver, extraViewableText, extraAttachmentInfos);
     }
 
     private ViewableExtractedText extractViewableAndAttachments(List<Part> parts,
-            List<AttachmentViewInfo> attachmentInfos) throws MessagingException {
+            List<AttachmentViewInfo> attachmentInfos, List<ICalendarViewInfo> iCalendarViewInfos)
+            throws MessagingException {
         ArrayList<Viewable> viewableParts = new ArrayList<>();
         ArrayList<Part> attachments = new ArrayList<>();
+        ArrayList<ICalPart> iCalendars = new ArrayList<>();
 
         for (Part part : parts) {
-            MessageExtractor.findViewablesAndAttachments(part, viewableParts, attachments);
+            MessageExtractor.findViewablesAndAttachments(part, viewableParts, attachments, iCalendars);
         }
 
         attachmentInfos.addAll(attachmentInfoExtractor.extractAttachmentInfoForView(attachments));
+        iCalendarViewInfos.addAll(iCalendarInfoExtractor.extractICalendarInfoForView(iCalendars));
         return extractTextFromViewables(viewableParts);
     }
 
@@ -226,10 +241,15 @@ public class MessageViewInfoExtractor {
     private StringBuilder buildHtml(Viewable viewable, boolean prependDivider) {
         StringBuilder html = new StringBuilder();
         if (viewable instanceof Textual) {
-            Part part = ((Textual)viewable).getPart();
+            Part part = ((Textual) viewable).getPart();
             addHtmlDivider(html, part, prependDivider);
 
-            String t = MessageExtractor.getTextFromPart(part);
+            String t = null;
+            try {
+                t = MessageExtractor.getTextFromPart(part);
+            } catch (Exception e) {
+                Log.w(K9.LOG_TAG, "Unable to get text from part", e);
+            }
             if (t == null) {
                 t = "";
             } else if (viewable instanceof Flowed) {
@@ -262,10 +282,15 @@ public class MessageViewInfoExtractor {
     private StringBuilder buildText(Viewable viewable, boolean prependDivider) {
         StringBuilder text = new StringBuilder();
         if (viewable instanceof Textual) {
-            Part part = ((Textual)viewable).getPart();
+            Part part = ((Textual) viewable).getPart();
             addTextDivider(text, part, prependDivider);
 
-            String t = MessageExtractor.getTextFromPart(part);
+            String t = null;
+            try {
+                t = MessageExtractor.getTextFromPart(part);
+            } catch (Exception e) {
+                Log.w(K9.LOG_TAG, "Unable to get text from part", e);
+            }
             if (t == null) {
                 t = "";
             } else if (viewable instanceof Html) {
