@@ -1,6 +1,7 @@
 package com.fsck.k9.mail;
 
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -88,6 +89,16 @@ public class AddressTest {
 
         assertEquals("Yahoo!ダイレクトオファー ", addresses[0].getPersonal());
         assertEquals("directoffer-master@mail.yahoo.co.jp", addresses[0].getAddress());
+
+    }
+
+    @Test @Ignore("RFC 6530")
+    public void parse_withUTF8Personal_shouldDecode() {
+        Address[] addresses = Address.parse(
+                "\"ł\" <a@b.c>");
+
+        assertEquals("ł", addresses[0].getPersonal());
+        assertEquals("a@b.c", addresses[0].getAddress());
 
     }
 
