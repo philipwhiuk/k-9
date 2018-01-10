@@ -9,6 +9,9 @@ import com.fsck.k9.Preferences;
 import com.fsck.k9.activity.MessageCompose;
 import com.fsck.k9.activity.MessageReference;
 
+import static com.fsck.k9.activity.compose.ReplyType.REPLY_ALL;
+
+
 public class MessageActions {
     /**
      * Compose a new message using the given account. If account is null the default account
@@ -30,14 +33,20 @@ public class MessageActions {
      * the function is reply all instead of simply reply.
      */
     public static Intent getActionReplyIntent(
-            Context context, MessageReference messageReference, boolean replyAll, Parcelable decryptionResult) {
+            Context context, MessageReference messageReference, ReplyType replyType, Parcelable decryptionResult) {
         Intent i = new Intent(context, MessageCompose.class);
         i.putExtra(MessageCompose.EXTRA_MESSAGE_DECRYPTION_RESULT, decryptionResult);
         i.putExtra(MessageCompose.EXTRA_MESSAGE_REFERENCE, messageReference.toIdentityString());
-        if (replyAll) {
-            i.setAction(MessageCompose.ACTION_REPLY_ALL);
-        } else {
-            i.setAction(MessageCompose.ACTION_REPLY);
+        switch (replyType) {
+            case REPLY:
+                i.setAction(MessageCompose.ACTION_REPLY);
+                break;
+            case REPLY_LIST:
+                i.setAction(MessageCompose.ACTION_REPLY_LIST);
+                break;
+            case REPLY_ALL:
+                i.setAction(MessageCompose.ACTION_REPLY_ALL);
+                break;
         }
         return i;
     }
@@ -56,8 +65,8 @@ public class MessageActions {
      * is reply all instead of simply reply.
      */
     public static void actionReply(
-            Context context, MessageReference messageReference, boolean replyAll, Parcelable decryptionResult) {
-        context.startActivity(getActionReplyIntent(context, messageReference, replyAll, decryptionResult));
+            Context context, MessageReference messageReference, ReplyType replyType, Parcelable decryptionResult) {
+        context.startActivity(getActionReplyIntent(context, messageReference, replyType, decryptionResult));
     }
 
     /**

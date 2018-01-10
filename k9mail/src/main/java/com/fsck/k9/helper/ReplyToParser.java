@@ -21,12 +21,29 @@ public class ReplyToParser {
         Address[] candidateAddress;
 
         Address[] replyToAddresses = message.getReplyTo();
-        Address[] listPostAddresses = ListHeaders.getListPostAddresses(message);
         Address[] fromAddresses = message.getFrom();
 
         if (replyToAddresses.length > 0) {
             candidateAddress = replyToAddresses;
-        } else if (listPostAddresses.length > 0) {
+        } else {
+            candidateAddress = fromAddresses;
+        }
+
+        boolean replyToAddressIsUserIdentity = account.isAnIdentity(candidateAddress);
+        if (replyToAddressIsUserIdentity) {
+            candidateAddress = message.getRecipients(RecipientType.TO);
+        }
+
+        return new ReplyToAddresses(candidateAddress);
+    }
+
+    public ReplyToAddresses getRecipientsToReplyListTo(Message message, Account account) {
+        Address[] candidateAddress;
+
+        Address[] listPostAddresses = ListHeaders.getListPostAddresses(message);
+        Address[] fromAddresses = message.getFrom();
+
+        if (listPostAddresses.length > 0) {
             candidateAddress = listPostAddresses;
         } else {
             candidateAddress = fromAddresses;

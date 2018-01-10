@@ -780,6 +780,10 @@ public class MessageListFragment extends Fragment implements OnItemClickListener
         fragmentListener.onReply(messageReference);
     }
 
+    private void onReplyList(MessageReference messageReference) {
+        fragmentListener.onReplyList(messageReference);
+    }
+
     private void onReplyAll(MessageReference messageReference) {
         fragmentListener.onReplyAll(messageReference);
     }
@@ -1106,6 +1110,10 @@ public class MessageListFragment extends Fragment implements OnItemClickListener
             }
             case R.id.reply: {
                 onReply(getMessageAtPosition(adapterPosition));
+                break;
+            }
+            case R.id.reply_list: {
+                onReplyList(getMessageAtPosition(adapterPosition));
                 break;
             }
             case R.id.reply_all: {
@@ -2377,6 +2385,7 @@ public class MessageListFragment extends Fragment implements OnItemClickListener
         void onResendMessage(MessageReference message);
         void onForward(MessageReference message);
         void onReply(MessageReference message);
+        void onReplyList(MessageReference message);
         void onReplyAll(MessageReference message);
         void openMessage(MessageReference messageReference);
         void setMessageListTitle(String title);

@@ -62,6 +62,7 @@ import com.fsck.k9.activity.compose.PgpInlineDialog.OnOpenPgpInlineChangeListene
 import com.fsck.k9.activity.compose.PgpSignOnlyDialog.OnOpenPgpSignOnlyChangeListener;
 import com.fsck.k9.activity.compose.RecipientMvpView;
 import com.fsck.k9.activity.compose.RecipientPresenter;
+import com.fsck.k9.activity.compose.ReplyType;
 import com.fsck.k9.activity.compose.SaveMessageTask;
 import com.fsck.k9.activity.misc.Attachment;
 import com.fsck.k9.controller.MessagingController;
@@ -119,6 +120,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
 
     public static final String ACTION_COMPOSE = "com.fsck.k9.intent.action.COMPOSE";
     public static final String ACTION_REPLY = "com.fsck.k9.intent.action.REPLY";
+    public static final String ACTION_REPLY_LIST = "com.fsck.k9.intent.action.REPLY_LIST";
     public static final String ACTION_REPLY_ALL = "com.fsck.k9.intent.action.REPLY_ALL";
     public static final String ACTION_FORWARD = "com.fsck.k9.intent.action.FORWARD";
     public static final String ACTION_EDIT_DRAFT = "com.fsck.k9.intent.action.EDIT_DRAFT";
@@ -351,6 +353,8 @@ public class MessageCompose extends K9Activity implements OnClickListener,
                 this.action = Action.COMPOSE;
             } else if (ACTION_REPLY.equals(action)) {
                 this.action = Action.REPLY;
+            } else if (ACTION_REPLY_LIST.equals(action)) {
+                this.action = Action.REPLY_LIST;
             } else if (ACTION_REPLY_ALL.equals(action)) {
                 this.action = Action.REPLY_ALL;
             } else if (ACTION_FORWARD.equals(action)) {
@@ -387,7 +391,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
         updateFrom();
 
         if (!relatedMessageProcessed) {
-            if (action == Action.REPLY || action == Action.REPLY_ALL ||
+            if (action == Action.REPLY || action == Action.REPLY_LIST || action == Action.REPLY_ALL ||
                     action == Action.FORWARD || action == Action.EDIT_DRAFT) {
                 messageLoaderHelper = new MessageLoaderHelper(this, getLoaderManager(), getFragmentManager(),
                         messageLoaderCallbacks);
@@ -405,11 +409,11 @@ public class MessageCompose extends K9Activity implements OnClickListener,
             }
         }
 
-        if (action == Action.REPLY || action == Action.REPLY_ALL) {
+        if (action == Action.REPLY || action == Action.REPLY_LIST || action == Action.REPLY_ALL) {
             relatedMessageReference = relatedMessageReference.withModifiedFlag(Flag.ANSWERED);
         }
 
-        if (action == Action.REPLY || action == Action.REPLY_ALL ||
+        if (action == Action.REPLY || action == Action.REPLY_LIST || action == Action.REPLY_ALL ||
                 action == Action.EDIT_DRAFT) {
             //change focus to message body.
             messageContentView.requestFocus();
@@ -1188,6 +1192,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
         try {
             switch (action) {
                 case REPLY:
+                case REPLY_LIST:
                 case REPLY_ALL: {
                     processMessageToReplyTo(messageViewInfo);
                     break;
@@ -1238,8 +1243,18 @@ public class MessageCompose extends K9Activity implements OnClickListener,
          * If a reply-to was included with the message use that, otherwise use the from
          * or sender address.
          */
-        boolean isReplyAll = action == Action.REPLY_ALL;
-        recipientPresenter.initFromReplyToMessage(message, isReplyAll);
+        ReplyType replyType;
+        switch (action) {
+            case REPLY_LIST:
+                replyType = ReplyType.REPLY_LIST;
+            case REPLY_ALL:
+                replyType = ReplyType.REPLY_ALL;
+            default:
+            case REPLY:
+                replyType = ReplyType.REPLY;
+        }
+
+        recipientPresenter.initFromReplyToMessage(message, replyType);
 
         if (message.getMessageId() != null && message.getMessageId().length() > 0) {
             repliedToMessageId = message.getMessageId();
@@ -1258,7 +1273,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
         // Quote the message and setup the UI.
         quotedMessagePresenter.initFromReplyToMessage(messageViewInfo, action);
 
-        if (action == Action.REPLY || action == Action.REPLY_ALL) {
+        if (action == Action.REPLY || action == Action.REPLY_LIST || action == Action.REPLY_ALL) {
             Identity useIdentity = IdentityHelper.getRecipientIdentityFromMessage(account, message);
             Identity defaultIdentity = account.getIdentity(0);
             if (useIdentity != defaultIdentity) {
@@ -1807,6 +1822,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
     public enum Action {
         COMPOSE(R.string.compose_title_compose),
         REPLY(R.string.compose_title_reply),
+        REPLY_LIST(R.string.compose_title_reply_list),
         REPLY_ALL(R.string.compose_title_reply_all),
         FORWARD(R.string.compose_title_forward),
         EDIT_DRAFT(R.string.compose_title_compose);
