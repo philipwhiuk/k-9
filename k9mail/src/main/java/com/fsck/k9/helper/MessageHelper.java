@@ -90,8 +90,8 @@ public class MessageHelper {
         target.uri = message.getUri();
     }
 
-    public CharSequence getDisplayName(Account account, Address[] fromAddrs, Address[] toAddrs) {
-        final Contacts contactHelper = K9.showContactName() ? Contacts.getInstance(mContext) : null;
+    public CharSequence getDisplayName(Account account, Address[] fromAddrs, Address[] toAddrs, boolean canUseContacts) {
+        final Contacts contactHelper = K9.showContactName() && canUseContacts ? Contacts.getInstance(mContext) : null;
 
         CharSequence displayName;
         if (fromAddrs.length > 0 && account.isAnIdentity(fromAddrs[0])) {

@@ -258,12 +258,22 @@ public class MessageViewFragment extends Fragment implements ConfirmationDialogF
     }
 
     private void displayHeaderForLoadingMessage(LocalMessage message) {
-        mMessageView.setHeaders(message, mAccount);
+        setHeadersOnMessage(message, mAccount);
         if (K9.isOpenPgpProviderConfigured()) {
             mMessageView.getMessageHeaderView().setCryptoStatusLoading();
         }
         displayMessageSubject(getSubjectForMessage(message));
         mFragmentListener.updateMenu();
+    }
+
+    private void setHeadersOnMessage(LocalMessage message, Account account) {
+        boolean canUseContacts = true;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+                && this.getActivity().checkSelfPermission(Manifest.permission.READ_CONTACTS)
+                != PackageManager.PERMISSION_GRANTED) {
+            canUseContacts = false;
+        }
+        mMessageView.setHeaders(message, account, canUseContacts);
     }
 
     /**
@@ -354,7 +364,7 @@ public class MessageViewFragment extends Fragment implements ConfirmationDialogF
             boolean newState = !mMessage.isSet(Flag.FLAGGED);
             mController.setFlag(mAccount, mMessage.getFolder().getName(),
                     Collections.singletonList(mMessage), Flag.FLAGGED, newState);
-            mMessageView.setHeaders(mMessage, mAccount);
+            setHeadersOnMessage(mMessage, mAccount);
         }
     }
 
@@ -488,7 +498,7 @@ public class MessageViewFragment extends Fragment implements ConfirmationDialogF
         if (mMessage != null) {
             mController.setFlag(mAccount, mMessage.getFolder().getName(),
                     Collections.singletonList(mMessage), Flag.SEEN, !mMessage.isSet(Flag.SEEN));
-            mMessageView.setHeaders(mMessage, mAccount);
+            setHeadersOnMessage(mMessage, mAccount);
             String subject = mMessage.getSubject();
             displayMessageSubject(subject);
             mFragmentListener.updateMenu();
