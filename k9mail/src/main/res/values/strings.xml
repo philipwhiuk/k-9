@@ -5,26 +5,29 @@
     <!-- This should make it easier for forks to change the branding -->
 
     <!-- Used in AndroidManifest.xml -->
-    <string name="app_name">K-9 Mail</string>
+    <string name="app_name">K2 Mail</string>
 
-    <string name="shortcuts_title">K-9 Accounts</string>
-    <string name="unread_widget_label">K-9 Unread</string>
+    <string name="shortcuts_title">K2 Accounts</string>
+    <string name="unread_widget_label">K2 Unread</string>
 
-    <string name="remote_control_label">K-9 Mail remote control</string>
+    <string name="remote_control_label">K2 Mail remote control</string>
     <string name="remote_control_desc">Allows this application to control K-9 Mail activities and settings.</string>
 
 
     <!-- Used in the about dialog -->
-    <string name="app_authors">Google, The K-9 Dog Walkers.</string>
-    <string name="app_copyright_fmt">Copyright 2008-<xliff:g>%s</xliff:g> The K-9 Dog Walkers. Portions Copyright 2006-<xliff:g>%s</xliff:g> the Android Open Source Project.</string>
+    <string name="app_authors">Google, The K-9 Dog Walkers, K2 Mail Developers.</string>
+    <string name="app_copyright_fmt">
+        Copyright 2018-<xliff:g>%s</xliff:g> K2 Mail Developers.
+        Portions Copyright 2008-<xliff:g>%s</xliff:g> The K-9 Dog Walkers.
+        Portions Copyright 2006-<xliff:g>%s</xliff:g> the Android Open Source Project.</string>
     <string name="app_license">Licensed under the Apache License, Version 2.0.</string>
 
 
     <!-- Welcome message -->
-    <string name="welcome_message_title">Welcome to K-9 Mail</string>
+    <string name="welcome_message_title">Welcome to K2 Mail</string>
     <string name="accounts_welcome"><![CDATA[
 <p>
-K-9 Mail is a powerful free email client for Android.
+K2 Mail is a powerful free email client for Android.
 </p><p>
 Its improved features include:
 </p>
@@ -45,21 +48,18 @@ Its improved features include:
   <li>…and more</li>
 </ul>
 <p>
-Please note that K-9 does not support most free Hotmail accounts and, like many mail clients, has
-some quirks when talking to Microsoft Exchange.
-</p><p>
-Please submit bug reports, contribute new features and ask questions at
-<a href="https://github.com/k9mail/k-9/">https://github.com/k9mail/k-9/</a>.
+Please submit bug reports, contribute new features and ask questions to
+<a href="https://github.com/philipwhiuk/k-9/">the K2 GitHub project</a>.
 </p>
     ]]></string>
 
 
     <!-- Default signature -->
-    <string name="default_signature">-- \nSent from my Android device with K-9 Mail. Please excuse my brevity.</string>
+    <string name="default_signature">-- \nSent from my Android device with K2 Mail.</string>
 
 
     <!-- General strings that include the app name -->
-    <string name="account_delete_dlg_instructions_fmt">The account \"<xliff:g id="account">%s</xliff:g>\" will be removed from K-9 Mail.</string>
+    <string name="account_delete_dlg_instructions_fmt">The account \"<xliff:g id="account">%s</xliff:g>\" will be removed from K2 Mail.</string>
     <string name="account_recreate_dlg_instructions_fmt">All local data for \"<xliff:g id="account">%s</xliff:g>\" will be removed. Account settings will be retained.</string>
     <string name="account_clear_dlg_instructions_fmt">Local copies of messages in \"<xliff:g id="account">%s</xliff:g>\" will be removed. Account settings will be retained.</string>
 
