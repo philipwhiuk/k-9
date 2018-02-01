@@ -4,7 +4,8 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
   <xsl:template match="/changelog">
     <html>
       <body>
-        <h2><img src="https://raw.githubusercontent.com/k9mail/k-9/master/k9mail/src/main/res/drawable-hdpi/icon.png"/><a href="https://k9mail.github.io/">K-9 Mail</a> Change Log</h2>
+        <h2><img src="https://raw.githubusercontent.com/philipwhiuk/k2/master/k9mail/src/main/res/drawable/icon.png"/>
+          <a href="https://philipwhiuk.github.io/k2/">K2 Mail</a> Change Log</h2>
         <xsl:for-each select="release">
           <h3>
             <xsl:value-of select="./@version" />

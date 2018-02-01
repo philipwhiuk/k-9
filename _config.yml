@@ -1,1 +1,10 @@
 theme: jekyll-theme-modernist
+url: https://philipwhiuk.github.io/k2/
+title: K2 Mail
+description: "K2 Mail is an open source email client"
+
+markdown_ext: "markdown,mkdown,mkdn,mkd,md"
+markdown:    kramdown
+
+gems:
+  - jekyll-feed

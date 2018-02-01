@@ -28,3 +28,7 @@ build.xml
 proguard-project.txt
 .idea/
 *.iml
+_site/
+.sass-cache/
+.jekyll-cache/
+.jekyll-metadata
