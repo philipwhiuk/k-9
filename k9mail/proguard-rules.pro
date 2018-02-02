@@ -16,6 +16,7 @@
 
 -dontwarn okio.**
 -dontwarn com.squareup.moshi.**
+-dontwarn biweekly.io.**
 
 # Project specific rules
 -dontnote com.fsck.k9.PRNGFixes
