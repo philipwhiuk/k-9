@@ -7,8 +7,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.graphics.Typeface;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.SpannableString;
@@ -268,8 +271,8 @@ public class MessageHeader extends LinearLayout implements OnClickListener, OnLo
 
     }
 
-    public void populate(final Message message, final Account account) {
-        final Contacts contacts = K9.showContactName() ? mContacts : null;
+    public void populate(final Message message, final Account account, boolean canUseContacts) {
+        final Contacts contacts = K9.showContactName() && canUseContacts ? mContacts : null;
         final CharSequence from = MessageHelper.toFriendly(message.getFrom(), contacts);
         final CharSequence to = MessageHelper.toFriendly(message.getRecipients(Message.RecipientType.TO), contacts);
         final CharSequence cc = MessageHelper.toFriendly(message.getRecipients(Message.RecipientType.CC), contacts);
