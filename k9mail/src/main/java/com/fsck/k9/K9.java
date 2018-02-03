@@ -26,6 +26,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.StrictMode;
+import android.util.Log;
 
 import com.fsck.k9.Account.SortType;
 import com.fsck.k9.activity.MessageCompose;
@@ -555,7 +556,7 @@ public class K9 extends Application {
         checkCachedDatabaseVersion();
 
         Preferences prefs = Preferences.getPreferences(this);
-        loadPrefs(prefs);
+        loadPrefs(prefs, this.getApplicationContext());
 
         /*
          * We have to give MimeMessage a temp directory because File.createTempFile(String, String)
@@ -688,9 +689,9 @@ public class K9 extends Application {
      *
      * @param prefs Preferences to load
      */
-    public static void loadPrefs(Preferences prefs) {
+    public static void loadPrefs(Preferences prefs, Context context) {
         Storage storage = prefs.getStorage();
-        setDebug(storage.getBoolean("enableDebugLogging", BuildConfig.DEVELOPER_MODE));
+        setDebug(context, Log.WARN, storage.getBoolean("enableDebugLogging", BuildConfig.DEVELOPER_MODE));
         DEBUG_SENSITIVE = storage.getBoolean("enableSensitiveLogging", false);
         animations = storage.getBoolean("animations", true);
         gesturesEnabled = storage.getBoolean("gesturesEnabled", false);
@@ -1013,9 +1014,9 @@ public class K9 extends Application {
         return quietTimeChecker.isQuietTime();
     }
 
-    public static void setDebug(boolean debug) {
+    public static void setDebug(Context context, int fileLogPriority, boolean debug) {
         K9.DEBUG = debug;
-        updateLoggingStatus();
+        updateLoggingStatus(context, fileLogPriority);
     }
 
     public static boolean isDebug() {
@@ -1431,8 +1432,9 @@ public class K9 extends Application {
         }
     }
 
-    private static void updateLoggingStatus() {
+    private static void updateLoggingStatus(Context context, int fileLogPriority) {
         Timber.uprootAll();
+        Timber.plant(new FileLoggingTree(context, fileLogPriority));
         boolean enableDebugLogging = BuildConfig.DEBUG || DEBUG;
         if (enableDebugLogging) {
             Timber.plant(new DebugTree());

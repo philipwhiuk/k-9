@@ -21,6 +21,7 @@ import android.preference.Preference;
 import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceScreen;
 import android.text.TextUtils;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.fsck.k9.K9;
@@ -560,7 +561,7 @@ public class Prefs extends K9PreferenceActivity {
         if (!K9.isDebug() && mDebugLogging.isChecked()) {
             Toast.makeText(this, R.string.debug_logging_enabled, Toast.LENGTH_LONG).show();
         }
-        K9.setDebug(mDebugLogging.isChecked());
+        K9.setDebug(this.getApplicationContext(), Log.WARN, mDebugLogging.isChecked());
         K9.DEBUG_SENSITIVE = mSensitiveLogging.isChecked();
         K9.setHideUserAgent(mHideUserAgent.isChecked());
         K9.setHideTimeZone(mHideTimeZone.isChecked());

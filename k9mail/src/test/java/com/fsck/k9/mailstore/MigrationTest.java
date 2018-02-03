@@ -11,6 +11,7 @@ import java.util.Collections;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import com.fsck.k9.Account;
 import com.fsck.k9.K9;
@@ -36,13 +37,13 @@ import org.robolectric.shadows.ShadowSQLiteConnection;
 @RunWith(K9RobolectricTestRunner.class)
 public class MigrationTest {
 
-    Account account;
-    File databaseFile;
-    File attachmentDir;
+    private Account account;
+    private File databaseFile;
+    private File attachmentDir;
 
     @Before
     public void setUp() throws Exception {
-        K9.setDebug(true);
+        K9.setDebug(RuntimeEnvironment.application, Log.ERROR, true);
         ShadowLog.stream = System.out;
         ShadowSQLiteConnection.reset();
 
