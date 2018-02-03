@@ -56,7 +56,7 @@ public class ActivityListener extends SimpleMessagingListener {
                         nextPollTime, System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS, 0);
                 return context.getString(R.string.status_next_poll, relativeTimeSpanString);
             }
-        } else if (K9.isDebug() && MailService.isSyncDisabled()) {
+        } else if (MailService.isSyncDisabled()) {
             if (MailService.hasNoConnectivity()) {
                 return context.getString(R.string.status_no_network);
             } else if (MailService.isSyncNoBackground()) {
@@ -68,8 +68,6 @@ public class ActivityListener extends SimpleMessagingListener {
             } else {
                 return context.getString(R.string.status_syncing_off);
             }
-        } else if (MailService.isSyncDisabled()) {
-            return context.getString(R.string.status_syncing_off);
         } else {
             return "";
         }
