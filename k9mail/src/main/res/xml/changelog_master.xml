@@ -8,6 +8,17 @@
      They are automatically updated with "ant bump-version".
 -->
 <changelog>
+    <release version="6.0.0" versioncode="26000">
+        <change>K-2 Mail first release</change>
+        <change>Using AppCompat theming</change>
+        <change>External storage runtime permissions</change>
+        <change>Contacts runtime permissions</change>
+        <change>Internal refactoring of MessagingController</change>
+        <change>Modernization of POP3 implementation</change>
+        <change>Adding iCal/ICS attachment handling</change>
+        <change>Improving encryption error handling</change>
+        <change>Adding Reply-To-List option</change>
+    </release>
     <release version="5.500" versioncode="23700">
         <change>Import/Export maintain account ordering</change>
         <change>Improvements to HTML sanitisation mechanism</change>
