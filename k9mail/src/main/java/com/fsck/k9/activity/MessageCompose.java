@@ -1261,8 +1261,10 @@ public class MessageCompose extends K9Activity implements OnClickListener,
         switch (action) {
             case REPLY_LIST:
                 replyType = ReplyType.REPLY_LIST;
+                break;
             case REPLY_ALL:
                 replyType = ReplyType.REPLY_ALL;
+                break;
             default:
             case REPLY:
                 replyType = ReplyType.REPLY;
