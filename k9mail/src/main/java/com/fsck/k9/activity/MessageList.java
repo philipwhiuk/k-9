@@ -19,6 +19,8 @@ import android.support.v7.app.ActionBar;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
+
+import com.fsck.k9.activity.compose.ReplyType;
 import timber.log.Timber;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -887,6 +889,10 @@ public class MessageList extends K9Activity implements MessageListFragmentListen
                 messageViewFragment.onReply();
                 return true;
             }
+            case R.id.reply_list: {
+                mMessageViewFragment.onReplyList();
+                return true;
+            }
             case R.id.reply_all: {
                 messageViewFragment.onReplyAll();
                 return true;
@@ -1266,7 +1272,17 @@ public class MessageList extends K9Activity implements MessageListFragmentListen
 
     @Override
     public void onReply(MessageReference messageReference, Parcelable decryptionResultForReply) {
-        MessageActions.actionReply(this, messageReference, false, decryptionResultForReply);
+        MessageActions.actionReply(this, messageReference, ReplyType.REPLY, decryptionResultForReply);
+    }
+
+    @Override
+    public void onReplyList(MessageReference messageReference) {
+        onReplyList(messageReference, null);
+    }
+
+    @Override
+    public void onReplyList(MessageReference messageReference, Parcelable decryptionResultForReply) {
+        MessageActions.actionReply(this, messageReference, ReplyType.REPLY_LIST, decryptionResultForReply);
     }
 
     @Override
@@ -1276,7 +1292,7 @@ public class MessageList extends K9Activity implements MessageListFragmentListen
 
     @Override
     public void onReplyAll(MessageReference messageReference, Parcelable decryptionResultForReply) {
-        MessageActions.actionReply(this, messageReference, true, decryptionResultForReply);
+        MessageActions.actionReply(this, messageReference, ReplyType.REPLY_ALL, decryptionResultForReply);
     }
 
     @Override

@@ -92,6 +92,7 @@ Please submit bug reports, contribute new features and ask questions to
 
     <string name="compose_title_compose">Compose</string>
     <string name="compose_title_reply">Reply</string>
+    <string name="compose_title_reply_list">Reply to list</string>
     <string name="compose_title_reply_all">Reply all</string>
     <string name="compose_title_forward">Forward</string>
     <string name="compose_title_forward_as_attachment">Forward as attachment</string>
@@ -125,6 +126,7 @@ Please submit bug reports, contribute new features and ask questions to
     <string name="deselect_action">Deselect</string>
     <string name="reply_action">Reply</string>
     <string name="reply_all_action">Reply all</string>
+    <string name="reply_list_action">Reply to list</string>
     <string name="delete_action">Delete</string>
     <string name="archive_action">Archive</string>
     <string name="spam_action">Spam</string>

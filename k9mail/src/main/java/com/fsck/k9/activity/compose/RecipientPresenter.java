@@ -25,6 +25,7 @@ import com.fsck.k9.Account;
 import com.fsck.k9.Identity;
 import com.fsck.k9.K9;
 import com.fsck.k9.R;
+import com.fsck.k9.activity.MessageCompose.Action;
 import com.fsck.k9.activity.compose.ComposeCryptoStatus.AttachErrorState;
 import com.fsck.k9.activity.compose.ComposeCryptoStatus.ComposeCryptoStatusBuilder;
 import com.fsck.k9.activity.compose.ComposeCryptoStatus.SendErrorState;
@@ -161,10 +162,19 @@ public class RecipientPresenter implements PermissionPingCallback {
         return false;
     }
 
-    public void initFromReplyToMessage(Message message, boolean isReplyAll) {
-        ReplyToAddresses replyToAddresses = isReplyAll ?
-                replyToParser.getRecipientsToReplyAllTo(message, account) :
-                replyToParser.getRecipientsToReplyTo(message, account);
+    public void initFromReplyToMessage(Message message, ReplyType replyType) {
+        ReplyToAddresses replyToAddresses;
+        switch (replyType) {
+            case REPLY_LIST:
+                replyToAddresses = replyToParser.getRecipientsToReplyListTo(message, account);
+                break;
+            case REPLY_ALL:
+                replyToAddresses = replyToParser.getRecipientsToReplyAllTo(message, account);
+                break;
+            default:
+            case REPLY:
+                replyToAddresses = replyToParser.getRecipientsToReplyTo(message, account);
+        }
 
         addToAddresses(replyToAddresses.to);
         addCcAddresses(replyToAddresses.cc);
