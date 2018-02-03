@@ -1319,4 +1319,10 @@ Please submit bug reports, contribute new features and ask questions to
 
     <string name="message_view_status_calendar_not_saved">Unable to save attachment to SD card.</string>
     <string name="dialog_calendar_progress_title">Downloading calendar</string>
+
+    <!-- Email Priority -->
+    <string name="set_importance">Set Importance</string>
+    <string name="importance_high">High</string>
+    <string name="importance_normal">Normal</string>
+    <string name="importance_low">Low</string>
 </resources>
