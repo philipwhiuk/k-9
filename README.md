@@ -1,4 +1,5 @@
 # K2 Mail
+[![Build Status](https://travis-ci.org/philipwhiuk/k2.svg?branch=master)](https://travis-ci.org/philipwhiuk/k2)
 
 K2 Mail is an open-source email client for Android.
 
