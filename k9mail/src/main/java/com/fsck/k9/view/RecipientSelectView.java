@@ -350,7 +350,7 @@ public class RecipientSelectView extends TokenCompleteTextView<Recipient> implem
             case LOADER_ID_FILTERING: {
                 String query = args != null && args.containsKey(ARG_QUERY) ? args.getString(ARG_QUERY) : "";
                 adapter.setHighlight(query);
-                return new RecipientLoader(getContext(), cryptoProvider, query);
+                return new RecipientLoader(getContext(), cryptoProvider, query, K9.canUseContacts(getContext()));
             }
             case LOADER_ID_ALTERNATES: {
                 Uri contactLookupUri = alternatesPopupRecipient.getContactLookupUri();

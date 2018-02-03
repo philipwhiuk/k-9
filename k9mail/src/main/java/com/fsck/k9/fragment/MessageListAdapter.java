@@ -156,14 +156,8 @@ public class MessageListAdapter extends CursorAdapter {
         boolean toMe = fragment.messageHelper.toMe(account, toAddrs);
         boolean ccMe = fragment.messageHelper.toMe(account, ccAddrs);
 
-        boolean canUseContacts = true;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
-                && fragment.getActivity().checkSelfPermission(Manifest.permission.READ_CONTACTS)
-                != PackageManager.PERMISSION_GRANTED) {
-            canUseContacts = false;
-        }
-
-        CharSequence displayName = fragment.messageHelper.getDisplayName(account, fromAddrs, toAddrs, canUseContacts);
+        CharSequence displayName = fragment.messageHelper.getDisplayName(account, fromAddrs, toAddrs,
+                K9.canUseContacts(fragment.getActivity()));
         CharSequence displayDate = DateUtils.getRelativeTimeSpanString(context, cursor.getLong(DATE_COLUMN));
 
         Address counterpartyAddress = fetchCounterPartyAddress(fromMe, toAddrs, ccAddrs, fromAddrs);
@@ -290,7 +284,8 @@ public class MessageListAdapter extends CursorAdapter {
                      * doesn't reset the padding, so we do it ourselves.
                      */
             holder.contactBadge.setPadding(0, 0, 0, 0);
-            fragment.contactsPictureLoader.loadContactPicture(counterpartyAddress, holder.contactBadge);
+            fragment.contactsPictureLoader.loadContactPicture(counterpartyAddress, holder.contactBadge,
+                    K9.canUseContacts(fragment.getActivity()));
         } else {
             holder.contactBadge.assignContactUri(null);
             holder.contactBadge.setImageResource(R.drawable.ic_contact_picture);

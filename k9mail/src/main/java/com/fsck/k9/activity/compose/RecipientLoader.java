@@ -89,15 +89,17 @@ public class RecipientLoader extends AsyncTaskLoader<List<Recipient>> {
 
     private List<Recipient> cachedRecipients;
     private ForceLoadContentObserver observerContact, observerKey;
+    private boolean canUseContacts = false;
 
 
-    public RecipientLoader(Context context, String cryptoProvider, String query) {
+    public RecipientLoader(Context context, String cryptoProvider, String query, boolean canUseContacts) {
         super(context);
         this.query = query;
         this.lookupKeyUri = null;
         this.addresses = null;
         this.contactUri = null;
         this.cryptoProvider = cryptoProvider;
+        this.canUseContacts = canUseContacts;
 
         contentResolver = context.getContentResolver();
     }
@@ -134,10 +136,13 @@ public class RecipientLoader extends AsyncTaskLoader<List<Recipient>> {
         } else if (contactUri != null) {
             fillContactDataFromEmailContentUri(contactUri, recipients, recipientMap);
         } else if (query != null) {
-            fillContactDataFromQuery(query, recipients, recipientMap);
-
+            if (canUseContacts) {
+                fillContactDataFromQuery(query, recipients, recipientMap);
+            }
             if (cryptoProvider != null) {
                 fillContactDataFromCryptoProvider(query, recipients, recipientMap);
+            } else {
+                Timber.v("Unoptimised - attempting to query with neither contacts permission or crypto provider");
             }
         } else if (lookupKeyUri != null) {
             fillContactDataFromLookupKey(lookupKeyUri, recipients, recipientMap);

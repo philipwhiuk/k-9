@@ -34,6 +34,7 @@ import com.bumptech.glide.load.resource.file.FileToStreamDecoder;
 import com.bumptech.glide.load.resource.transcode.BitmapToGlideDrawableTranscoder;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+import com.fsck.k9.K9;
 import com.fsck.k9.helper.Contacts;
 import com.fsck.k9.mail.Address;
 import com.fsck.k9.view.RecipientSelectView.Recipient;
@@ -113,8 +114,8 @@ public class ContactPictureLoader {
 
     }
 
-    public void loadContactPicture(final Address address, final ImageView imageView) {
-        Uri photoUri = mContactsHelper.getPhotoUri(address.getAddress());
+    public void loadContactPicture(final Address address, final ImageView imageView, boolean canUseContacts) {
+        Uri photoUri = canUseContacts ? mContactsHelper.getPhotoUri(address.getAddress()) : null;
         loadContactPicture(photoUri, address, imageView);
     }
 

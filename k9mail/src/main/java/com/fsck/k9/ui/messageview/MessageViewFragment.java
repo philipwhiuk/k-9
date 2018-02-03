@@ -273,13 +273,7 @@ public class MessageViewFragment extends Fragment implements ConfirmationDialogF
     }
 
     private void setHeadersOnMessage(LocalMessage message, Account account) {
-        boolean canUseContacts = true;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
-                && this.getActivity().checkSelfPermission(Manifest.permission.READ_CONTACTS)
-                != PackageManager.PERMISSION_GRANTED) {
-            canUseContacts = false;
-        }
-        mMessageView.setHeaders(message, account, canUseContacts);
+        mMessageView.setHeaders(message, account, K9.canUseContacts(this.getActivity()));
     }
 
     /**
