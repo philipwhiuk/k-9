@@ -62,7 +62,7 @@ android {
         versionName '6.0.0-SNAPSHOT'
 
         minSdkVersion 15
-        targetSdkVersion 22
+        targetSdkVersion 23
 
         generatedDensities = ['mdpi', 'hdpi', 'xhdpi']
 
