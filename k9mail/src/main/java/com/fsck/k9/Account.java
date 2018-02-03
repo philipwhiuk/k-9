@@ -97,6 +97,10 @@ public class Account implements BaseAccount, StoreConfig {
         }
     }
 
+    public static enum ResizeFactor {
+        FULL_SIZE, HALF_SIZE, QUARTER_SIZE
+    }
+
     public static final MessageFormat DEFAULT_MESSAGE_FORMAT = MessageFormat.HTML;
     public static final boolean DEFAULT_MESSAGE_FORMAT_AUTO = false;
     public static final boolean DEFAULT_MESSAGE_READ_RECEIPT = false;
@@ -107,6 +111,9 @@ public class Account implements BaseAccount, StoreConfig {
     public static final boolean DEFAULT_STRIP_SIGNATURE = true;
     public static final int DEFAULT_REMOTE_SEARCH_NUM_RESULTS = 25;
 
+    public static final boolean DEFAULT_RESIZE_ENABLED = false;
+    public static final int DEFAULT_RESIZE_FACTOR = 1;
+
     public static final String ACCOUNT_DESCRIPTION_KEY = "description";
     public static final String STORE_URI_KEY = "storeUri";
     public static final String TRANSPORT_URI_KEY = "transportUri";
@@ -114,6 +121,11 @@ public class Account implements BaseAccount, StoreConfig {
     public static final String IDENTITY_NAME_KEY = "name";
     public static final String IDENTITY_EMAIL_KEY = "email";
     public static final String IDENTITY_DESCRIPTION_KEY = "description";
+
+    public static final int RESIZE_FACTOR_NONE_SELECTED = -1;
+    public static final int RESIZE_FACTOR_ORIGINAL_SIZE_SELECTED = 0;
+    public static final int RESIZE_FACTOR_HALF_SIZE_SELECTED = 1;
+    public static final int RESIZE_FACTOR_ONE_FOURTH_SIZE_SELECTED = 2;
 
     /*
      * http://developer.android.com/design/style/color.html
@@ -209,6 +221,7 @@ public class Account implements BaseAccount, StoreConfig {
     private int maximumAutoDownloadMessageSize;
     // Tracks if we have sent a notification for this account for
     // current set of fetched messages
+
     private boolean ringNotified;
     private MessageFormat messageFormat;
     private boolean messageFormatAuto;
@@ -226,12 +239,14 @@ public class Account implements BaseAccount, StoreConfig {
     private boolean remoteSearchFullText;
     private int remoteSearchNumResults;
 
+    private boolean resizeEnabled;
+    private int resizeFactor;
+
     private ColorChip unreadColorChip;
     private ColorChip readColorChip;
 
     private ColorChip flaggedUnreadColorChip;
     private ColorChip flaggedReadColorChip;
-
 
     /**
      * Indicates whether this account is enabled, i.e. ready for use, or not.
@@ -318,10 +333,11 @@ public class Account implements BaseAccount, StoreConfig {
         allowRemoteSearch = false;
         remoteSearchFullText = false;
         remoteSearchNumResults = DEFAULT_REMOTE_SEARCH_NUM_RESULTS;
+        resizeEnabled = DEFAULT_RESIZE_ENABLED;
+        resizeFactor = DEFAULT_RESIZE_FACTOR;
         isEnabled = true;
         markMessageAsReadOnView = true;
         alwaysShowCcBcc = false;
-
         searchableFolders = Searchable.ALL;
 
         identities = new ArrayList<>();
@@ -468,6 +484,8 @@ public class Account implements BaseAccount, StoreConfig {
         remoteSearchFullText = storage.getBoolean(accountUuid + ".remoteSearchFullText", false);
         remoteSearchNumResults = storage.getInt(accountUuid + ".remoteSearchNumResults", DEFAULT_REMOTE_SEARCH_NUM_RESULTS);
 
+        resizeEnabled = storage.getBoolean(accountUuid + ".resizeEnabled", false);
+        resizeFactor = storage.getInt(accountUuid + ".resizeFactor", DEFAULT_RESIZE_FACTOR);
         isEnabled = storage.getBoolean(accountUuid + ".enabled", true);
         markMessageAsReadOnView = storage.getBoolean(accountUuid + ".markMessageAsReadOnView", true);
         alwaysShowCcBcc = storage.getBoolean(accountUuid + ".alwaysShowCcBcc", false);
@@ -733,6 +751,8 @@ public class Account implements BaseAccount, StoreConfig {
         editor.putBoolean(accountUuid + ".allowRemoteSearch", allowRemoteSearch);
         editor.putBoolean(accountUuid + ".remoteSearchFullText", remoteSearchFullText);
         editor.putInt(accountUuid + ".remoteSearchNumResults", remoteSearchNumResults);
+        editor.putBoolean(accountUuid + ".resizeEnabled", resizeEnabled);
+        editor.putInt(accountUuid + ".resizeFactor", resizeFactor);
         editor.putBoolean(accountUuid + ".enabled", isEnabled);
         editor.putBoolean(accountUuid + ".markMessageAsReadOnView", markMessageAsReadOnView);
         editor.putBoolean(accountUuid + ".alwaysShowCcBcc", alwaysShowCcBcc);
@@ -1658,6 +1678,22 @@ public class Account implements BaseAccount, StoreConfig {
 
     public void setRemoteSearchNumResults(int val) {
         remoteSearchNumResults = (val >= 0 ? val : 0);
+    }
+
+    public boolean getImageResizeEnabled() {
+        return resizeEnabled;
+    }
+
+    public void setResizeEnabled(boolean resizeEnabled) {
+        this.resizeEnabled = resizeEnabled;
+    }
+
+    public int getResizeFactor() {
+        return resizeFactor;
+    }
+
+    public void setResizeFactor(int resizeFactor) {
+        this.resizeFactor = resizeFactor;
     }
 
     public String getInboxFolderName() {

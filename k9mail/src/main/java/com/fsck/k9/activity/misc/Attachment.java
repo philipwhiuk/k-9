@@ -60,6 +60,22 @@ public class Attachment implements Parcelable {
      */
     public final String filename;
 
+    /**
+     * The resized factor.
+     *
+     * Valid iff {@link #state} is {@link LoadingState#COMPLETE}.
+     */
+
+    public float resizeFactor = 1.0f;
+
+    /**
+     * Stores whether default resized settings need to be overridden.
+     *
+     * Valid iff {@link #state} is {@link LoadingState#COMPLETE}.
+     */
+
+    public boolean overrideDefault = false;
+
     public enum LoadingState {
         URI_ONLY,
         METADATA,
@@ -123,6 +139,11 @@ public class Attachment implements Parcelable {
                 size, absolutePath);
     }
 
+    public void updateResizeInfo(float resizeFactor, boolean overrideDefault){
+        this.resizeFactor = resizeFactor;
+        this.overrideDefault = overrideDefault;
+    }
+
     // === Parcelable ===
 
     @Override
@@ -159,4 +180,9 @@ public class Attachment implements Parcelable {
             return new Attachment[size];
         }
     };
+
+    public Attachment createResizedCopy(String newFilename, long newSize){
+        return new Attachment(uri, LoadingState.COMPLETE, loaderId, contentType, name, newSize, newFilename);
+    }
+
 }

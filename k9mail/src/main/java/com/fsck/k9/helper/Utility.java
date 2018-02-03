@@ -3,13 +3,16 @@ package com.fsck.k9.helper;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.ContactsContract;
+import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextUtils;
 import timber.log.Timber;
@@ -19,8 +22,13 @@ import android.widget.TextView;
 import com.fsck.k9.ui.ContactBadge;
 import com.fsck.k9.mail.Address;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.james.mime4j.util.MimeUtil;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -43,6 +51,12 @@ public class Utility {
             Pattern.CASE_INSENSITIVE);
 
     private static Handler sMainThreadHandler;
+
+    /**
+     * The path of the temporary directory that is used to store resized image attachments.
+     * The directory is cleaned as soon as message is sent.
+     */
+    private static final String RESIZED_ATTACHMENTS_TEMPORARY_DIRECTORY = "/tempAttachments/";
 
     public static boolean arrayContains(Object[] a, Object o) {
         for (Object element : a) {
@@ -456,6 +470,48 @@ public class Utility {
 
         return null;
     }
+
+    public static String getResizedImageFile(Context context, Uri uri, float multiplier) {
+        File cacheDir = context.getCacheDir();
+        File tempAttachmentsDirectory = new File(cacheDir.getPath() + RESIZED_ATTACHMENTS_TEMPORARY_DIRECTORY);
+        tempAttachmentsDirectory.mkdirs();
+
+        File tempFile = null;
+        Bitmap bitmap = null;
+        Bitmap resized = null;
+        FileOutputStream out = null;
+        try {
+            tempFile = File.createTempFile("TempResizedAttachment", null, tempAttachmentsDirectory);
+            bitmap = MediaStore.Images.Media.getBitmap(context.getContentResolver(), uri);
+            resized = Bitmap.createScaledBitmap(bitmap, (int) (bitmap.getWidth() * multiplier), (int) (bitmap.getHeight() * multiplier), true);
+            out = new FileOutputStream(tempFile);
+            resized.compress(Bitmap.CompressFormat.PNG, 100, out);
+        } catch (IOException e) {
+            Timber.e(e, "Error while resizing image attachment");
+            return "";
+        } finally {
+            IOUtils.closeQuietly(out);
+        }
+
+        return tempFile.getAbsolutePath();
+    }
+
+    public static void clearTemporaryAttachmentsCache(Context context) {
+        File cacheDir = context.getCacheDir();
+        File tempAttachmentsDirectory = new File(cacheDir.getPath() + RESIZED_ATTACHMENTS_TEMPORARY_DIRECTORY);
+        if (tempAttachmentsDirectory.exists()) {
+            try {
+                FileUtils.cleanDirectory(tempAttachmentsDirectory);
+            } catch (IOException e) {
+                Timber.e(e, "Error occurred while cleaning temporary directory for resized attachments");
+            }
+        }
+    }
+
+    public static boolean isImage(Context context, Uri uri) {
+        return context.getContentResolver().getType(uri).contains("image");
+    }
+
 
     /**
      * @return a {@link Handler} tied to the main thread.

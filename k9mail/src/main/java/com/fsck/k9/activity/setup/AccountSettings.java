@@ -115,6 +115,8 @@ public class AccountSettings extends K9PreferenceActivity {
     private static final String PREFERENCE_CLOUD_SEARCH_ENABLED = "remote_search_enabled";
     private static final String PREFERENCE_REMOTE_SEARCH_NUM_RESULTS = "account_remote_search_num_results";
     private static final String PREFERENCE_REMOTE_SEARCH_FULL_TEXT = "account_remote_search_full_text";
+    private static final String PREFERENCE_RESIZE_ENABLED = "resize_enabled";
+    private static final String PREFERENCE_RESIZE_FACTOR = "account_attachment_resize_factor";
 
     private static final String PREFERENCE_LOCAL_STORAGE_PROVIDER = "local_storage_provider";
     private static final String PREFERENCE_CATEGORY_FOLDERS = "folders";
@@ -183,6 +185,9 @@ public class AccountSettings extends K9PreferenceActivity {
     private PreferenceScreen searchScreen;
     private CheckBoxPreference cloudSearchEnabled;
     private ListPreference remoteSearchNumResults;
+
+    private CheckBoxPreference resizeEnabled;
+    private ListPreference resizeFactor;
 
     /*
      * Temporarily removed because search results aren't displayed to the user.
@@ -516,6 +521,44 @@ public class AccountSettings extends K9PreferenceActivity {
                 }
             }
         );
+
+        resizeEnabled = (CheckBoxPreference) findPreference(PREFERENCE_RESIZE_ENABLED);
+        resizeFactor = (ListPreference) findPreference(PREFERENCE_RESIZE_FACTOR);
+        resizeEnabled.setChecked(account.getImageResizeEnabled());
+
+        int resizeFactorValue = account.getResizeFactor();
+        if (resizeFactorValue == Account.RESIZE_FACTOR_ORIGINAL_SIZE_SELECTED) {
+            resizeFactor.setValueIndex(0);
+        } else if (resizeFactorValue == Account.RESIZE_FACTOR_HALF_SIZE_SELECTED) {
+            resizeFactor.setValueIndex(1);
+        } else {
+            resizeFactor.setValueIndex(2);
+        }
+        updateResizeFactor(account.getResizeFactor());
+
+        resizeFactor.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                final String value = newValue.toString();
+                int index = resizeFactor.findIndexOfValue(value);
+                switch(index){
+                    case Account.RESIZE_FACTOR_ORIGINAL_SIZE_SELECTED :{
+                        updateResizeFactor(1);
+                        break;
+                    }
+                    case Account.RESIZE_FACTOR_HALF_SIZE_SELECTED :{
+                        updateResizeFactor(2);
+                        break;
+                    }
+                    case Account.RESIZE_FACTOR_ONE_FOURTH_SIZE_SELECTED :{
+                        updateResizeFactor(4);
+                        break;
+                    }
+                }
+                return true;
+            }
+        });
+
         //mRemoteSearchFullText = (CheckBoxPreference) findPreference(PREFERENCE_REMOTE_SEARCH_FULL_TEXT);
 
         pushPollOnConnect = (CheckBoxPreference) findPreference(PREFERENCE_PUSH_POLL_ON_CONNECT);
@@ -816,6 +859,7 @@ public class AccountSettings extends K9PreferenceActivity {
             account.setRemoteSearchNumResults(Integer.parseInt(remoteSearchNumResults.getValue()));
             //account.setRemoteSearchFullText(mRemoteSearchFullText.isChecked());
         }
+        account.setResizeEnabled(resizeEnabled.isChecked());
 
         boolean needsRefresh = account.setAutomaticCheckIntervalMinutes(Integer.parseInt(checkFrequency.getValue()));
         needsRefresh |= account.setFolderSyncMode(FolderMode.valueOf(syncMode.getValue()));
@@ -998,6 +1042,15 @@ public class AccountSettings extends K9PreferenceActivity {
 
             remoteSearchNumResults
                     .setSummary(String.format(getString(R.string.account_settings_remote_search_num_summary), maxResults));
+        }
+    }
+
+    private void updateResizeFactor(int factor) {
+        account.setResizeFactor(factor);
+        if (factor != 1) {
+            resizeFactor.setSummary(String.format(getString(R.string.account_settings_attachment_resize_factor_summary), String.valueOf(factor)));
+        } else {
+            resizeFactor.setSummary(getString(R.string.account_settings_attachment_resize_factor_summary_default));
         }
     }
 
