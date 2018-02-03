@@ -1325,4 +1325,8 @@ Please submit bug reports, contribute new features and ask questions to
     <string name="importance_high">High</string>
     <string name="importance_normal">Normal</string>
     <string name="importance_low">Low</string>
+
+    <!-- notification channel(s) -->
+    <string name="k9_channel_id" translatable="false">k9_channel</string>
+    <string name="k9_channel_description">All notifications</string>
 </resources>
