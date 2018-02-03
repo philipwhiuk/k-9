@@ -890,7 +890,7 @@ public class MessageList extends K9Activity implements MessageListFragmentListen
                 return true;
             }
             case R.id.reply_list: {
-                mMessageViewFragment.onReplyList();
+                messageViewFragment.onReplyList();
                 return true;
             }
             case R.id.reply_all: {
@@ -1631,7 +1631,6 @@ public class MessageList extends K9Activity implements MessageListFragmentListen
     @Override
     public void startIntentSenderForResult(IntentSender intent, int requestCode, Intent fillInIntent,
             int flagsMask, int flagsValues, int extraFlags) throws SendIntentException {
-        requestCode |= REQUEST_MASK_PENDING_INTENT;
         super.startIntentSenderForResult(intent, requestCode, fillInIntent, flagsMask, flagsValues, extraFlags);
     }
 
