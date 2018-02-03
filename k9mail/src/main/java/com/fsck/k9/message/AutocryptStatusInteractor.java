@@ -99,7 +99,7 @@ public class AutocryptStatusInteractor {
     }
 
     public enum RecipientAutocryptStatusType {
-        NO_RECIPIENTS (false, false, false),
+        NO_RECIPIENTS (true, false, false),
         UNAVAILABLE (false, false, false),
         DISCOURAGE_UNCONFIRMED (true, false, false),
         DISCOURAGE_CONFIRMED (true, true, false),
