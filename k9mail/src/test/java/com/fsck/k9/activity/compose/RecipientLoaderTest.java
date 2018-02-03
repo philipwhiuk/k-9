@@ -67,7 +67,7 @@ public class RecipientLoaderTest {
 
     @Test
     public void queryCryptoProvider() throws Exception {
-        RecipientLoader recipientLoader = new RecipientLoader(context, CRYPTO_PROVIDER, QUERYSTRING);
+        RecipientLoader recipientLoader = new RecipientLoader(context, CRYPTO_PROVIDER, QUERYSTRING, true);
 
         setupQueryCryptoProvider("%" + QUERYSTRING + "%", CONTACT_ADDRESS_1, CONTACT_ADDRESS_2);
 
@@ -174,7 +174,7 @@ public class RecipientLoaderTest {
 
     @Test
     public void queryContactProvider() throws Exception {
-        RecipientLoader recipientLoader = new RecipientLoader(context, CRYPTO_PROVIDER, QUERYSTRING);
+        RecipientLoader recipientLoader = new RecipientLoader(context, CRYPTO_PROVIDER, QUERYSTRING, true);
         setupContactProvider("%" + QUERYSTRING + "%", CONTACT_1);
 
         List<Recipient> recipients = recipientLoader.loadInBackground();
@@ -186,7 +186,7 @@ public class RecipientLoaderTest {
 
     @Test
     public void queryContactProvider_ignoresRecipientWithNoEmail() throws Exception {
-        RecipientLoader recipientLoader = new RecipientLoader(context, CRYPTO_PROVIDER, QUERYSTRING);
+        RecipientLoader recipientLoader = new RecipientLoader(context, CRYPTO_PROVIDER, QUERYSTRING, true);
         setupContactProvider("%" + QUERYSTRING + "%", CONTACT_NO_EMAIL);
 
         List<Recipient> recipients = recipientLoader.loadInBackground();

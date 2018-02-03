@@ -57,6 +57,6 @@ class ImapResponse extends ImapList {
 
     @Override
     public String toString() {
-        return "#" + (commandContinuationRequested ? "+" : tag) + "# " + super.toString();
+        return "#" + (commandContinuationRequested ? "+" : tag != null ? tag : "*") + "# " + super.toString();
     }
 }
