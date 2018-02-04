@@ -182,7 +182,8 @@ public class Attachment implements Parcelable {
     };
 
     public Attachment createResizedCopy(String newFilename, long newSize){
-        return new Attachment(uri, LoadingState.COMPLETE, loaderId, contentType, name, newSize, newFilename);
+        return new Attachment(uri, LoadingState.COMPLETE, loaderId, contentType, false,
+                name, newSize, newFilename);
     }
 
 }
