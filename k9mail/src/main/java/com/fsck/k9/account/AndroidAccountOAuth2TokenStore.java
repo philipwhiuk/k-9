@@ -25,7 +25,7 @@ public class AndroidAccountOAuth2TokenStore {
     private static final String GMAIL_AUTH_TOKEN_TYPE = "oauth2:https://mail.google.com/";
     private static final String GOOGLE_ACCOUNT_TYPE = "com.google";
 
-    private Map<String,String> authTokens = new HashMap<>();
+    private Map<String, String> authTokens = new HashMap<>();
     private AccountManager accountManager;
     private Oauth2PromptRequestHandler promptRequestHandler;
 
@@ -39,7 +39,7 @@ public class AndroidAccountOAuth2TokenStore {
 
     public String getToken(String username, Account account, long timeoutMillis) throws
             AuthenticationFailedException, OAuth2NeedUserPromptException {
-        if(authTokens.get(username) == null) {
+        if (authTokens.get(username) == null) {
             if (account == null) {
                 throw new AuthenticationFailedException("Account not available");
             }
@@ -54,18 +54,21 @@ public class AndroidAccountOAuth2TokenStore {
             AccountManagerFuture<Bundle> future = accountManager
                     .getAuthToken(account, GMAIL_AUTH_TOKEN_TYPE, null, false, null, null);
             Bundle bundle = future.getResult(timeoutMillis, TimeUnit.MILLISECONDS);
-            if (bundle == null)
+            if (bundle == null) {
                 throw new AuthenticationFailedException("No token provided");
+            }
             if (bundle.get(AccountManager.KEY_INTENT) != null) {
                 promptRequestHandler.handleGmailXOAuth2Intent((Intent) bundle.get(AccountManager.KEY_INTENT));
                 throw new OAuth2NeedUserPromptException();
             } else {
-                if (bundle.get(AccountManager.KEY_ACCOUNT_NAME) == null)
+                if (bundle.get(AccountManager.KEY_ACCOUNT_NAME) == null) {
                     throw new AuthenticationFailedException("No account information provided");
-                if (bundle.get(AccountManager.KEY_ACCOUNT_NAME).equals(username))
+                }
+                if (bundle.get(AccountManager.KEY_ACCOUNT_NAME).equals(username)) {
                     authTokens.put(username, bundle.get(AccountManager.KEY_AUTHTOKEN).toString());
-                else
+                } else {
                     throw new AuthenticationFailedException("Unexpected account information provided");
+                }
             }
         } catch (OAuth2NeedUserPromptException e) {
             throw e;

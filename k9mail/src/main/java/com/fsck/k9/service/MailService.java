@@ -13,6 +13,7 @@ import android.os.SystemClock;
 import com.fsck.k9.Account;
 import com.fsck.k9.Account.FolderMode;
 import com.fsck.k9.K9;
+import com.fsck.k9.K9.BackgroundOperations;
 import com.fsck.k9.Preferences;
 import com.fsck.k9.controller.MessagingController;
 import com.fsck.k9.helper.Utility;
@@ -94,7 +95,7 @@ public class MailService extends CoreService {
         final boolean hasConnectivity = Utility.hasConnectivity(getApplication());
         boolean autoSync = ContentResolver.getMasterSyncAutomatically();
 
-        K9.BACKGROUND_OPS bOps = K9.getBackgroundOps();
+        BackgroundOperations bOps = K9.getBackgroundOps();
 
         switch (bOps) {
             case NEVER:

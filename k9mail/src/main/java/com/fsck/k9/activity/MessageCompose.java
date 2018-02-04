@@ -28,7 +28,6 @@ import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.v7.app.ActionBar;
-import android.text.Html;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.TypedValue;
@@ -759,8 +758,9 @@ public class MessageCompose extends K9Activity implements OnClickListener,
         performSaveAfterChecksWithoutResizing();
     }
 
-    private void performSaveAfterChecksWithoutResizing(){
-        currentMessageBuilder = createMessageBuilder(true, attachmentPresenter.createAttachmentListWithoutResizing());
+    private void performSaveAfterChecksWithoutResizing() {
+        currentMessageBuilder = createMessageBuilder(true,
+                attachmentPresenter.createAttachmentListWithoutResizing());
         if (currentMessageBuilder != null) {
             setProgressBarIndeterminateVisibility(true);
             currentMessageBuilder.buildAsync(MessageCompose.this);
@@ -772,7 +772,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
         resizeImageAttachments.execute(true);
     }
 
-    public void performSendAfterChecksWithoutResizing(){
+    public void performSendAfterChecksWithoutResizing() {
         currentMessageBuilder = createMessageBuilder(false, attachmentPresenter.createAttachmentListWithoutResizing());
         if (currentMessageBuilder != null) {
             changesMadeSinceLastSave = false;
@@ -1257,7 +1257,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
         return super.onCreateDialog(id);
     }
 
-    public void showResizeFactorDialog(final Attachment attachment){
+    public void showResizeFactorDialog(final Attachment attachment) {
         final CharSequence[] resizeOptions = {
                 getString(R.string.account_settings_attachments_resize_factor_entry_original),
                 getString(R.string.account_settings_attachments_resize_factor_entry_half),
@@ -1280,7 +1280,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         Account.ResizeFactor factor = Account.ResizeFactor.values()[which];
-                        switch(factor) {
+                        switch (factor) {
                             case FULL_SIZE:
                                 attachment.updateResizeInfo(1.0f, true);
                                 attachmentPresenter.updateAttachmentsList(attachment);

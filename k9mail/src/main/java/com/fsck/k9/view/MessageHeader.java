@@ -7,11 +7,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import android.Manifest;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.graphics.Typeface;
-import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.SpannableString;
@@ -44,7 +41,6 @@ import com.fsck.k9.helper.Utility;
 import com.fsck.k9.mail.Address;
 import com.fsck.k9.mail.Flag;
 import com.fsck.k9.mail.Message;
-import com.fsck.k9.mail.MessagingException;
 import com.fsck.k9.mail.internet.MimeUtility;
 import com.fsck.k9.ui.messageview.OnCryptoClickListener;
 import com.fsck.k9.ui.ContactBadge;
@@ -93,7 +89,7 @@ public class MessageHeader extends LinearLayout implements OnClickListener, OnLo
         public String label;
         public String value;
 
-        public HeaderEntry(String label, String value) {
+        HeaderEntry(String label, String value) {
             this.label = label;
             this.value = value;
         }
@@ -171,7 +167,7 @@ public class MessageHeader extends LinearLayout implements OnClickListener, OnLo
             case R.id.to:
             case R.id.cc:
             case R.id.bcc: {
-                expand((TextView)view, ((TextView)view).getEllipsize() != null);
+                expand((TextView) view, ((TextView) view).getEllipsize() != null);
                 layoutChanged();
                 break;
             }
@@ -358,7 +354,7 @@ public class MessageHeader extends LinearLayout implements OnClickListener, OnLo
         mAnsweredIcon.setVisibility(message.isSet(Flag.ANSWERED) ? View.VISIBLE : View.GONE);
         mForwardedIcon.setVisibility(message.isSet(Flag.FORWARDED) ? View.VISIBLE : View.GONE);
         mFlagged.setChecked(message.isSet(Flag.FLAGGED));
-        switch(message.getImportance()) {
+        switch (message.getImportance()) {
             case HIGH:
                 mHighImportance.setVisibility(VISIBLE);
                 mLowImportance.setVisibility(GONE);
@@ -508,12 +504,12 @@ public class MessageHeader extends LinearLayout implements OnClickListener, OnLo
 
     @Override
     public void onRestoreInstanceState(Parcelable state) {
-        if(!(state instanceof SavedState)) {
+        if (!(state instanceof SavedState)) {
             super.onRestoreInstanceState(state);
             return;
         }
 
-        SavedState savedState = (SavedState)state;
+        SavedState savedState = (SavedState) state;
         super.onRestoreInstanceState(savedState.getSuperState());
 
         mSavedState = savedState;

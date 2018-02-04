@@ -9,10 +9,8 @@ import android.text.format.DateUtils;
 
 import com.fsck.k9.Account;
 import com.fsck.k9.AccountStats;
-import com.fsck.k9.K9;
 import com.fsck.k9.R;
 import com.fsck.k9.controller.MessagingControllerCommands;
-import com.fsck.k9.controller.MessagingControllerCommands.PendingCommand;
 import com.fsck.k9.controller.SimpleMessagingListener;
 import com.fsck.k9.service.MailService;
 import net.jcip.annotations.GuardedBy;

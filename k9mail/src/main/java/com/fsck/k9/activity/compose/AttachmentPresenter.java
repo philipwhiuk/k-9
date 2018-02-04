@@ -116,7 +116,7 @@ public class AttachmentPresenter {
         return false;
     }
 
-    public ArrayList<Attachment> createAttachmentListWithoutResizing(){
+    public ArrayList<Attachment> createAttachmentListWithoutResizing() {
         ArrayList<Attachment> result = new ArrayList<>();
         for (Attachment attachment : attachments.values()) {
             result.add(attachment);
@@ -406,7 +406,7 @@ public class AttachmentPresenter {
         listener.onAttachmentRemoved();
     }
 
-    public void updateAttachmentsList(Attachment attachment){
+    public void updateAttachmentsList(Attachment attachment) {
         Attachment originalAttachment = attachments.get(attachment.uri);
         originalAttachment.updateResizeInfo(attachment.resizeFactor, attachment.overrideDefault);
     }

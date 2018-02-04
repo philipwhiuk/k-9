@@ -77,6 +77,9 @@ import org.openintents.openpgp.util.OpenPgpApi.OpenPgpDataSource;
 public class LocalStore extends Store {
     static final String[] EMPTY_STRING_ARRAY = new String[0];
     static final byte[] EMPTY_BYTE_ARRAY = new byte[0];
+    private static final String INSERT_QUERY =
+            "INSERT INTO folders (name, visible_limit, top_group, display_class, " +
+                    "poll_class, notify_class, push_class, integrate) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
     /**
      * Lock objects indexed by account UUID.
@@ -398,9 +401,9 @@ public class LocalStore extends Store {
     public List<LocalFolder> getPersonalNamespaces(boolean forceListAll) throws MessagingException {
         final List<LocalFolder> folders = new LinkedList<>();
         try {
-            database.execute(false, new DbCallback < List <? extends Folder >> () {
+            database.execute(false, new DbCallback<List<? extends Folder>> () {
                 @Override
-                public List <? extends Folder > doDbWork(final SQLiteDatabase db) throws WrappedException {
+                public List<? extends Folder> doDbWork(final SQLiteDatabase db) throws WrappedException {
                     Cursor cursor = null;
 
                     try {
@@ -823,7 +826,7 @@ public class LocalStore extends Store {
             return null;
         }
 
-        Map.Entry<String,List<String>> entry = foldersAndUids.entrySet().iterator().next();
+        Map.Entry<String, List<String>> entry = foldersAndUids.entrySet().iterator().next();
         String folderName = entry.getKey();
         String uid = entry.getValue().get(0);
 
@@ -934,7 +937,7 @@ public class LocalStore extends Store {
                     }
                     folder.refresh(name, prefHolder);   // Recover settings from Preferences
 
-                    db.execSQL("INSERT INTO folders (name, visible_limit, top_group, display_class, poll_class, notify_class, push_class, integrate) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", new Object[] {
+                    db.execSQL(INSERT_QUERY, new Object[] {
                                    name,
                                    visibleLimit,
                                    prefHolder.inTopGroup ? 1 : 0,

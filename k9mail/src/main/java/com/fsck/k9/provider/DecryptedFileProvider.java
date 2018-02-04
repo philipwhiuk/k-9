@@ -34,7 +34,7 @@ public class DecryptedFileProvider extends FileProvider {
     private static final String AUTHORITY = BuildConfig.APPLICATION_ID + ".decryptedfileprovider";
     private static final String DECRYPTED_CACHE_DIRECTORY = "decrypted";
     private static final long FILE_DELETE_THRESHOLD_MILLISECONDS = 3 * 60 * 1000;
-    private static final Object cleanupReceiverMonitor = new Object();
+    private static final Object CLEANUP_RECEIVER_MONITOR = new Object();
 
 
     private static DecryptedFileProviderCleanupReceiver cleanupReceiver = null;
@@ -155,7 +155,7 @@ public class DecryptedFileProvider extends FileProvider {
             return;
         }
 
-        new AsyncTask<Void,Void,Void>() {
+        new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... voids) {
                 deleteOldTemporaryFiles(context);
@@ -167,7 +167,7 @@ public class DecryptedFileProvider extends FileProvider {
     }
 
     private static void unregisterFileCleanupReceiver(Context context) {
-        synchronized (cleanupReceiverMonitor) {
+        synchronized (CLEANUP_RECEIVER_MONITOR) {
             if (cleanupReceiver == null) {
                 return;
             }
@@ -179,7 +179,7 @@ public class DecryptedFileProvider extends FileProvider {
     }
 
     private static void registerFileCleanupReceiver(Context context) {
-        synchronized (cleanupReceiverMonitor) {
+        synchronized (CLEANUP_RECEIVER_MONITOR) {
             if (cleanupReceiver != null) {
                 return;
             }

@@ -1359,8 +1359,9 @@ public class MessageList extends K9Activity implements MessageListFragmentListen
         FragmentTransaction ft = getFragmentManager().beginTransaction();
 
         ft.replace(R.id.message_list_container, fragment);
-        if (addToBackStack)
+        if (addToBackStack) {
             ft.addToBackStack(null);
+        }
 
         messageListFragment = fragment;
 
@@ -1464,8 +1465,9 @@ public class MessageList extends K9Activity implements MessageListFragmentListen
                 menuButtonCheckMail.setActionView(null);
             }
         } else {
-            if (menuButtonCheckMail != null)
+            if (menuButtonCheckMail != null) {
                 menuButtonCheckMail.setActionView(null);
+            }
             if (enable) {
                 actionBarProgress.setVisibility(ProgressBar.VISIBLE);
             } else {

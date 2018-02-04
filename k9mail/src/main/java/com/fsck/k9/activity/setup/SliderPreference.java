@@ -33,7 +33,8 @@ import android.support.annotation.ArrayRes;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.SeekBar;
-import com.fsck.k9.*;
+
+import com.fsck.k9.R;
 
 
 /**
@@ -43,7 +44,7 @@ public class SliderPreference extends DialogPreference {
     private static final String STATE_KEY_SUPER = "super";
     private static final String STATE_KEY_SEEK_BAR_VALUE = "seek_bar_value";
 
-    protected final static int SEEKBAR_RESOLUTION = 10000;
+    protected static final int SEEKBAR_RESOLUTION = 10000;
 
     protected float mValue;
     protected int mSeekBarValue;

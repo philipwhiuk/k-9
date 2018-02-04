@@ -7,8 +7,6 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-import com.fsck.k9.activity.setup.AccountSetupPresenter;
-
 import timber.log.Timber;
 
 /**
@@ -18,7 +16,7 @@ abstract class OAuth2WebViewClient extends WebViewClient {
     private Oauth2PromptRequestHandler requestHandler;
     private OAuth2ErrorHandler errorHandler;
 
-    public OAuth2WebViewClient(Oauth2PromptRequestHandler requestHandler) {
+    OAuth2WebViewClient(Oauth2PromptRequestHandler requestHandler) {
         this.requestHandler = requestHandler;
     }
 

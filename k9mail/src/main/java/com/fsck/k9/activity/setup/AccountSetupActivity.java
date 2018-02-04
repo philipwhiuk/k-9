@@ -38,24 +38,26 @@ import android.text.TextWatcher;
 import android.text.method.DigitsKeyListener;
 import android.webkit.CookieManager;
 import android.webkit.WebView;
-import android.widget.AdapterView;
-import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.EditText;
-import android.widget.Spinner;
-import android.widget.TextView;
 
 import com.fsck.k9.mail.ServerSettings.Type;
-import com.fsck.k9.service.StorageGoneReceiver;
 import com.fsck.k9.view.ClientCertificateSpinner;
 
 import me.zhanghai.android.materialprogressbar.MaterialProgressBar;
 import timber.log.Timber;
 
 import android.view.View.OnClickListener;
-import android.widget.*;
+import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.EditText;
+import android.widget.RadioGroup;
+import android.widget.Spinner;
+import android.widget.TextView;
+import android.widget.Toast;
+import android.widget.ViewFlipper;
 
 import com.fsck.k9.helper.Utility;
 import com.fsck.k9.mail.AuthType;
@@ -252,7 +254,9 @@ public class AccountSetupActivity extends AppCompatActivity implements AccountSe
     }
 
     private void onInputChangedInBasics() {
-        if (presenter == null) return;
+        if (presenter == null) {
+            return;
+        }
 
         presenter.onInputChangedInBasics(emailView.getText().toString(), passwordView.getText().toString());
     }
@@ -405,7 +409,9 @@ public class AccountSetupActivity extends AppCompatActivity implements AccountSe
     }
 
     private void setSelection(int position) {
-        if (position == -1) return;
+        if (position == -1) {
+            return;
+        }
 
         this.position = position;
         flipper.setDisplayedChild(position);
@@ -514,11 +520,15 @@ public class AccountSetupActivity extends AppCompatActivity implements AccountSe
     }
 
     private void onInputChangedInIncoming() {
-        if (presenter == null) return;
+        if (presenter == null) {
+            return;
+        }
 
         final AuthType selectedAuthType = getSelectedAuthType();
         final ConnectionSecurity selectedSecurity = getSelectedSecurity();
-        if (selectedAuthType == null || selectedSecurity == null) return;
+        if (selectedAuthType == null || selectedSecurity == null) {
+            return;
+        }
 
         presenter.onInputChangedInIncoming(clientCertificateSpinner.getAlias(),
                 serverView.getText().toString(),
@@ -1027,7 +1037,9 @@ public class AccountSetupActivity extends AppCompatActivity implements AccountSe
      * that this is the last thing called after an input change.)
      */
     private void onInputChangedInOutgoing() {
-        if (presenter == null) return;
+        if (presenter == null) {
+            return;
+        }
 
         presenter.onInputChangedInOutgoing(clientCertificateSpinner.getAlias(),
                 serverView.getText().toString(),
@@ -1084,13 +1096,17 @@ public class AccountSetupActivity extends AppCompatActivity implements AccountSe
 
     private AuthType getSelectedAuthType() {
         AuthTypeHolder holder = (AuthTypeHolder) authTypeView.getSelectedItem();
-        if (holder == null) return null;
+        if (holder == null) {
+            return null;
+        }
         return holder.getAuthType();
     }
 
     private ConnectionSecurity getSelectedSecurity() {
         ConnectionSecurityHolder holder = (ConnectionSecurityHolder) securityTypeView.getSelectedItem();
-        if (holder == null) return null;
+        if (holder == null) {
+            return null;
+        }
         return holder.getConnectionSecurity();
     }
 

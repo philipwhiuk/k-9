@@ -25,7 +25,6 @@ import com.fsck.k9.Account;
 import com.fsck.k9.Identity;
 import com.fsck.k9.K9;
 import com.fsck.k9.R;
-import com.fsck.k9.activity.MessageCompose.Action;
 import com.fsck.k9.activity.compose.ComposeCryptoStatus.AttachErrorState;
 import com.fsck.k9.activity.compose.ComposeCryptoStatus.ComposeCryptoStatusBuilder;
 import com.fsck.k9.activity.compose.ComposeCryptoStatus.SendErrorState;
@@ -417,7 +416,7 @@ public class RecipientPresenter implements PermissionPingCallback {
 
         final String[] recipientAddresses = composeCryptoStatus.getRecipientAddresses();
 
-        new AsyncTask<Void,Void,RecipientAutocryptStatus>() {
+        new AsyncTask<Void, Void, RecipientAutocryptStatus>() {
             @Override
             protected RecipientAutocryptStatus doInBackground(Void... voids) {
                 if (cryptoProviderState != CryptoProviderState.OK) {

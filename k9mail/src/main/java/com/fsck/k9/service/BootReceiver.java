@@ -7,6 +7,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.Uri;
+
+import com.fsck.k9.K9.BackgroundOperations;
 import timber.log.Timber;
 
 import com.fsck.k9.K9;
@@ -39,8 +41,8 @@ public class BootReceiver extends CoreReceiver {
             MailService.connectivityChange(context, tmpWakeLockId);
             tmpWakeLockId = null;
         } else if ("com.android.sync.SYNC_CONN_STATUS_CHANGED".equals(action)) {
-            K9.BACKGROUND_OPS bOps = K9.getBackgroundOps();
-            if (bOps == K9.BACKGROUND_OPS.WHEN_CHECKED_AUTO_SYNC) {
+            BackgroundOperations bOps = K9.getBackgroundOps();
+            if (bOps == BackgroundOperations.WHEN_CHECKED_AUTO_SYNC) {
                 MailService.actionReset(context, tmpWakeLockId);
                 tmpWakeLockId = null;
             }

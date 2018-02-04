@@ -19,7 +19,7 @@ class HttpUriParser implements UriParser {
     private static final Pattern DOMAIN_PATTERN =
             Pattern.compile("[\\da-z](?:[\\da-z-]*[\\da-z])*(?:\\.[\\da-z](?:[\\da-z-]*[\\da-z])*)*(?::(\\d{0,5}))?",
                     Pattern.CASE_INSENSITIVE);
-    private static final Pattern IPv4_PATTERN =
+    private static final Pattern IPV4_PATTERN =
             Pattern.compile("(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})(:(\\d{0,5}))?");
 
 
@@ -131,7 +131,7 @@ class HttpUriParser implements UriParser {
     }
 
     private int tryMatchIpv4Address(String text, int startPos, boolean portAllowed) {
-        Matcher matcher = IPv4_PATTERN.matcher(text);
+        Matcher matcher = IPV4_PATTERN.matcher(text);
         if (!matcher.find(startPos) || matcher.start() != startPos) {
             return startPos;
         }

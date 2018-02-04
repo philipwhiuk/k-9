@@ -89,7 +89,7 @@ class StoreSchemaDefinition implements LockableDatabase.SchemaDefinition {
                 "poll_class TEXT, " +
                 "push_class TEXT, " +
                 "display_class TEXT, " +
-                "notify_class TEXT default '"+ Folder.FolderClass.INHERITED.name() + "', " +
+                "notify_class TEXT default '" + Folder.FolderClass.INHERITED.name() + "', " +
                 "more_messages TEXT default \"unknown\"" +
                 ")");
 
@@ -113,7 +113,7 @@ class StoreSchemaDefinition implements LockableDatabase.SchemaDefinition {
                 "message_id TEXT, " +
                 "preview_type TEXT default \"none\", " +
                 "preview TEXT, " +
-                "mime_type TEXT, "+
+                "mime_type TEXT, " +
                 "normalized_subject_hash INTEGER, " +
                 "empty INTEGER default 0, " +
                 "read INTEGER default 0, " +
@@ -217,7 +217,7 @@ class StoreSchemaDefinition implements LockableDatabase.SchemaDefinition {
         private final LocalStore localStore;
 
 
-        public RealMigrationsHelper(LocalStore localStore) {
+        RealMigrationsHelper(LocalStore localStore) {
             this.localStore = localStore;
         }
 

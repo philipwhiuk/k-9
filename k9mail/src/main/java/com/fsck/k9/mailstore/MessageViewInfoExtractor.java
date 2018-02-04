@@ -290,7 +290,7 @@ public class MessageViewInfoExtractor {
     private StringBuilder buildText(Viewable viewable, boolean prependDivider) {
         StringBuilder text = new StringBuilder();
         if (viewable instanceof Textual) {
-            Part part = ((Textual)viewable).getPart();
+            Part part = ((Textual) viewable).getPart();
             addTextDivider(text, part, prependDivider);
 
             String t = getTextFromPart(part);

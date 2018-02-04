@@ -37,7 +37,7 @@ class AutocryptHeaderParser {
     @Nullable
     @VisibleForTesting
     AutocryptHeader parseAutocryptHeader(String headerValue) {
-        Map<String,String> parameters = MimeUtility.getAllHeaderParameters(headerValue);
+        Map<String, String> parameters = MimeUtility.getAllHeaderParameters(headerValue);
 
         String type = parameters.remove(AutocryptHeader.AUTOCRYPT_PARAM_TYPE);
         if (type != null && !type.equals(AutocryptHeader.AUTOCRYPT_TYPE_1)) {

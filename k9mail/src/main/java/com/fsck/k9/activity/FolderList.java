@@ -150,7 +150,9 @@ public class FolderList extends K9ListActivity {
         public void accountSizeChanged(final long oldSize, final long newSize) {
             runOnUiThread(new Runnable() {
                 public void run() {
-                    String toastText = getString(R.string.account_size_changed, account.getDescription(), SizeFormatter.formatSize(getApplication(), oldSize), SizeFormatter.formatSize(getApplication(), newSize));
+                    String toastText = getString(R.string.account_size_changed, account.getDescription(),
+                            SizeFormatter.formatSize(getApplication(), oldSize),
+                            SizeFormatter.formatSize(getApplication(), newSize));
 
                     Toast toast = Toast.makeText(getApplication(), toastText, Toast.LENGTH_LONG);
                     toast.show();
@@ -213,7 +215,8 @@ public class FolderList extends K9ListActivity {
         wakeLock.acquire(K9.WAKE_LOCK_TIMEOUT);
         MessagingListener listener = new SimpleMessagingListener() {
             @Override
-            public void synchronizeMailboxFinished(Account account, String folder, int totalMessagesInMailbox, int numNewMessages) {
+            public void synchronizeMailboxFinished(Account account, String folder, int totalMessagesInMailbox,
+                    int numNewMessages) {
                 if (!account.equals(FolderList.this.account)) {
                     return;
                 }
@@ -229,7 +232,8 @@ public class FolderList extends K9ListActivity {
                 wakeLock.release();
             }
         };
-        MessagingController.getInstance(getApplication()).synchronizeMailbox(account, folder.name, listener, null);
+        MessagingController.getInstance(getApplication()).synchronizeMailbox(
+                account, folder.name, listener, null);
         sendMail(account);
     }
 
@@ -346,7 +350,8 @@ public class FolderList extends K9ListActivity {
         restorePreviousData();
 
         setListAdapter(adapter);
-        getListView().setTextFilterEnabled(adapter.getFilter() != null); // should never be false but better safe then sorry
+        // should never be false but better safe then sorry
+        getListView().setTextFilterEnabled(adapter.getFilter() != null);
     }
 
     @SuppressWarnings("unchecked")
@@ -379,7 +384,7 @@ public class FolderList extends K9ListActivity {
         super.onResume();
 
         if (!account.isAvailable(this)) {
-            Timber.i("account unavaliabale, not showing folder-list but account-list");
+            Timber.i("account unavailable, not showing folder-list but account-list");
             Accounts.listAccounts(this);
             finish();
             return;
@@ -403,43 +408,44 @@ public class FolderList extends K9ListActivity {
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         //Shortcuts that work no matter what is selected
         switch (keyCode) {
-        case KeyEvent.KEYCODE_Q: {
-            onAccounts();
-            return true;
-        }
+            case KeyEvent.KEYCODE_Q: {
+                onAccounts();
+                return true;
+            }
 
-        case KeyEvent.KEYCODE_S: {
-            onEditAccount();
-            return true;
-        }
+            case KeyEvent.KEYCODE_S: {
+                onEditAccount();
+                return true;
+            }
 
-        case KeyEvent.KEYCODE_H: {
-            Toast toast = Toast.makeText(this, R.string.folder_list_help_key, Toast.LENGTH_LONG);
-            toast.show();
-            return true;
-        }
+            case KeyEvent.KEYCODE_H: {
+                Toast toast = Toast.makeText(
+                        this, R.string.folder_list_help_key, Toast.LENGTH_LONG);
+                toast.show();
+                return true;
+            }
 
-        case KeyEvent.KEYCODE_1: {
-            setDisplayMode(FolderMode.FIRST_CLASS);
-            return true;
+            case KeyEvent.KEYCODE_1: {
+                setDisplayMode(FolderMode.FIRST_CLASS);
+                return true;
+            }
+            case KeyEvent.KEYCODE_2: {
+                setDisplayMode(FolderMode.FIRST_AND_SECOND_CLASS);
+                return true;
+            }
+            case KeyEvent.KEYCODE_3: {
+                setDisplayMode(FolderMode.NOT_SECOND_CLASS);
+                return true;
+            }
+            case KeyEvent.KEYCODE_4: {
+                setDisplayMode(FolderMode.ALL);
+                return true;
+            }
         }
-        case KeyEvent.KEYCODE_2: {
-            setDisplayMode(FolderMode.FIRST_AND_SECOND_CLASS);
-            return true;
-        }
-        case KeyEvent.KEYCODE_3: {
-            setDisplayMode(FolderMode.NOT_SECOND_CLASS);
-            return true;
-        }
-        case KeyEvent.KEYCODE_4: {
-            setDisplayMode(FolderMode.ALL);
-            return true;
-        }
-        }//switch
 
 
         return super.onKeyDown(keyCode, event);
-    }//onKeyDown
+    }
 
     private void setDisplayMode(FolderMode newMode) {
         account.setFolderDisplayMode(newMode);
@@ -502,7 +508,8 @@ public class FolderList extends K9ListActivity {
             return true;
 
         case R.id.check_mail:
-            MessagingController.getInstance(getApplication()).checkMail(this, account, true, true, adapter.mListener);
+            MessagingController.getInstance(getApplication()).checkMail(
+                    this, account, true, true, adapter.mListener);
 
             return true;
 
@@ -783,7 +790,8 @@ public class FolderList extends K9ListActivity {
             }
 
             @Override
-            public void synchronizeMailboxFinished(Account account, String folder, int totalMessagesInMailbox, int numNewMessages) {
+            public void synchronizeMailboxFinished(Account account, String folder,
+                    int totalMessagesInMailbox, int numNewMessages) {
                 super.synchronizeMailboxFinished(account, folder, totalMessagesInMailbox, numNewMessages);
                 if (account.equals(FolderList.this.account)) {
                     handler.progress(false);
@@ -1054,7 +1062,8 @@ public class FolderList extends K9ListActivity {
 
             holder.activeIcons.setOnClickListener(new OnClickListener() {
                 public void onClick(View v) {
-                    Toast toast = Toast.makeText(getApplication(), getString(R.string.tap_hint), Toast.LENGTH_SHORT);
+                    Toast toast = Toast.makeText(
+                            getApplication(), getString(R.string.tap_hint), Toast.LENGTH_SHORT);
                     toast.show();
                 }
             });

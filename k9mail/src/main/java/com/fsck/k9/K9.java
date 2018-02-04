@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.SynchronousQueue;
 
-import android.app.Activity;
 import android.app.Application;
 import android.content.ComponentName;
 import android.content.Context;
@@ -30,7 +29,6 @@ import android.support.annotation.StringRes;
 import android.util.Log;
 
 import com.fsck.k9.Account.SortType;
-import com.fsck.k9.account.K9OAuth2AuthorizationCodeFlowTokenProvider;
 import com.fsck.k9.account.K9OAuth2TokenProvider;
 import com.fsck.k9.activity.MessageCompose;
 import com.fsck.k9.activity.UpgradeDatabases;
@@ -58,7 +56,7 @@ import timber.log.Timber.DebugTree;
 public class K9 extends Application {
     public static boolean canUseContacts(Context context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
-                context.checkSelfPermission(android.Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED){
+                context.checkSelfPermission(android.Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
             return false;
         }
         return true;
@@ -70,7 +68,7 @@ public class K9 extends Application {
      * components') should implement this interface and register using
      * {@link K9#registerApplicationAware(ApplicationAware)}.
      */
-    public static interface ApplicationAware {
+    public interface ApplicationAware {
         /**
          * Called when the Application instance is available and ready.
          *
@@ -108,7 +106,7 @@ public class K9 extends Application {
      *
      * @see ApplicationAware
      */
-    private static final List<ApplicationAware> observers = new ArrayList<ApplicationAware>();
+    private static final List<ApplicationAware> OBSERVERS = new ArrayList<ApplicationAware>();
 
     /**
      * This will be {@code true} once the initialization is complete and {@link #notifyObservers()}
@@ -119,7 +117,7 @@ public class K9 extends Application {
      */
     private static boolean initialized = false;
 
-    public enum BACKGROUND_OPS {
+    public enum BackgroundOperations {
         ALWAYS, NEVER, WHEN_CHECKED_AUTO_SYNC
     }
 
@@ -129,16 +127,16 @@ public class K9 extends Application {
     private static Theme composerTheme = Theme.USE_GLOBAL;
     private static boolean useFixedMessageTheme = true;
 
-    private static final FontSizes fontSizes = new FontSizes();
+    private static final FontSizes FONT_SIZES = new FontSizes();
 
-    private static BACKGROUND_OPS backgroundOps = BACKGROUND_OPS.WHEN_CHECKED_AUTO_SYNC;
+    private static BackgroundOperations backgroundOps = BackgroundOperations.WHEN_CHECKED_AUTO_SYNC;
     /**
      * Some log messages can be sent to a file, so that the logs
      * can be read using unprivileged access (eg. Terminal Emulator)
      * on the phone, without adb.  Set to null to disable
      */
-    public static final String logFile = null;
-    //public static final String logFile = Environment.getExternalStorageDirectory() + "/k9mail/debug.log";
+    public static final String LOG_FILE = null;
+    //public static final String LOG_FILE = Environment.getExternalStorageDirectory() + "/k9mail/debug.log";
 
     /**
      * If this is enabled, various development settings will be enabled
@@ -531,7 +529,7 @@ public class K9 extends Application {
         editor.putInt("pgpInlineDialogCounter", pgpInlineDialogCounter);
         editor.putInt("pgpSignOnlyDialogCounter", pgpSignOnlyDialogCounter);
 
-        fontSizes.save(editor);
+        FONT_SIZES.save(editor);
     }
 
     @Override
@@ -579,15 +577,19 @@ public class K9 extends Application {
 
         MessagingController.getInstance(this).addListener(new SimpleMessagingListener() {
             private void broadcastIntent(String action, Account account, String folder, Message message) {
-                Uri uri = Uri.parse("email://messages/" + account.getAccountNumber() + "/" + Uri.encode(folder) + "/" + Uri.encode(message.getUid()));
+                Uri uri = Uri.parse("email://messages/" + account.getAccountNumber()
+                        + "/" + Uri.encode(folder) + "/" + Uri.encode(message.getUid()));
                 Intent intent = new Intent(action, uri);
                 intent.putExtra(K9.Intents.EmailReceived.EXTRA_ACCOUNT, account.getDescription());
                 intent.putExtra(K9.Intents.EmailReceived.EXTRA_FOLDER, folder);
                 intent.putExtra(K9.Intents.EmailReceived.EXTRA_SENT_DATE, message.getSentDate());
                 intent.putExtra(K9.Intents.EmailReceived.EXTRA_FROM, Address.toString(message.getFrom()));
-                intent.putExtra(K9.Intents.EmailReceived.EXTRA_TO, Address.toString(message.getRecipients(Message.RecipientType.TO)));
-                intent.putExtra(K9.Intents.EmailReceived.EXTRA_CC, Address.toString(message.getRecipients(Message.RecipientType.CC)));
-                intent.putExtra(K9.Intents.EmailReceived.EXTRA_BCC, Address.toString(message.getRecipients(Message.RecipientType.BCC)));
+                intent.putExtra(K9.Intents.EmailReceived.EXTRA_TO,
+                        Address.toString(message.getRecipients(Message.RecipientType.TO)));
+                intent.putExtra(K9.Intents.EmailReceived.EXTRA_CC,
+                        Address.toString(message.getRecipients(Message.RecipientType.CC)));
+                intent.putExtra(K9.Intents.EmailReceived.EXTRA_BCC,
+                        Address.toString(message.getRecipients(Message.RecipientType.BCC)));
                 intent.putExtra(K9.Intents.EmailReceived.EXTRA_SUBJECT, message.getSubject());
                 intent.putExtra(K9.Intents.EmailReceived.EXTRA_FROM_SELF, account.isAnIdentity(message.getFrom()));
                 K9.this.sendBroadcast(intent);
@@ -647,7 +649,7 @@ public class K9 extends Application {
                 updateUnreadWidget();
                 updateMailListWidget();
 
-                // let observers know a change occurred
+                // let OBSERVERS know a change occurred
                 Intent intent = new Intent(K9.Intents.EmailReceived.ACTION_REFRESH_OBSERVER, null);
                 intent.putExtra(K9.Intents.EmailReceived.EXTRA_ACCOUNT, account.getDescription());
                 intent.putExtra(K9.Intents.EmailReceived.EXTRA_FOLDER, folderName);
@@ -766,7 +768,7 @@ public class K9 extends Application {
         }
 
         String lockScreenNotificationVisibility = storage.getString("lockScreenNotificationVisibility", null);
-        if(lockScreenNotificationVisibility != null) {
+        if (lockScreenNotificationVisibility != null) {
             sLockScreenNotificationVisibility = LockScreenNotificationVisibility.valueOf(lockScreenNotificationVisibility);
         }
 
@@ -779,14 +781,14 @@ public class K9 extends Application {
                 Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString());
         useBackgroundAsUnreadIndicator = storage.getBoolean("useBackgroundAsUnreadIndicator", true);
         threadedViewEnabled = storage.getBoolean("threadedView", true);
-        fontSizes.load(storage);
+        FONT_SIZES.load(storage);
 
         try {
-            setBackgroundOps(BACKGROUND_OPS.valueOf(storage.getString(
+            setBackgroundOps(BackgroundOperations.valueOf(storage.getString(
                     "backgroundOperations",
-                    BACKGROUND_OPS.WHEN_CHECKED_AUTO_SYNC.name())));
+                    BackgroundOperations.WHEN_CHECKED_AUTO_SYNC.name())));
         } catch (Exception e) {
-            setBackgroundOps(BACKGROUND_OPS.WHEN_CHECKED_AUTO_SYNC);
+            setBackgroundOps(BackgroundOperations.WHEN_CHECKED_AUTO_SYNC);
         }
 
         colorizeMissingContactPictures = storage.getBoolean("colorizeMissingContactPictures", true);
@@ -824,8 +826,8 @@ public class K9 extends Application {
      * component that the application is available and ready
      */
     protected void notifyObservers() {
-        synchronized (observers) {
-            for (final ApplicationAware aware : observers) {
+        synchronized (OBSERVERS) {
+            for (final ApplicationAware aware : OBSERVERS) {
                 Timber.v("Initializing observer: %s", aware);
 
                 try {
@@ -836,7 +838,7 @@ public class K9 extends Application {
             }
 
             initialized = true;
-            observers.clear();
+            OBSERVERS.clear();
         }
     }
 
@@ -847,11 +849,11 @@ public class K9 extends Application {
      *            Never <code>null</code>.
      */
     public static void registerApplicationAware(final ApplicationAware component) {
-        synchronized (observers) {
+        synchronized (OBSERVERS) {
             if (initialized) {
                 component.initializeComponent(K9.app);
-            } else if (!observers.contains(component)) {
-                observers.add(component);
+            } else if (!OBSERVERS.contains(component)) {
+                OBSERVERS.add(component);
             }
         }
     }
@@ -938,18 +940,18 @@ public class K9 extends Application {
         }
     }
 
-    public static BACKGROUND_OPS getBackgroundOps() {
+    public static BackgroundOperations getBackgroundOps() {
         return backgroundOps;
     }
 
-    public static boolean setBackgroundOps(BACKGROUND_OPS backgroundOps) {
-        BACKGROUND_OPS oldBackgroundOps = K9.backgroundOps;
+    public static boolean setBackgroundOps(BackgroundOperations backgroundOps) {
+        BackgroundOperations oldBackgroundOps = K9.backgroundOps;
         K9.backgroundOps = backgroundOps;
         return backgroundOps != oldBackgroundOps;
     }
 
     public static boolean setBackgroundOps(String nbackgroundOps) {
-        return setBackgroundOps(BACKGROUND_OPS.valueOf(nbackgroundOps));
+        return setBackgroundOps(BackgroundOperations.valueOf(nbackgroundOps));
     }
 
     public static boolean gesturesEnabled() {
@@ -1139,7 +1141,7 @@ public class K9 extends Application {
     }
 
     public static FontSizes getFontSizes() {
-        return fontSizes;
+        return FONT_SIZES;
     }
 
     public static boolean measureAccounts() {
@@ -1454,7 +1456,7 @@ public class K9 extends Application {
     }
 
     public static void saveSettingsAsync() {
-        new AsyncTask<Void,Void,Void>() {
+        new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... voids) {
                 Preferences prefs = Preferences.getPreferences(app);

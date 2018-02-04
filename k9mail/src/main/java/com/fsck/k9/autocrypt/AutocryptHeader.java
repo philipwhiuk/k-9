@@ -29,7 +29,7 @@ class AutocryptHeader {
     @NonNull
     final String addr;
     @NonNull
-    final Map<String,String> parameters;
+    final Map<String, String> parameters;
     final boolean isPreferEncryptMutual;
 
     AutocryptHeader(@NonNull Map<String, String> parameters, @NonNull String addr,
@@ -65,7 +65,7 @@ class AutocryptHeader {
 
         int base64Length = base64KeyData.length();
         int lineLengthBeforeKeyData = builder.length();
-        int dataLengthInFirstLine = HEADER_LINE_LENGTH -lineLengthBeforeKeyData;
+        int dataLengthInFirstLine = HEADER_LINE_LENGTH - lineLengthBeforeKeyData;
 
         boolean keyDataFitsInFirstLine = dataLengthInFirstLine > 0 && base64Length < dataLengthInFirstLine;
         if (keyDataFitsInFirstLine) {

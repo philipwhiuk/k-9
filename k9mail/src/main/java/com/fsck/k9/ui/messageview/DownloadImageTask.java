@@ -28,7 +28,7 @@ import org.apache.commons.io.IOUtils;
 @Deprecated
 class DownloadImageTask extends AsyncTask<String, Void, String> {
     private static final String[] ATTACHMENT_PROJECTION = new String[] {
-            AttachmentProviderColumns._ID,
+            AttachmentProviderColumns.ID,
             AttachmentProviderColumns.DISPLAY_NAME
     };
     private static final int DISPLAY_NAME_INDEX = 1;

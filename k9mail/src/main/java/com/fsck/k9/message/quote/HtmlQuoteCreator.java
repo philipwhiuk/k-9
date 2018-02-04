@@ -29,9 +29,11 @@ public class HtmlQuoteCreator {
     private static final int FIND_INSERTION_POINT_FIRST_GROUP = 1;
     // HTML bits to insert as appropriate
     // TODO is it safe to assume utf-8 here?
-    private static final String FIND_INSERTION_POINT_HTML_CONTENT = "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.0 Transitional//EN\">\r\n<html>";
+    private static final String FIND_INSERTION_POINT_HTML_CONTENT =
+            "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.0 Transitional//EN\">\r\n<html>";
     private static final String FIND_INSERTION_POINT_HTML_END_CONTENT = "</html>";
-    private static final String FIND_INSERTION_POINT_HEAD_CONTENT = "<head><meta content=\"text/html; charset=utf-8\" http-equiv=\"Content-Type\"></head>";
+    private static final String FIND_INSERTION_POINT_HEAD_CONTENT =
+            "<head><meta content=\"text/html; charset=utf-8\" http-equiv=\"Content-Type\"></head>";
     // Index of the start of the beginning of a String.
     private static final int FIND_INSERTION_POINT_START_OF_STRING = 0;
 
@@ -72,8 +74,11 @@ public class HtmlQuoteCreator {
         } else if (quoteStyle == QuoteStyle.HEADER) {
 
             StringBuilder header = new StringBuilder();
-            header.append("<div style='font-size:10.0pt;font-family:\"Tahoma\",\"sans-serif\";padding:3.0pt 0in 0in 0in'>\r\n");
-            header.append("<hr style='border:none;border-top:solid #E1E1E1 1.0pt'>\r\n"); // This gets converted into a horizontal line during html to text conversion.
+            header.append(
+                    "<div style='font-size:10.0pt;font-family:\"Tahoma\",\"sans-serif\";padding:3.0pt 0in 0in 0in'>\r\n");
+            // This gets converted into a horizontal line during html to text conversion.
+            header.append(
+                    "<hr style='border:none;border-top:solid #E1E1E1 1.0pt'>\r\n");
             if (originalMessage.getFrom() != null && fromAddress.length() != 0) {
                 header.append("<b>").append(resources.getString(R.string.message_compose_quote_header_from)).append("</b> ")
                         .append(HtmlConverter.textToHtmlFragment(fromAddress))
@@ -84,14 +89,18 @@ public class HtmlQuoteCreator {
                         .append(sentDate)
                         .append("<br>\r\n");
             }
-            if (originalMessage.getRecipients(RecipientType.TO) != null && originalMessage.getRecipients(RecipientType.TO).length != 0) {
+            if (originalMessage.getRecipients(RecipientType.TO) != null
+                    && originalMessage.getRecipients(RecipientType.TO).length != 0) {
                 header.append("<b>").append(resources.getString(R.string.message_compose_quote_header_to)).append("</b> ")
-                        .append(HtmlConverter.textToHtmlFragment(Address.toString(originalMessage.getRecipients(RecipientType.TO))))
+                        .append(HtmlConverter.textToHtmlFragment(Address.toString(
+                                originalMessage.getRecipients(RecipientType.TO))))
                         .append("<br>\r\n");
             }
-            if (originalMessage.getRecipients(RecipientType.CC) != null && originalMessage.getRecipients(RecipientType.CC).length != 0) {
+            if (originalMessage.getRecipients(RecipientType.CC) != null
+                    && originalMessage.getRecipients(RecipientType.CC).length != 0) {
                 header.append("<b>").append(resources.getString(R.string.message_compose_quote_header_cc)).append("</b> ")
-                        .append(HtmlConverter.textToHtmlFragment(Address.toString(originalMessage.getRecipients(RecipientType.CC))))
+                        .append(HtmlConverter.textToHtmlFragment(Address.toString(
+                                originalMessage.getRecipients(RecipientType.CC))))
                         .append("<br>\r\n");
             }
             if (originalMessage.getSubject() != null) {
@@ -170,7 +179,8 @@ public class HtmlQuoteCreator {
             newContent.insert(htmlMatcher.end(FIND_INSERTION_POINT_FIRST_GROUP), FIND_INSERTION_POINT_HEAD_CONTENT);
             insertable.setQuotedContent(newContent);
             // The new insertion point is the end of the HTML tag, plus the length of the HEAD content.
-            insertable.setHeaderInsertionPoint(htmlMatcher.end(FIND_INSERTION_POINT_FIRST_GROUP) + FIND_INSERTION_POINT_HEAD_CONTENT.length());
+            insertable.setHeaderInsertionPoint(htmlMatcher.end(FIND_INSERTION_POINT_FIRST_GROUP)
+                    + FIND_INSERTION_POINT_HEAD_CONTENT.length());
         } else {
             // If we have none of the above, we probably have a fragment of HTML.  Yahoo! and Gmail both do this.
             // Again, we add a HEAD, but not BODY.
@@ -181,7 +191,8 @@ public class HtmlQuoteCreator {
             // Append the </HTML> tag.
             newContent.append(FIND_INSERTION_POINT_HTML_END_CONTENT);
             insertable.setQuotedContent(newContent);
-            insertable.setHeaderInsertionPoint(FIND_INSERTION_POINT_HTML_CONTENT.length() + FIND_INSERTION_POINT_HEAD_CONTENT.length());
+            insertable.setHeaderInsertionPoint(FIND_INSERTION_POINT_HTML_CONTENT.length()
+                    + FIND_INSERTION_POINT_HEAD_CONTENT.length());
         }
 
         // Search for closing tags. We have to do this after we deal with opening tags since it may

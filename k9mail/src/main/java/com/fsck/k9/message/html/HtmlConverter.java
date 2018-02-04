@@ -27,15 +27,15 @@ public class HtmlConverter {
      * represented as 0xfffc. When displayed, these show up as undisplayed squares. These constants
      * define the object character and the replacement character.
      */
-    private static final char PREVIEW_OBJECT_CHARACTER = (char)0xfffc;
-    private static final char PREVIEW_OBJECT_REPLACEMENT = (char)0x20;  // space
+    private static final char PREVIEW_OBJECT_CHARACTER = (char) 0xfffc;
+    private static final char PREVIEW_OBJECT_REPLACEMENT = (char) 0x20;  // space
 
     /**
      * toHtml() converts non-breaking spaces into the UTF-8 non-breaking space, which doesn't get
      * rendered properly in some clients. Replace it with a simple space.
      */
-    private static final char NBSP_CHARACTER = (char)0x00a0;    // utf-8 non-breaking space
-    private static final char NBSP_REPLACEMENT = (char)0x20;    // space
+    private static final char NBSP_CHARACTER = (char) 0x00a0;    // utf-8 non-breaking space
+    private static final char NBSP_REPLACEMENT = (char) 0x20;    // space
 
     // Number of extra bytes to allocate in a string buffer for htmlification.
     private static final int TEXT_TO_HTML_EXTRA_BUFFER_LENGTH = 512;
@@ -139,7 +139,7 @@ public class HtmlConverter {
      * <p>
      * No HTML headers or footers are added to the result.  Headers and footers
      * are added at display time in
-     * {@link com.fsck.k9.view#MessageWebView.setText(String) MessageWebView.setText()}
+     * {@link com.fsck.k9.view.MessageWebView#setHtmlContent(String) MessageWebView.setHtmlContent()}
      * </p>
      *
      * @param text

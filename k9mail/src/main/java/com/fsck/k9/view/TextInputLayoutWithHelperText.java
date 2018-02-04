@@ -33,16 +33,16 @@ public class TextInputLayoutWithHelperText extends TextInputLayout {
     private TextView mHelperView;
     private int mHelperTextAppearance = R.style.HelperTextAppearance;
 
-    public TextInputLayoutWithHelperText(Context _context) {
-        super(_context);
+    public TextInputLayoutWithHelperText(Context context) {
+        super(context);
     }
 
-    public TextInputLayoutWithHelperText(Context _context, AttributeSet _attrs) {
-        super(_context, _attrs);
+    public TextInputLayoutWithHelperText(Context context, AttributeSet attrs) {
+        super(context, attrs);
 
         final TypedArray a = getContext().obtainStyledAttributes(
-                _attrs,
-                R.styleable.TextInputLayoutWithHelperText,0,0);
+                attrs,
+                R.styleable.TextInputLayoutWithHelperText, 0, 0);
         try {
             mHelperTextColor = a.getColorStateList(R.styleable.TextInputLayoutWithHelperText_helperTextColor);
             mHelperText = a.getText(R.styleable.TextInputLayoutWithHelperText_helperText);
@@ -65,24 +65,26 @@ public class TextInputLayoutWithHelperText extends TextInputLayout {
         return mHelperTextAppearance;
     }
 
-    public void setHelperTextAppearance(int _helperTextAppearanceResId) {
-        mHelperTextAppearance = _helperTextAppearanceResId;
+    public void setHelperTextAppearance(int helperTextAppearanceResId) {
+        mHelperTextAppearance = helperTextAppearanceResId;
     }
 
-    public void setHelperTextColor(ColorStateList _helperTextColor) {
-        mHelperTextColor = _helperTextColor;
+    public void setHelperTextColor(ColorStateList helperTextColor) {
+        mHelperTextColor = helperTextColor;
     }
 
-    public void setHelperTextEnabled(boolean _enabled) {
-        if (mHelperTextEnabled == _enabled) return;
-        if (_enabled && mErrorEnabled) {
+    public void setHelperTextEnabled(boolean enabled) {
+        if (mHelperTextEnabled == enabled) {
+            return;
+        }
+        if (enabled && mErrorEnabled) {
             setErrorEnabled(false);
         }
-        if (this.mHelperTextEnabled != _enabled) {
-            if (_enabled) {
+        if (this.mHelperTextEnabled != enabled) {
+            if (enabled) {
                 this.mHelperView = new TextView(this.getContext());
                 this.mHelperView.setTextAppearance(this.getContext(), this.mHelperTextAppearance);
-                if (mHelperTextColor != null){
+                if (mHelperTextColor != null) {
                     this.mHelperView.setTextColor(mHelperTextColor);
                 }
                 this.mHelperView.setVisibility(INVISIBLE);
@@ -99,12 +101,12 @@ public class TextInputLayoutWithHelperText extends TextInputLayout {
                 this.mHelperView = null;
             }
 
-            this.mHelperTextEnabled = _enabled;
+            this.mHelperTextEnabled = enabled;
         }
     }
 
-    public void setHelperText(CharSequence _helperText) {
-        mHelperText = _helperText;
+    public void setHelperText(CharSequence helperText) {
+        mHelperText = helperText;
         if (!this.mHelperTextEnabled) {
             if (TextUtils.isEmpty(mHelperText)) {
                 return;
@@ -135,16 +137,18 @@ public class TextInputLayoutWithHelperText extends TextInputLayout {
     }
 
     @Override
-    public void setErrorEnabled(boolean _enabled) {
-        if (mErrorEnabled == _enabled) return;
-        mErrorEnabled = _enabled;
-        if (_enabled && mHelperTextEnabled) {
+    public void setErrorEnabled(boolean enabled) {
+        if (mErrorEnabled == enabled) {
+            return;
+        }
+        mErrorEnabled = enabled;
+        if (enabled && mHelperTextEnabled) {
             setHelperTextEnabled(false);
         }
 
-        super.setErrorEnabled(_enabled);
+        super.setErrorEnabled(enabled);
 
-        if (!(_enabled || TextUtils.isEmpty(mHelperText))) {
+        if (!(enabled || TextUtils.isEmpty(mHelperText))) {
             setHelperText(mHelperText);
         }
     }

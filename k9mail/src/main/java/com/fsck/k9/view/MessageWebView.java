@@ -145,7 +145,7 @@ public class MessageWebView extends RigidWebView {
             KeyEvent shiftPressEvent = new KeyEvent(0, 0, KeyEvent.ACTION_DOWN,
                                                     KeyEvent.KEYCODE_SHIFT_LEFT, 0, 0);
             shiftPressEvent.dispatch(this, null, null);
-            Toast.makeText(getContext() , R.string.select_text_now, Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), R.string.select_text_now, Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
             Timber.e(e, "Exception in emulateShiftHeld()");
         }

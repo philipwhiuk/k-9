@@ -620,7 +620,7 @@ public class EmailProvider extends ContentProvider {
     }
 
     /**
-     * This class is needed to make {@link CursorAdapter} work with our database schema.
+     * This class is needed to make {@link android.widget.CursorAdapter} work with our database schema.
      *
      * <p>
      * {@code CursorAdapter} requires a column named {@code "_id"} containing a stable id. We use
@@ -632,7 +632,7 @@ public class EmailProvider extends ContentProvider {
      * </p>
      */
     static class IdTrickeryCursor extends CursorWrapper {
-        public IdTrickeryCursor(Cursor cursor) {
+        IdTrickeryCursor(Cursor cursor) {
             super(cursor);
         }
 
@@ -660,7 +660,7 @@ public class EmailProvider extends ContentProvider {
         private String[] mSpecialColumnValues;
         private String[] mColumnNames;
 
-        public SpecialColumnsCursor(Cursor cursor, String[] allColumnNames, Map<String, String> specialColumns) {
+        SpecialColumnsCursor(Cursor cursor, String[] allColumnNames, Map<String, String> specialColumns) {
             super(cursor);
 
             mColumnNames = allColumnNames;

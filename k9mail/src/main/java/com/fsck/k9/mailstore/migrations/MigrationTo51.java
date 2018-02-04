@@ -29,11 +29,11 @@ import timber.log.Timber;
 
 
 class MigrationTo51 {
-    private static final int MESSAGE_PART_TYPE__UNKNOWN = 0;
-    private static final int MESSAGE_PART_TYPE__HIDDEN_ATTACHMENT = 6;
-    private static final int DATA_LOCATION__MISSING = 0;
-    private static final int DATA_LOCATION__IN_DATABASE = 1;
-    private static final int DATA_LOCATION__ON_DISK = 2;
+    private static final int MESSAGE_PART_TYPE_UNKNOWN = 0;
+    private static final int MESSAGE_PART_TYPE_HIDDEN_ATTACHMENT = 6;
+    private static final int DATA_LOCATION_MISSING = 0;
+    private static final int DATA_LOCATION_IN_DATABASE = 1;
+    private static final int DATA_LOCATION_ON_DISK = 2;
 
     /**
      * This method converts from the old message table structure to the new one.
@@ -211,7 +211,7 @@ class MigrationTo51 {
                 "internal_date INTEGER, " +
                 "message_id TEXT, " +
                 "preview TEXT, " +
-                "mime_type TEXT, "+
+                "mime_type TEXT, " +
                 "normalized_subject_hash INTEGER, " +
                 "empty INTEGER default 0, " +
                 "read INTEGER default 0, " +
@@ -309,8 +309,8 @@ class MigrationTo51 {
                     String.format("multipart/encrypted; boundary=\"%s\"; protocol=\"application/pgp-encrypted\"", boundary));
 
             ContentValues cv = new ContentValues();
-            cv.put("type", MESSAGE_PART_TYPE__UNKNOWN);
-            cv.put("data_location", DATA_LOCATION__IN_DATABASE);
+            cv.put("type", MESSAGE_PART_TYPE_UNKNOWN);
+            cv.put("data_location", DATA_LOCATION_IN_DATABASE);
             cv.put("mime_type", "multipart/encrypted");
             cv.put("header", mimeHeader.toString());
             cv.put("boundary", boundary);
@@ -350,8 +350,8 @@ class MigrationTo51 {
                 String.format("multipart/mixed; boundary=\"%s\";", boundary));
 
         ContentValues cv = new ContentValues();
-        cv.put("type", MESSAGE_PART_TYPE__UNKNOWN);
-        cv.put("data_location", DATA_LOCATION__IN_DATABASE);
+        cv.put("type", MESSAGE_PART_TYPE_UNKNOWN);
+        cv.put("data_location", DATA_LOCATION_IN_DATABASE);
         cv.put("mime_type", "multipart/mixed");
         cv.put("header", mimeHeader.toString());
         cv.put("boundary", boundary);
@@ -505,7 +505,7 @@ class MigrationTo51 {
 
         boolean hasContentTypeAndIsInline = !TextUtils.isEmpty(contentId) && "inline".equalsIgnoreCase(contentDisposition);
         int messageType = hasContentTypeAndIsInline ?
-                MESSAGE_PART_TYPE__HIDDEN_ATTACHMENT : MESSAGE_PART_TYPE__UNKNOWN;
+                MESSAGE_PART_TYPE_HIDDEN_ATTACHMENT : MESSAGE_PART_TYPE_UNKNOWN;
 
         ContentValues cv = new ContentValues();
         cv.put("type", messageType);
@@ -514,7 +514,7 @@ class MigrationTo51 {
         cv.put("display_name", name);
         cv.put("header", mimeHeader.toString());
         cv.put("encoding", MimeUtil.ENC_BINARY);
-        cv.put("data_location", attachmentFileToMove != null ? DATA_LOCATION__ON_DISK : DATA_LOCATION__MISSING);
+        cv.put("data_location", attachmentFileToMove != null ? DATA_LOCATION_ON_DISK : DATA_LOCATION_MISSING);
         cv.put("content_id", contentId);
         cv.put("server_extra", storeData);
         structureState.applyValues(cv);
@@ -549,7 +549,7 @@ class MigrationTo51 {
         extraFlags.add(Flag.X_MIGRATED_FROM_V50);
 
         String flagsString = migrationsHelper.serializeFlags(extraFlags);
-        db.execSQL("UPDATE messages SET flags = ? WHERE id = ?", new Object[] { flagsString, messageId } );
+        db.execSQL("UPDATE messages SET flags = ? WHERE id = ?", new Object[] { flagsString, messageId });
     }
 
     private static MimeStructureState insertBodyAsMultipartAlternative(SQLiteDatabase db,
@@ -567,10 +567,10 @@ class MigrationTo51 {
                 String.format("multipart/alternative; boundary=\"%s\";", boundary));
 
         int dataLocation = textContent != null || htmlContent != null
-                ? DATA_LOCATION__IN_DATABASE : DATA_LOCATION__MISSING;
+                ? DATA_LOCATION_IN_DATABASE : DATA_LOCATION_MISSING;
 
         ContentValues cv = new ContentValues();
-        cv.put("type", MESSAGE_PART_TYPE__UNKNOWN);
+        cv.put("type", MESSAGE_PART_TYPE_UNKNOWN);
         cv.put("data_location", dataLocation);
         cv.put("mime_type", "multipart/alternative");
         cv.put("header", mimeHeader.toString());
@@ -610,17 +610,17 @@ class MigrationTo51 {
             quotedPrintableOutputStream.write(content.getBytes());
             quotedPrintableOutputStream.flush();
 
-            dataLocation = DATA_LOCATION__IN_DATABASE;
+            dataLocation = DATA_LOCATION_IN_DATABASE;
             contentBytes = contentOutputStream.toByteArray();
             decodedBodySize = content.length();
         } else {
-            dataLocation = DATA_LOCATION__MISSING;
+            dataLocation = DATA_LOCATION_MISSING;
             contentBytes = null;
             decodedBodySize = 0;
         }
 
         ContentValues cv = new ContentValues();
-        cv.put("type", MESSAGE_PART_TYPE__UNKNOWN);
+        cv.put("type", MESSAGE_PART_TYPE_UNKNOWN);
         cv.put("data_location", dataLocation);
         cv.put("mime_type", isHtml ? "text/html" : "text/plain");
         cv.put("header", mimeHeader.toString());
@@ -698,9 +698,9 @@ class MigrationTo51 {
             isStateAdvanced = true;
 
             if (rootPartId == null) {
-                return new MimeStructureState(newPartId, null, -1, nextOrder+1);
+                return new MimeStructureState(newPartId, null, -1, nextOrder + 1);
             }
-            return new MimeStructureState(rootPartId, prevParentId, parentId, nextOrder+1);
+            return new MimeStructureState(rootPartId, prevParentId, parentId, nextOrder + 1);
         }
 
         public MimeStructureState nextMultipartChild(long newPartId) {
@@ -710,9 +710,9 @@ class MigrationTo51 {
             isStateAdvanced = true;
 
             if (rootPartId == null) {
-                return new MimeStructureState(newPartId, parentId, newPartId, nextOrder+1);
+                return new MimeStructureState(newPartId, parentId, newPartId, nextOrder + 1);
             }
-            return new MimeStructureState(rootPartId, parentId, newPartId, nextOrder+1);
+            return new MimeStructureState(rootPartId, parentId, newPartId, nextOrder + 1);
         }
 
         public void applyValues(ContentValues cv) {

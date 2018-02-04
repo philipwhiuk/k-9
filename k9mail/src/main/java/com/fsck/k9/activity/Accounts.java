@@ -16,7 +16,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Application;
@@ -39,7 +38,6 @@ import android.text.Editable;
 import android.text.TextWatcher;
 
 import com.fsck.k9.activity.setup.AccountSetupActivity;
-import timber.log.Timber;
 import android.util.SparseBooleanArray;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -307,7 +305,7 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
                 handler.progress(Window.PROGRESS_END);
                 handler.refreshTitle();
             } else {
-                int level = (Window.PROGRESS_END / adapter.getCount()) * (adapter.getCount() - pendingWork.size()) ;
+                int level = (Window.PROGRESS_END / adapter.getCount()) * (adapter.getCount() - pendingWork.size());
                 handler.progress(level);
             }
         }
@@ -473,7 +471,7 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
     @SuppressWarnings("unchecked")
     private void restoreAccountStats(Bundle icicle) {
         if (icicle != null) {
-            Map<String, AccountStats> oldStats = (Map<String, AccountStats>)icicle.get(ACCOUNT_STATS);
+            Map<String, AccountStats> oldStats = (Map<String, AccountStats>) icicle.get(ACCOUNT_STATS);
             if (oldStats != null) {
                 accountStats.putAll(oldStats);
             }
@@ -546,19 +544,19 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
     }
 
     private List<BaseAccount> accounts = new ArrayList<BaseAccount>();
-    private enum ACCOUNT_LOCATION {
+    private enum AccountLocation {
         TOP, MIDDLE, BOTTOM;
     }
-    private EnumSet<ACCOUNT_LOCATION> accountLocation(BaseAccount account) {
-        EnumSet<ACCOUNT_LOCATION> accountLocation = EnumSet.of(ACCOUNT_LOCATION.MIDDLE);
+    private EnumSet<AccountLocation> accountLocation(BaseAccount account) {
+        EnumSet<AccountLocation> accountLocation = EnumSet.of(AccountLocation.MIDDLE);
         if (accounts.size() > 0) {
             if (accounts.get(0).equals(account)) {
-                accountLocation.remove(ACCOUNT_LOCATION.MIDDLE);
-                accountLocation.add(ACCOUNT_LOCATION.TOP);
+                accountLocation.remove(AccountLocation.MIDDLE);
+                accountLocation.add(AccountLocation.TOP);
             }
             if (accounts.get(accounts.size() - 1).equals(account)) {
-                accountLocation.remove(ACCOUNT_LOCATION.MIDDLE);
-                accountLocation.add(ACCOUNT_LOCATION.BOTTOM);
+                accountLocation.remove(AccountLocation.MIDDLE);
+                accountLocation.add(AccountLocation.BOTTOM);
             }
         }
         return accountLocation;
@@ -664,10 +662,10 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
      */
     private boolean onOpenAccount(BaseAccount account) {
         if (account instanceof SearchAccount) {
-            SearchAccount searchAccount = (SearchAccount)account;
+            SearchAccount searchAccount = (SearchAccount) account;
             MessageList.actionDisplaySearch(this, searchAccount.getRelatedSearch(), false, false);
         } else {
-            Account realAccount = (Account)account;
+            Account realAccount = (Account) account;
             if (!realAccount.isEnabled()) {
                 onActivateAccount(realAccount);
                 return false;
@@ -685,7 +683,8 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
                 LocalSearch search = new LocalSearch(realAccount.getAutoExpandFolderName());
                 search.addAllowedFolder(realAccount.getAutoExpandFolderName());
                 search.addAccountUuid(realAccount.getUuid());
-                MessageList.actionDisplaySearch(this, search, false, true);}
+                MessageList.actionDisplaySearch(this, search, false, true);
+            }
         }
         return true;
     }
@@ -1183,11 +1182,11 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
 
     @Override
     public boolean onContextItemSelected(android.view.MenuItem item) {
-        AdapterContextMenuInfo menuInfo = (AdapterContextMenuInfo)item.getMenuInfo();
+        AdapterContextMenuInfo menuInfo = (AdapterContextMenuInfo) item.getMenuInfo();
         // submenus don't actually set the menuInfo, so the "advanced"
         // submenu wouldn't work.
         if (menuInfo != null) {
-            selectedContextAccount = (BaseAccount)getListView().getItemAtPosition(menuInfo.position);
+            selectedContextAccount = (BaseAccount) getListView().getItemAtPosition(menuInfo.position);
         }
         if (selectedContextAccount instanceof Account) {
             Account realAccount = (Account) selectedContextAccount;
@@ -1243,7 +1242,7 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
     }
 
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        BaseAccount account = (BaseAccount)parent.getItemAtPosition(position);
+        BaseAccount account = (BaseAccount) parent.getItemAtPosition(position);
         onOpenAccount(account);
     }
 
@@ -1404,14 +1403,14 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
             }
         }
         else {
-            EnumSet<ACCOUNT_LOCATION> accountLocation = accountLocation(account);
-            if (accountLocation.contains(ACCOUNT_LOCATION.TOP)) {
+            EnumSet<AccountLocation> accountLocation = accountLocation(account);
+            if (accountLocation.contains(AccountLocation.TOP)) {
                 menu.findItem(R.id.move_up).setEnabled(false);
             }
             else {
                 menu.findItem(R.id.move_up).setEnabled(true);
             }
-            if (accountLocation.contains(ACCOUNT_LOCATION.BOTTOM)) {
+            if (accountLocation.contains(AccountLocation.BOTTOM)) {
                 menu.findItem(R.id.move_down).setEnabled(false);
             }
             else {
@@ -1439,8 +1438,9 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         Timber.i("onActivityResult requestCode = %d, resultCode = %s, data = %s", requestCode, resultCode, data);
-        if (resultCode != RESULT_OK)
+        if (resultCode != RESULT_OK) {
             return;
+        }
         if (data == null) {
             return;
         }
@@ -1749,7 +1749,7 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
     }
 
     class AccountsAdapter extends ArrayAdapter<BaseAccount> {
-        public AccountsAdapter(List<BaseAccount> accounts) {
+        AccountsAdapter(List<BaseAccount> accounts) {
             super(Accounts.this, 0, accounts);
         }
 
@@ -1777,7 +1777,7 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
 
                 holder.chip = view.findViewById(R.id.chip);
                 holder.folders = (ImageButton) view.findViewById(R.id.folders);
-                holder.accountsItemLayout = (LinearLayout)view.findViewById(R.id.accounts_item_layout);
+                holder.accountsItemLayout = (LinearLayout) view.findViewById(R.id.accounts_item_layout);
 
                 view.setTag(holder);
             }
@@ -1809,7 +1809,9 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
                 holder.newMessageCountWrapper.setVisibility(unreadMessageCount > 0 ? View.VISIBLE : View.GONE);
 
                 holder.flaggedMessageCount.setText(String.format("%d", stats.flaggedMessageCount));
-                holder.flaggedMessageCountWrapper.setVisibility(K9.messageListStars() && stats.flaggedMessageCount > 0 ? View.VISIBLE : View.GONE);
+                holder.flaggedMessageCountWrapper.setVisibility(
+                        K9.messageListStars() && stats.flaggedMessageCount > 0 ?
+                                View.VISIBLE : View.GONE);
 
                 holder.flaggedMessageCountWrapper.setOnClickListener(createFlaggedSearchListener(account));
                 holder.newMessageCountWrapper.setOnClickListener(createUnreadSearchListener(account));
@@ -1819,29 +1821,29 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
                         Toast toast = Toast.makeText(getApplication(), getString(R.string.tap_hint), Toast.LENGTH_SHORT);
                         toast.show();
                     }
-                }
-                                                     );
+                });
 
             } else {
                 holder.newMessageCountWrapper.setVisibility(View.GONE);
                 holder.flaggedMessageCountWrapper.setVisibility(View.GONE);
             }
             if (account instanceof Account) {
-                Account realAccount = (Account)account;
+                Account realAccount = (Account) account;
 
                 holder.chip.setBackgroundColor(realAccount.getChipColor());
 
-                holder.flaggedMessageCountIcon.setBackgroundDrawable( realAccount.generateColorChip(false, true).drawable() );
-                holder.newMessageCountIcon.setBackgroundDrawable( realAccount.generateColorChip(false, false).drawable() );
+                holder.flaggedMessageCountIcon.setBackgroundDrawable(realAccount.generateColorChip(false,
+                        true).drawable() );
+                holder.newMessageCountIcon.setBackgroundDrawable(realAccount.generateColorChip(false,
+                        false).drawable() );
 
             } else {
                 holder.chip.setBackgroundColor(0xff999999);
-                holder.newMessageCountIcon.setBackgroundDrawable( new ColorChip(0xff999999, false, ColorChip.CIRCULAR).drawable() );
-                holder.flaggedMessageCountIcon.setBackgroundDrawable(new ColorChip(0xff999999, false, ColorChip.STAR).drawable());
+                holder.newMessageCountIcon.setBackgroundDrawable(new ColorChip(0xff999999, false,
+                        ColorChip.CIRCULAR).drawable() );
+                holder.flaggedMessageCountIcon.setBackgroundDrawable(new ColorChip(0xff999999, false,
+                        ColorChip.STAR).drawable());
             }
-
-
-
 
             fontSizes.setViewTextSize(holder.description, fontSizes.getAccountName());
             fontSizes.setViewTextSize(holder.email, fontSizes.getAccountDescription());
@@ -1852,7 +1854,7 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
                 holder.folders.setVisibility(View.VISIBLE);
                 holder.folders.setOnClickListener(new OnClickListener() {
                     public void onClick(View v) {
-                        FolderList.actionHandleAccount(Accounts.this, (Account)account);
+                        FolderList.actionHandleAccount(Accounts.this, (Account) account);
 
                     }
                 });
@@ -1915,16 +1917,17 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
 
         @Override
         public void onClick(View v) {
-            MessageList.actionDisplaySearch(Accounts.this, search, true, false);
+            MessageList.actionDisplaySearch(Accounts.this, search,
+                    true, false);
         }
 
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] result){
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] result) {
         super.onRequestPermissionsResult(requestCode, permissions, result);
 
-        if(requestCode == EXPORT_SAVE_PERMISSION && result[0] == PackageManager.PERMISSION_GRANTED){
+        if (requestCode == EXPORT_SAVE_PERMISSION && result[0] == PackageManager.PERMISSION_GRANTED) {
             performExport(exportIncludeGlobals, exportAccount);
         }
     }

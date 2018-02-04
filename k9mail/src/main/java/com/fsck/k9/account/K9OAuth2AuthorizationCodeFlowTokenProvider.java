@@ -37,7 +37,9 @@ public class K9OAuth2AuthorizationCodeFlowTokenProvider extends OAuth2Authorizat
     @Override
     public void showAuthDialog(String email) {
         SpecificOAuth2TokenProvider provider = getSpecificProviderFromEmail(email);
-        if (provider == null) return;
+        if (provider == null) {
+            return;
+        }
         provider.showAuthDialog();
     }
 
@@ -54,7 +56,9 @@ public class K9OAuth2AuthorizationCodeFlowTokenProvider extends OAuth2Authorizat
     @Override
     protected SpecificOAuth2TokenProvider getSpecificProviderFromEmail(String email) {
         TYPE type = getServerTypeFromEmail(email);
-        if (type == null) return null;
+        if (type == null) {
+            return null;
+        }
         switch (type) {
             case GMAIL:
                 return gmailOAuth2TokenStore;

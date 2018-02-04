@@ -1,14 +1,11 @@
 package com.fsck.k9.fragment;
 
 
-import android.Manifest;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.format.DateUtils;
@@ -122,7 +119,7 @@ public class MessageListAdapter extends CursorAdapter {
 
 
         // 1 preview line is needed even if it is set to 0, because subject is part of the same text view
-        holder.preview.setLines(Math.max(fragment.previewLines,1));
+        holder.preview.setLines(Math.max(fragment.previewLines, 1));
         fontSizes.setViewTextSize(holder.preview, fontSizes.getMessageListPreview());
         holder.threadCount = (TextView) view.findViewById(R.id.thread_count);
         fontSizes.setViewTextSize(holder.threadCount, fontSizes.getMessageListSubject()); // thread count is next to subject
@@ -211,7 +208,7 @@ public class MessageListAdapter extends CursorAdapter {
 
         Drawable statusHolder = buildStatusHolder(forwarded, answered);
 
-        if (holder.from != null ) {
+        if (holder.from != null) {
             holder.from.setTypeface(Typeface.create(holder.from.getTypeface(), maybeBoldTypeface));
             if (fragment.senderAboveSubject) {
                 holder.from.setCompoundDrawablesWithIntrinsicBounds(
@@ -225,7 +222,7 @@ public class MessageListAdapter extends CursorAdapter {
                 holder.from.setText(new SpannableStringBuilder(sigil).append(displayName));
             }
         }
-        if (holder.subject != null ) {
+        if (holder.subject != null) {
             if (!fragment.senderAboveSubject) {
                 holder.subject.setCompoundDrawablesWithIntrinsicBounds(
                         statusHolder, // left
@@ -241,7 +238,7 @@ public class MessageListAdapter extends CursorAdapter {
     }
 
     private void formatPreviewText(TextView preview, CharSequence beforePreviewText, String sigil) {
-        Spannable previewText = (Spannable)preview.getText();
+        Spannable previewText = (Spannable) preview.getText();
         previewText.setSpan(buildSenderSpan(), 0, beforePreviewText.length() + sigil.length(),
                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 
@@ -257,7 +254,7 @@ public class MessageListAdapter extends CursorAdapter {
      */
     private AbsoluteSizeSpan buildSenderSpan() {
         int fontSize = (fragment.senderAboveSubject) ?
-                fontSizes.getMessageListSubject():
+                fontSizes.getMessageListSubject() :
                 fontSizes.getMessageListSender();
         return new AbsoluteSizeSpan(fontSize, true);
     }

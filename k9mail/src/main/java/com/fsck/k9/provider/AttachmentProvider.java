@@ -33,12 +33,12 @@ public class AttachmentProvider extends ContentProvider {
     public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY);
 
     private static final String[] DEFAULT_PROJECTION = new String[] {
-            AttachmentProviderColumns._ID,
+            AttachmentProviderColumns.ID,
             AttachmentProviderColumns.DATA,
     };
 
     public static class AttachmentProviderColumns {
-        public static final String _ID = "_id";
+        public static final String ID = "_id";
         public static final String DATA = "_data";
         public static final String DISPLAY_NAME = "_display_name";
         public static final String SIZE = "_size";
@@ -107,7 +107,7 @@ public class AttachmentProvider extends ContentProvider {
         Object[] values = new Object[columnNames.length];
         for (int i = 0, count = columnNames.length; i < count; i++) {
             String column = columnNames[i];
-            if (AttachmentProviderColumns._ID.equals(column)) {
+            if (AttachmentProviderColumns.ID.equals(column)) {
                 values[i] = id;
             } else if (AttachmentProviderColumns.DATA.equals(column)) {
                 values[i] = uri.toString();

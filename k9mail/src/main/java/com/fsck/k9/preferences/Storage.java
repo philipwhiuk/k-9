@@ -26,8 +26,8 @@ public class Storage {
 
     private volatile ConcurrentMap<String, String> storage = new ConcurrentHashMap<String, String>();
 
-    private int DB_VERSION = 2;
-    private String DB_NAME = "preferences_storage";
+    private final static int DB_VERSION = 2;
+    private final static String DB_NAME = "preferences_storage";
 
     private ThreadLocal<ConcurrentMap<String, String>> workingStorage
     = new ThreadLocal<ConcurrentMap<String, String>>();
@@ -48,6 +48,7 @@ public class Storage {
             if (accountUuids != null && accountUuids.length() != 0) {
                 String[] uuids = accountUuids.split(",");
                 for (String uuid : uuids) {
+                    //TODO: Extract a method
                     try {
                         String storeUriStr = Base64.decode(readValue(mDb, uuid + ".storeUri"));
                         String transportUriStr = Base64.decode(readValue(mDb, uuid + ".transportUri"));
@@ -71,7 +72,8 @@ public class Storage {
                         }
 
                         if (newUserInfo != null) {
-                            URI newUri = new URI(uri.getScheme(), newUserInfo, uri.getHost(), uri.getPort(), uri.getPath(), uri.getQuery(), uri.getFragment());
+                            URI newUri = new URI(uri.getScheme(), newUserInfo, uri.getHost(), uri.getPort(),
+                                    uri.getPath(), uri.getQuery(), uri.getFragment());
                             String newTransportUriStr = Base64.encode(newUri.toString());
                             writeValue(mDb, uuid + ".transportUri", newTransportUriStr);
                         }
@@ -115,7 +117,8 @@ public class Storage {
                         }
 
                         if (newUserInfo != null) {
-                            URI newUri = new URI(uri.getScheme(), newUserInfo, uri.getHost(), uri.getPort(), uri.getPath(), uri.getQuery(), uri.getFragment());
+                            URI newUri = new URI(uri.getScheme(), newUserInfo, uri.getHost(), uri.getPort(),
+                                    uri.getPath(), uri.getQuery(), uri.getFragment());
                             String newStoreUriStr = Base64.encode(newUri.toString());
                             writeValue(mDb, uuid + ".storeUri", newStoreUriStr);
                         }

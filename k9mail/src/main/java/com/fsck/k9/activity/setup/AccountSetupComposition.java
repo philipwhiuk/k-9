@@ -55,18 +55,18 @@ public class AccountSetupComposition extends K9Activity {
             account = Preferences.getPreferences(this).getAccount(accountUuid);
         }
 
-        accountName = (EditText)findViewById(R.id.account_name);
+        accountName = (EditText) findViewById(R.id.account_name);
         accountName.setText(account.getName());
 
-        accountEmail = (EditText)findViewById(R.id.account_email);
+        accountEmail = (EditText) findViewById(R.id.account_email);
         accountEmail.setText(account.getEmail());
 
-        accountAlwaysBcc = (EditText)findViewById(R.id.account_always_bcc);
+        accountAlwaysBcc = (EditText) findViewById(R.id.account_always_bcc);
         accountAlwaysBcc.setText(account.getAlwaysBcc());
 
-        accountSignatureLayout = (LinearLayout)findViewById(R.id.account_signature_layout);
+        accountSignatureLayout = (LinearLayout) findViewById(R.id.account_signature_layout);
 
-        accountSignatureUse = (CheckBox)findViewById(R.id.account_signature_use);
+        accountSignatureUse = (CheckBox) findViewById(R.id.account_signature_use);
         boolean useSignature = account.getSignatureUse();
         accountSignatureUse.setChecked(useSignature);
         accountSignatureUse.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -83,10 +83,10 @@ public class AccountSetupComposition extends K9Activity {
             }
         });
 
-        accountSignature = (EditText)findViewById(R.id.account_signature);
+        accountSignature = (EditText) findViewById(R.id.account_signature);
 
-        accountSignatureBeforeLocation = (RadioButton)findViewById(R.id.account_signature_location_before_quoted_text);
-        accountSignatureAfterLocation = (RadioButton)findViewById(R.id.account_signature_location_after_quoted_text);
+        accountSignatureBeforeLocation = (RadioButton) findViewById(R.id.account_signature_location_before_quoted_text);
+        accountSignatureAfterLocation = (RadioButton) findViewById(R.id.account_signature_location_after_quoted_text);
 
         if (useSignature) {
             accountSignature.setText(account.getSignature());

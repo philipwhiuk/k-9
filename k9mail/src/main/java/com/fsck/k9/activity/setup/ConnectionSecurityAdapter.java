@@ -28,7 +28,7 @@ public class ConnectionSecurityAdapter extends ArrayAdapter<ConnectionSecurityHo
     }
 
     public int getConnectionSecurityPosition(ConnectionSecurity connectionSecurity) {
-        for (int i=0; i<getCount(); i++) {
+        for (int i = 0; i < getCount(); i++) {
             if (getItem(i).connectionSecurity == connectionSecurity) {
                 return i;
             }

@@ -19,7 +19,7 @@ class CertificateErrorNotifications {
     private final NotificationController controller;
 
 
-    public CertificateErrorNotifications(NotificationController controller) {
+    CertificateErrorNotifications(NotificationController controller) {
         this.controller = controller;
     }
 

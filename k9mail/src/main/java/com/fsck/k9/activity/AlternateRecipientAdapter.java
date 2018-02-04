@@ -244,7 +244,7 @@ public class AlternateRecipientAdapter extends BaseAdapter {
         public final ImageView itemCryptoStatusSimple;
 
 
-        public RecipientTokenHolder(View view) {
+        RecipientTokenHolder(View view) {
             layoutHeader = view.findViewById(R.id.alternate_container_header);
             layoutItem = view.findViewById(R.id.alternate_container_item);
 

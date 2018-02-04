@@ -26,8 +26,8 @@ public class StorageEditor {
     }
 
     public void copy(android.content.SharedPreferences input) {
-        Map < String, ? > oldVals = input.getAll();
-        for (Entry < String, ? > entry : oldVals.entrySet()) {
+        Map<String, ?> oldVals = input.getAll();
+        for (Entry<String, ?> entry : oldVals.entrySet()) {
             String key = entry.getKey();
             Object value = entry.getValue();
             if (key != null && value != null) {

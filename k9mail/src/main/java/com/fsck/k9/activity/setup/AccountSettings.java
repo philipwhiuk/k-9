@@ -516,7 +516,7 @@ public class AccountSettings extends K9PreferenceActivity {
         remoteSearchNumResults.setOnPreferenceChangeListener(
             new OnPreferenceChangeListener() {
                 public boolean onPreferenceChange(Preference pref, Object newVal) {
-                    updateRemoteSearchLimit((String)newVal);
+                    updateRemoteSearchLimit((String) newVal);
                     return true;
                 }
             }
@@ -541,16 +541,16 @@ public class AccountSettings extends K9PreferenceActivity {
             public boolean onPreferenceChange(Preference preference, Object newValue) {
                 final String value = newValue.toString();
                 int index = resizeFactor.findIndexOfValue(value);
-                switch(index){
-                    case Account.RESIZE_FACTOR_ORIGINAL_SIZE_SELECTED :{
+                switch (index) {
+                    case Account.RESIZE_FACTOR_ORIGINAL_SIZE_SELECTED: {
                         updateResizeFactor(1);
                         break;
                     }
-                    case Account.RESIZE_FACTOR_HALF_SIZE_SELECTED :{
+                    case Account.RESIZE_FACTOR_HALF_SIZE_SELECTED: {
                         updateResizeFactor(2);
                         break;
                     }
-                    case Account.RESIZE_FACTOR_ONE_FOURTH_SIZE_SELECTED :{
+                    case Account.RESIZE_FACTOR_ONE_FOURTH_SIZE_SELECTED: {
                         updateResizeFactor(4);
                         break;
                     }
@@ -645,7 +645,8 @@ public class AccountSettings extends K9PreferenceActivity {
         // XXX: The following two lines act as a workaround for the RingtonePreference
         //      which does not let us set/get the value programmatically
         SharedPreferences prefs = accountRingtone.getPreferenceManager().getSharedPreferences();
-        String currentRingtone = (!account.getNotificationSetting().isRingEnabled() ? null : account.getNotificationSetting().getRingtone());
+        String currentRingtone = (!account.getNotificationSetting().isRingEnabled() ?
+                null : account.getNotificationSetting().getRingtone());
         prefs.edit().putString(PREFERENCE_RINGTONE, currentRingtone).commit();
 
         accountVibrateEnabled = (CheckBoxPreference) findPreference(PREFERENCE_VIBRATE);
@@ -837,10 +838,11 @@ public class AccountSettings extends K9PreferenceActivity {
 
         // In webdav account we use the exact folder name also for inbox,
         // since it varies because of internationalization
-        if (account.getStoreUri().startsWith("webdav"))
+        if (account.getStoreUri().startsWith("webdav")) {
             account.setAutoExpandFolderName(autoExpandFolder.getValue());
-        else
+        } else {
             account.setAutoExpandFolderName(reverseTranslateFolder(autoExpandFolder.getValue()));
+        }
 
         if (isMoveCapable) {
             account.setArchiveFolderName(archiveFolder.getValue());

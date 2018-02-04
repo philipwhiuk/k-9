@@ -99,15 +99,15 @@ public class AutocryptStatusInteractor {
     }
 
     public enum RecipientAutocryptStatusType {
-        NO_RECIPIENTS (true, false, false),
-        UNAVAILABLE (false, false, false),
-        DISCOURAGE_UNCONFIRMED (true, false, false),
-        DISCOURAGE_CONFIRMED (true, true, false),
-        AVAILABLE_UNCONFIRMED (true, false, false),
-        AVAILABLE_CONFIRMED (true, true, false),
-        RECOMMENDED_UNCONFIRMED (true, false, true),
-        RECOMMENDED_CONFIRMED (true, true, true),
-        ERROR (false, false, false);
+        NO_RECIPIENTS(true, false, false),
+        UNAVAILABLE(false, false, false),
+        DISCOURAGE_UNCONFIRMED(true, false, false),
+        DISCOURAGE_CONFIRMED(true, true, false),
+        AVAILABLE_UNCONFIRMED(true, false, false),
+        AVAILABLE_CONFIRMED(true, true, false),
+        RECOMMENDED_UNCONFIRMED(true, false, true),
+        RECOMMENDED_CONFIRMED(true, true, true),
+        ERROR(false, false, false);
 
         private final boolean canEncrypt;
         private final boolean isConfirmed;

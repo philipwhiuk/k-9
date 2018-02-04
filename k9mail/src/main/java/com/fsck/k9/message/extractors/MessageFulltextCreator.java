@@ -11,7 +11,7 @@ import com.fsck.k9.mail.internet.MimeUtility;
 
 
 public class MessageFulltextCreator {
-    private static final int MAX_CHARACTERS_CHECKED_FOR_FTS = 200*1024;
+    private static final int MAX_CHARACTERS_CHECKED_FOR_FTS = 200 * 1024;
 
 
     private final TextPartFinder textPartFinder;

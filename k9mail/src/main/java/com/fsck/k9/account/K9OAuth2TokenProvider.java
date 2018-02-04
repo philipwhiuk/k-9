@@ -1,9 +1,5 @@
 package com.fsck.k9.account;
 
-
-import java.util.HashMap;
-import java.util.Map;
-
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.content.Context;

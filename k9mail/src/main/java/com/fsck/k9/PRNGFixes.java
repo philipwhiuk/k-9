@@ -41,7 +41,9 @@ public final class PRNGFixes {
             getBuildFingerprintAndDeviceSerial();
 
     /** Hidden constructor to prevent instantiation. */
-    private PRNGFixes() {}
+    private PRNGFixes() {
+
+    }
 
     /**
      * Applies all fixes.
@@ -144,7 +146,7 @@ public final class PRNGFixes {
     private static class LinuxPRNGSecureRandomProvider extends Provider {
         private static final long serialVersionUID = 6538669771360998378L;
 
-        public LinuxPRNGSecureRandomProvider() {
+        LinuxPRNGSecureRandomProvider() {
             super("LinuxPRNG",
                     1.0,
                     "A Linux-specific random number provider that uses"
@@ -172,7 +174,7 @@ public final class PRNGFixes {
          * Linux PRNG.
          *
          * Concurrency: Read requests to the underlying Linux PRNG are
-         * serialized (on sLock) to ensure that multiple threads do not get
+         * serialized (on S_LOCK) to ensure that multiple threads do not get
          * duplicated PRNG output.
          */
 
@@ -180,13 +182,13 @@ public final class PRNGFixes {
 
         private static final File URANDOM_FILE = new File("/dev/urandom");
 
-        private static final Object sLock = new Object();
+        private static final Object S_LOCK = new Object();
 
         /**
          * Input stream for reading from Linux PRNG or {@code null} if not yet
          * opened.
          *
-         * @GuardedBy("sLock")
+         * @GuardedBy("S_LOCK")
          */
         private static DataInputStream sUrandomIn;
 
@@ -199,7 +201,7 @@ public final class PRNGFixes {
         protected void engineNextBytes(byte[] bytes) {
             try {
                 DataInputStream in;
-                synchronized (sLock) {
+                synchronized (S_LOCK) {
                     in = getUrandomInputStream();
                 }
                 synchronized (in) {
@@ -219,7 +221,7 @@ public final class PRNGFixes {
         }
 
         private DataInputStream getUrandomInputStream() {
-            synchronized (sLock) {
+            synchronized (S_LOCK) {
                 if (sUrandomIn == null) {
                     // NOTE: Consider inserting a BufferedInputStream between
                     // DataInputStream and FileInputStream if you need higher

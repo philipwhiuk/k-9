@@ -25,7 +25,8 @@ public class TextQuoteCreator {
      * @return Quoted text.
      * @throws MessagingException
      */
-    public static String quoteOriginalTextMessage(Resources resources, Message originalMessage, String messageBody, QuoteStyle quoteStyle, String prefix) {
+    public static String quoteOriginalTextMessage(Resources resources, Message originalMessage,
+            String messageBody, QuoteStyle quoteStyle, String prefix) {
         String body = messageBody == null ? "" : messageBody;
         String sentDate = QuoteHelper.getSentDateText(resources, originalMessage);
         if (quoteStyle == QuoteStyle.PREFIX) {
@@ -56,19 +57,28 @@ public class TextQuoteCreator {
             quotedText.append("\r\n");
             quotedText.append(resources.getString(R.string.message_compose_quote_header_separator)).append("\r\n");
             if (originalMessage.getFrom() != null && Address.toString(originalMessage.getFrom()).length() != 0) {
-                quotedText.append(resources.getString(R.string.message_compose_quote_header_from)).append(" ").append(Address.toString(originalMessage.getFrom())).append("\r\n");
+                quotedText.append(resources.getString(R.string.message_compose_quote_header_from)).append(" ")
+                        .append(Address.toString(originalMessage.getFrom()))
+                        .append("\r\n");
             }
             if (sentDate.length() != 0) {
-                quotedText.append(resources.getString(R.string.message_compose_quote_header_send_date)).append(" ").append(sentDate).append("\r\n");
+                quotedText.append(resources.getString(R.string.message_compose_quote_header_send_date)).append(" ")
+                        .append(sentDate).append("\r\n");
             }
-            if (originalMessage.getRecipients(RecipientType.TO) != null && originalMessage.getRecipients(RecipientType.TO).length != 0) {
-                quotedText.append(resources.getString(R.string.message_compose_quote_header_to)).append(" ").append(Address.toString(originalMessage.getRecipients(RecipientType.TO))).append("\r\n");
+            if (originalMessage.getRecipients(RecipientType.TO) != null
+                    && originalMessage.getRecipients(RecipientType.TO).length != 0) {
+                quotedText.append(resources.getString(R.string.message_compose_quote_header_to))
+                        .append(" ").append(Address.toString( originalMessage.getRecipients(RecipientType.TO)))
+                        .append("\r\n");
             }
-            if (originalMessage.getRecipients(RecipientType.CC) != null && originalMessage.getRecipients(RecipientType.CC).length != 0) {
-                quotedText.append(resources.getString(R.string.message_compose_quote_header_cc)).append(" ").append(Address.toString(originalMessage.getRecipients(RecipientType.CC))).append("\r\n");
+            if (originalMessage.getRecipients(RecipientType.CC) != null
+                    && originalMessage.getRecipients(RecipientType.CC).length != 0) {
+                quotedText.append(resources.getString(R.string.message_compose_quote_header_cc)).append(" ")
+                        .append(Address.toString(originalMessage.getRecipients(RecipientType.CC))).append("\r\n");
             }
             if (originalMessage.getSubject() != null) {
-                quotedText.append(resources.getString(R.string.message_compose_quote_header_subject)).append(" ").append(originalMessage.getSubject()).append("\r\n");
+                quotedText.append(resources.getString(R.string.message_compose_quote_header_subject))
+                        .append(" ").append(originalMessage.getSubject()).append("\r\n");
             }
             quotedText.append("\r\n");
 

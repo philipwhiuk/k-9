@@ -177,7 +177,7 @@ public class PgpMessageBuilder extends MessageBuilder {
             long[] selfEncryptIds = { openPgpKeyId };
             pgpApiIntent.putExtra(OpenPgpApi.EXTRA_KEY_IDS, selfEncryptIds);
 
-            if(!isDraft()) {
+            if (!isDraft()) {
                 pgpApiIntent.putExtra(OpenPgpApi.EXTRA_USER_IDS, cryptoStatus.getRecipientAddresses());
 //                pgpApiIntent.putExtra(OpenPgpApi.EXTRA_ENCRYPT_OPPORTUNISTIC, cryptoStatus.isEncryptionOpportunistic());
             }

@@ -36,7 +36,9 @@ abstract class AndroidSpecificOAuth2TokenProvider extends SpecificOAuth2TokenPro
         } catch (Exception e) {
             throw new AuthenticationFailedException(e.getMessage());
         }
-        if (exchangeResponse == null || exchangeResponse.accessToken.isEmpty()) return null;
+        if (exchangeResponse == null || exchangeResponse.accessToken.isEmpty()) {
+            return null;
+        }
 
         return new OAuth2AuthorizationCodeFlowTokenProvider.Tokens(exchangeResponse.accessToken, exchangeResponse.refreshToken);
     }

@@ -2,13 +2,13 @@ package com.fsck.k9.service;
 
 import com.fsck.k9.Account;
 import com.fsck.k9.K9;
+import com.fsck.k9.K9.BackgroundOperations;
 import com.fsck.k9.preferences.Storage;
 import com.fsck.k9.preferences.StorageEditor;
 import com.fsck.k9.remotecontrol.K9RemoteControl;
 import com.fsck.k9.Preferences;
 import com.fsck.k9.R;
 import com.fsck.k9.Account.FolderMode;
-import com.fsck.k9.K9.BACKGROUND_OPS;
 
 import static com.fsck.k9.remotecontrol.K9RemoteControl.*;
 
@@ -112,7 +112,7 @@ public class RemoteControlService extends CoreService {
                         if (K9RemoteControl.K9_BACKGROUND_OPERATIONS_ALWAYS.equals(backgroundOps)
                                 || K9RemoteControl.K9_BACKGROUND_OPERATIONS_NEVER.equals(backgroundOps)
                                 || K9RemoteControl.K9_BACKGROUND_OPERATIONS_WHEN_CHECKED_AUTO_SYNC.equals(backgroundOps)) {
-                            BACKGROUND_OPS newBackgroundOps = BACKGROUND_OPS.valueOf(backgroundOps);
+                            BackgroundOperations newBackgroundOps = BackgroundOperations.valueOf(backgroundOps);
                             boolean needsReset = K9.setBackgroundOps(newBackgroundOps);
                             needsPushRestart |= needsReset;
                             needsReschedule |= needsReset;

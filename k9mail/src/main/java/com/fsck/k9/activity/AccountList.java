@@ -101,7 +101,7 @@ public abstract class AccountList extends K9ListActivity implements OnItemClickL
     protected abstract void onAccountSelected(BaseAccount account);
 
     class AccountsAdapter extends ArrayAdapter<BaseAccount> {
-        public AccountsAdapter(List<BaseAccount> accounts) {
+        AccountsAdapter(List<BaseAccount> accounts) {
             super(AccountList.this, 0, accounts);
         }
 

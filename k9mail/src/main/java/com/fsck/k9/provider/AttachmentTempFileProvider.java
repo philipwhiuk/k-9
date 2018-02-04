@@ -29,8 +29,8 @@ public class AttachmentTempFileProvider extends FileProvider {
     private static final String AUTHORITY = BuildConfig.APPLICATION_ID + ".tempfileprovider";
     private static final String CACHE_DIRECTORY = "temp";
     private static final long FILE_DELETE_THRESHOLD_MILLISECONDS = 3 * 60 * 1000;
-    private static final Object tempFileWriteMonitor = new Object();
-    private static final Object cleanupReceiverMonitor = new Object();
+    private static final Object TEMP_FILE_WRITE_MONITOR = new Object();
+    private static final Object CLEANUP_RECEIVER_MONITOR = new Object();
 
 
     private static AttachmentTempFileProviderCleanupReceiver cleanupReceiver = null;
@@ -64,7 +64,7 @@ public class AttachmentTempFileProvider extends FileProvider {
 
     private static void writeUriContentToTempFileIfNotExists(Context context, Uri uri, File tempFile)
             throws IOException {
-        synchronized (tempFileWriteMonitor) {
+        synchronized (TEMP_FILE_WRITE_MONITOR) {
             if (tempFile.exists()) {
                 return;
             }
@@ -149,7 +149,7 @@ public class AttachmentTempFileProvider extends FileProvider {
             return;
         }
 
-        new AsyncTask<Void,Void,Void>() {
+        new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... voids) {
                 deleteOldTemporaryFiles(context);
@@ -161,7 +161,7 @@ public class AttachmentTempFileProvider extends FileProvider {
     }
 
     private static void unregisterFileCleanupReceiver(Context context) {
-        synchronized (cleanupReceiverMonitor) {
+        synchronized (CLEANUP_RECEIVER_MONITOR) {
             if (cleanupReceiver == null) {
                 return;
             }
@@ -173,7 +173,7 @@ public class AttachmentTempFileProvider extends FileProvider {
     }
 
     private static void registerFileCleanupReceiver(Context context) {
-        synchronized (cleanupReceiverMonitor) {
+        synchronized (CLEANUP_RECEIVER_MONITOR) {
             if (cleanupReceiver != null) {
                 return;
             }

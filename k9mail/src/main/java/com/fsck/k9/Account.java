@@ -26,7 +26,6 @@ import com.fsck.k9.helper.EmailHelper;
 import com.fsck.k9.mail.AuthType;
 import com.fsck.k9.mail.ConnectionSecurity;
 import com.fsck.k9.mail.ServerSettings;
-import com.fsck.k9.mail.Transport;
 import timber.log.Timber;
 
 import com.fsck.k9.helper.Utility;
@@ -104,7 +103,7 @@ public class Account implements BaseAccount, AccountConfig {
         }
     }
 
-    public static enum ResizeFactor {
+    public enum ResizeFactor {
         FULL_SIZE, HALF_SIZE, QUARTER_SIZE
     }
 
@@ -666,8 +665,8 @@ public class Account implements BaseAccount, AccountConfig {
         if (moveUp) {
             for (int i = 0; i < uuids.length; i++) {
                 if (i > 0 && uuids[i].equals(accountUuid)) {
-                    newUuids[i] = newUuids[i-1];
-                    newUuids[i-1] = accountUuid;
+                    newUuids[i] = newUuids[i - 1];
+                    newUuids[i - 1] = accountUuid;
                 }
                 else {
                     newUuids[i] = uuids[i];
@@ -677,8 +676,8 @@ public class Account implements BaseAccount, AccountConfig {
         else {
             for (int i = uuids.length - 1; i >= 0; i--) {
                 if (i < uuids.length - 1 && uuids[i].equals(accountUuid)) {
-                    newUuids[i] = newUuids[i+1];
-                    newUuids[i+1] = accountUuid;
+                    newUuids[i] = newUuids[i + 1];
+                    newUuids[i + 1] = accountUuid;
                 }
                 else {
                     newUuids[i] = uuids[i];
@@ -1436,7 +1435,7 @@ public class Account implements BaseAccount, AccountConfig {
     @Override
     public boolean equals(Object o) {
         if (o instanceof Account) {
-            return ((Account)o).accountUuid.equals(accountUuid);
+            return ((Account) o).accountUuid.equals(accountUuid);
         }
         return super.equals(o);
     }
@@ -1652,23 +1651,25 @@ public class Account implements BaseAccount, AccountConfig {
             now.set(Calendar.MILLISECOND, 0);
             if (age < 28) {
                 now.add(Calendar.DATE, age * -1);
-            } else switch (age) {
-                case 28:
-                    now.add(Calendar.MONTH, -1);
-                    break;
-                case 56:
-                    now.add(Calendar.MONTH, -2);
-                    break;
-                case 84:
-                    now.add(Calendar.MONTH, -3);
-                    break;
-                case 168:
-                    now.add(Calendar.MONTH, -6);
-                    break;
-                case 365:
-                    now.add(Calendar.YEAR, -1);
-                    break;
+            } else {
+                switch (age) {
+                    case 28:
+                        now.add(Calendar.MONTH, -1);
+                        break;
+                    case 56:
+                        now.add(Calendar.MONTH, -2);
+                        break;
+                    case 84:
+                        now.add(Calendar.MONTH, -3);
+                        break;
+                    case 168:
+                        now.add(Calendar.MONTH, -6);
+                        break;
+                    case 365:
+                        now.add(Calendar.YEAR, -1);
+                        break;
                 }
+            }
 
             return now.getTime();
         }

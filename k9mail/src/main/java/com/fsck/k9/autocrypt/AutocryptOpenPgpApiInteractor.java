@@ -27,7 +27,7 @@ public class AutocryptOpenPgpApiInteractor {
         if (result.getIntExtra(OpenPgpApi.RESULT_CODE, OpenPgpApi.RESULT_CODE_ERROR) ==
                 OpenPgpApi.RESULT_CODE_SUCCESS) {
             return baos.toByteArray();
-        } else{
+        } else {
             return null;
         }
     }

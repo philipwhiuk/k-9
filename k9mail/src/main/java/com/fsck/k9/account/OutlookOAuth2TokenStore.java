@@ -48,14 +48,17 @@ class OutlookOAuth2TokenStore extends SpecificOAuth2TokenProvider {
         } catch (Exception e) {
             throw new AuthenticationFailedException(e.getMessage());
         }
-        if (exchangeResponse == null || exchangeResponse.accessToken.isEmpty()) return null;
+        if (exchangeResponse == null || exchangeResponse.accessToken.isEmpty()) {
+            return null;
+        }
 
         return new OAuth2AuthorizationCodeFlowTokenProvider.Tokens(exchangeResponse.accessToken, exchangeResponse.refreshToken);
     }
 
     @Override
     public String refreshToken(String username, String refreshToken) throws AuthenticationFailedException {
-        Call<RefreshResponse> call = service.refreshToken(CLIENT_ID, refreshToken, "refresh_token", "https://login.live.com/oauth20_desktop.srf");
+        Call<RefreshResponse> call = service.refreshToken(CLIENT_ID, refreshToken, "refresh_token",
+                "https://login.live.com/oauth20_desktop.srf");
         RefreshResponse response;
         try {
             response = call.execute().body();

@@ -53,38 +53,54 @@ public final class FlowedMessageUtils {
             int actualQuoteDepth = 0;
 
             if (line != null && line.length() > 0) {
-                if (line.equals(RFC2646_SIGNATURE))
+                if (line.equals(RFC2646_SIGNATURE)) {
                     // signature handling (the previous line is not flowed)
                     resultLineFlowed = false;
-
-                else if (line.charAt(0) == RFC2646_QUOTE) {
+                } else if (line.charAt(0) == RFC2646_QUOTE) {
                     // Quote
                     actualQuoteDepth = 1;
-                    while (actualQuoteDepth < line.length() && line.charAt(actualQuoteDepth) == RFC2646_QUOTE) actualQuoteDepth ++;
+                    while (actualQuoteDepth < line.length() && line.charAt(actualQuoteDepth) == RFC2646_QUOTE) {
+                        actualQuoteDepth++;
+                    }
                     // if quote-depth changes wrt the previous line then this is not flowed
-                    if (resultLineQuoteDepth != actualQuoteDepth) resultLineFlowed = false;
+                    if (resultLineQuoteDepth != actualQuoteDepth) {
+                        resultLineFlowed = false;
+                    }
                     line = line.substring(actualQuoteDepth);
 
                 } else {
                     // id quote-depth changes wrt the first line then this is not flowed
-                    if (resultLineQuoteDepth > 0) resultLineFlowed = false;
+                    if (resultLineQuoteDepth > 0) {
+                        resultLineFlowed = false;
+                    }
                 }
 
-                if (line.length() > 0 && line.charAt(0) == RFC2646_SPACE)
+                if (line.length() > 0 && line.charAt(0) == RFC2646_SPACE) {
                     // Line space-stuffed
                     line = line.substring(1);
+                }
 
                 // if the previous was the last then it was not flowed
-            } else if (line == null) resultLineFlowed = false;
+            } else if (line == null) {
+                resultLineFlowed = false;
+            }
 
             // Add the PREVIOUS line.
             // This often will find the flow looking for a space as the last char of the line.
             // With quote changes or signatures it could be the followinf line to void the flow.
             if (!resultLineFlowed && i > 0) {
-                if (resultLineQuoteDepth > 0) resultLine.insert(0, RFC2646_SPACE);
-                for (int j = 0; j < resultLineQuoteDepth; j++) resultLine.insert(0, RFC2646_QUOTE);
-                if (result == null) result = new StringBuffer();
-                else result.append(RFC2646_CRLF);
+                if (resultLineQuoteDepth > 0) {
+                    resultLine.insert(0, RFC2646_SPACE);
+                }
+                for (int j = 0; j < resultLineQuoteDepth; j++) {
+                    resultLine.insert(0, RFC2646_QUOTE);
+                }
+                if (result == null) {
+                    result = new StringBuffer();
+                }
+                else {
+                    result.append(RFC2646_CRLF);
+                }
                 result.append(resultLine.toString());
                 resultLine = new StringBuffer();
                 resultLineFlowed = false;
@@ -93,12 +109,17 @@ public final class FlowedMessageUtils {
 
             if (line != null) {
                 if (!line.equals(RFC2646_SIGNATURE) && line.endsWith("" + RFC2646_SPACE) && i < lines.length - 1) {
-                    // Line flowed (NOTE: for the split operation the line having i == lines.length is the last that does not end with RFC2646_CRLF)
-                    if (delSp) line = line.substring(0, line.length() - 1);
+                    // Line flowed (NOTE: for the split operation the line having i == lines.length
+                    // is the last that does not end with RFC2646_CRLF)
+                    if (delSp) {
+                        line = line.substring(0, line.length() - 1);
+                    }
                     resultLineFlowed = true;
                 }
 
-                else resultLineFlowed = false;
+                else {
+                    resultLineFlowed = false;
+                }
 
                 resultLine.append(line);
             }
@@ -120,15 +141,21 @@ public final class FlowedMessageUtils {
     public static String flow(String text, boolean delSp, int width) {
         StringBuilder result = new StringBuilder();
         String[] lines = text.split("\r\n|\n", -1);
-        for (int i = 0; i < lines.length; i ++) {
+        for (int i = 0; i < lines.length; i++) {
             String line = lines[i];
             boolean notempty = line.length() > 0;
 
             int quoteDepth = 0;
-            while (quoteDepth < line.length() && line.charAt(quoteDepth) == RFC2646_QUOTE) quoteDepth ++;
+            while (quoteDepth < line.length() && line.charAt(quoteDepth) == RFC2646_QUOTE) {
+                quoteDepth++;
+            }
             if (quoteDepth > 0) {
-                if (quoteDepth + 1 < line.length() && line.charAt(quoteDepth) == RFC2646_SPACE) line = line.substring(quoteDepth + 1);
-                else line = line.substring(quoteDepth);
+                if (quoteDepth + 1 < line.length() && line.charAt(quoteDepth) == RFC2646_SPACE) {
+                    line = line.substring(quoteDepth + 1);
+                }
+                else {
+                    line = line.substring(quoteDepth);
+                }
             }
 
             while (notempty) {
@@ -140,24 +167,34 @@ public final class FlowedMessageUtils {
                     }
                 } else {
                     line = RFC2646_SPACE + line;
-                    for (int j = 0; j < quoteDepth; j++) line = "" + RFC2646_QUOTE + line;
+                    for (int j = 0; j < quoteDepth; j++) {
+                        line = "" + RFC2646_QUOTE + line;
+                    }
                     extra = quoteDepth + 1;
                 }
 
                 int j = width - 1;
-                if (j >= line.length()) j = line.length() - 1;
+                if (j >= line.length()) {
+                    j = line.length() - 1;
+                }
                 else {
-                    while (j >= extra && ((delSp && isAlphaChar(text, j)) || (!delSp && line.charAt(j) != RFC2646_SPACE))) j --;
+                    while (j >= extra && ((delSp && isAlphaChar(text, j)) || (!delSp && line.charAt(j) != RFC2646_SPACE))) {
+                        j--;
+                    }
                     if (j < extra) {
                         // Not able to cut a word: skip to word end even if greater than the max width
                         j = width - 1;
-                        while (j < line.length() - 1 && ((delSp && isAlphaChar(text, j)) || (!delSp && line.charAt(j) != RFC2646_SPACE))) j ++;
+                        while (j < line.length() - 1 && ((delSp && isAlphaChar(text, j)) || (!delSp && line.charAt(j) != RFC2646_SPACE))) {
+                            j++;
+                        }
                     }
                 }
 
                 result.append(line.substring(0, j + 1));
                 if (j < line.length() - 1) {
-                    if (delSp) result.append(RFC2646_SPACE);
+                    if (delSp) {
+                        result.append(RFC2646_SPACE);
+                    }
                     result.append(RFC2646_CRLF);
                 }
 
@@ -168,7 +205,9 @@ public final class FlowedMessageUtils {
             if (i < lines.length - 1) {
                 // NOTE: Have to trim the spaces before, otherwise it won't recognize soft-break from hard break.
                 // Deflow of flowed message will not be identical to the original.
-                while (result.length() > 0 && result.charAt(result.length() - 1) == RFC2646_SPACE) result.deleteCharAt(result.length() - 1);
+                while (result.length() > 0 && result.charAt(result.length() - 1) == RFC2646_SPACE) {
+                    result.deleteCharAt(result.length() - 1);
+                }
                 result.append(RFC2646_CRLF);
             }
         }

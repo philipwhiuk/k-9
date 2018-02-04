@@ -68,8 +68,8 @@ abstract class BaseNotifications {
     }
 
     protected SpannableString markImportance(String subject, NotificationContent content) {
-        if(content.importance.equals(Importance.HIGH)) {
-            return new SpannableString(Html.fromHtml(subject+"<h1><font color=\"#FF0000\">"+ "!" + "</font></h1>"));
+        if (content.importance.equals(Importance.HIGH)) {
+            return new SpannableString(Html.fromHtml(subject + "<h1><font color=\"#FF0000\">" + "!" + "</font></h1>"));
         }
        return new SpannableString(subject);
     }

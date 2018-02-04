@@ -54,7 +54,7 @@ public class AutocryptOperations {
     public void addAutocryptHeaderToMessage(Message message, byte[] keyData,
             String autocryptAddress, boolean preferEncryptMutual) {
         AutocryptHeader autocryptHeader = new AutocryptHeader(
-                Collections.<String,String>emptyMap(), autocryptAddress, keyData, preferEncryptMutual);
+                Collections.<String, String>emptyMap(), autocryptAddress, keyData, preferEncryptMutual);
         String rawAutocryptHeader = autocryptHeader.toRawHeaderString();
 
         message.addRawHeader(AutocryptHeader.AUTOCRYPT_HEADER, rawAutocryptHeader);

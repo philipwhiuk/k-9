@@ -39,7 +39,6 @@ import com.fsck.k9.mail.Store;
 import com.fsck.k9.mail.Transport;
 import com.fsck.k9.mail.TransportProvider;
 import com.fsck.k9.mail.TransportUris;
-import com.fsck.k9.mail.autoconfiguration.Autoconfigure;
 import com.fsck.k9.mail.autoconfiguration.Autodiscover;
 import com.fsck.k9.mail.autoconfiguration.AutoconfigureMozilla;
 import com.fsck.k9.mail.autoconfiguration.AutoconfigureSrv;
@@ -251,7 +250,9 @@ public class AccountSetupPresenter implements AccountSetupContract.Presenter,
                 try {
                     String mxDomain = DnsHelper.getMxDomain(domain);
 
-                    if (mxDomain == null) return null;
+                    if (mxDomain == null) {
+                        return null;
+                    }
 
                     publishProgress(R.string.account_setup_check_settings_retr_info_msg);
                     providerInfo = autoconfigureDomain(mxDomain);
@@ -272,16 +273,24 @@ public class AccountSetupPresenter implements AccountSetupContract.Presenter,
 
                 provider = findProviderForDomain(domain);
 
-                if (provider != null) return null;
+                if (provider != null) {
+                    return null;
+                }
 
                 providerInfo = autoconfigureMozilla.findProviderInfo(email);
-                if (providerInfo != null) return providerInfo;
+                if (providerInfo != null) {
+                    return providerInfo;
+                }
 
                 providerInfo = autoconfigureSrv.findProviderInfo(email);
-                if (providerInfo != null) return providerInfo;
+                if (providerInfo != null) {
+                    return providerInfo;
+                }
 
                 providerInfo = autodiscover.findProviderInfo(email);
-                if (providerInfo != null) return providerInfo;
+                if (providerInfo != null) {
+                    return providerInfo;
+                }
 
                 testDomain(domain);
 
@@ -617,6 +626,7 @@ public class AccountSetupPresenter implements AccountSetupContract.Presenter,
                 return true;
 
             } catch (OAuth2NeedUserPromptException ignored) {
+                //TODO: ?
             } catch (final AuthenticationFailedException afe) {
                 Timber.e(afe, "Error while testing settings");
                 if (afe.getMessage().equals(AuthenticationFailedException.OAUTH2_ERROR_INVALID_REFRESH_TOKEN)) {
@@ -842,7 +852,7 @@ public class AccountSetupPresenter implements AccountSetupContract.Presenter,
     public void onPositiveClickedInConfirmationDialog() {
         if (stage == Stage.INCOMING_CHECKING) {
             view.goToIncoming();
-        } else if (stage == Stage.OUTGOING_CHECKING){
+        } else if (stage == Stage.OUTGOING_CHECKING) {
             view.goToOutgoing();
         } else {
             view.goToBasics();
@@ -907,7 +917,7 @@ public class AccountSetupPresenter implements AccountSetupContract.Presenter,
             //  by a subjectDN not matching the server even though a
             //  SubjectAltName matches)
             try {
-                final Collection<List<? >> subjectAlternativeNames = chain[i].getSubjectAlternativeNames();
+                final Collection<List<?>> subjectAlternativeNames = chain[i].getSubjectAlternativeNames();
                 if (subjectAlternativeNames != null) {
                     // The list of SubjectAltNames may be very long
                     //TODO: localize this string
@@ -917,7 +927,7 @@ public class AccountSetupPresenter implements AccountSetupContract.Presenter,
                     // we need these for matching
 
                     for (List<?> subjectAlternativeName : subjectAlternativeNames) {
-                        Integer type = (Integer)subjectAlternativeName.get(0);
+                        Integer type = (Integer) subjectAlternativeName.get(0);
                         Object value = subjectAlternativeName.get(1);
                         String name;
                         switch (type.intValue()) {
@@ -925,10 +935,10 @@ public class AccountSetupPresenter implements AccountSetupContract.Presenter,
                                 Timber.w("SubjectAltName of type OtherName not supported.");
                                 continue;
                             case 1: // RFC822Name
-                                name = (String)value;
+                                name = (String) value;
                                 break;
                             case 2:  // DNSName
-                                name = (String)value;
+                                name = (String) value;
                                 break;
                             case 3:
                                 Timber.w("unsupported SubjectAltName of type x400Address");
@@ -940,10 +950,10 @@ public class AccountSetupPresenter implements AccountSetupContract.Presenter,
                                 Timber.w("unsupported SubjectAltName of type ediPartyName");
                                 continue;
                             case 6:  // Uri
-                                name = (String)value;
+                                name = (String) value;
                                 break;
                             case 7: // ip-address
-                                name = (String)value;
+                                name = (String) value;
                                 break;
                             default:
                                 Timber.w("unsupported SubjectAltName of unknown type");
@@ -1027,7 +1037,9 @@ public class AccountSetupPresenter implements AccountSetupContract.Presenter,
         public String note;
 
         public static Provider newInstanceFromProviderInfo(@Nullable ProviderInfo providerInfo) throws URISyntaxException {
-            if (providerInfo == null) return null;
+            if (providerInfo == null) {
+                return null;
+            }
 
             Provider provider = new Provider();
 
@@ -1173,7 +1185,9 @@ public class AccountSetupPresenter implements AccountSetupContract.Presenter,
     }
 
     private void updatePortFromSecurityTypeInIncoming(ConnectionSecurity securityType) {
-        if (restoring) return;
+        if (restoring) {
+            return;
+        }
 
         String port = String.valueOf(AccountCreator.getDefaultPort(securityType, incomingSettings.type));
         view.setPortInIncoming(port);
@@ -1592,7 +1606,9 @@ public class AccountSetupPresenter implements AccountSetupContract.Presenter,
     private void updateViewFromSecurityTypeInOutgoing(ConnectionSecurity securityType) {
         view.updateAuthPlainTextInOutgoing(securityType == ConnectionSecurity.NONE);
 
-        if (restoring) return;
+        if (restoring) {
+            return;
+        }
         String port = String.valueOf(AccountCreator.getDefaultPort(securityType, SMTP));
         view.setPortInOutgoing(port);
         currentOutgoingPort = port;

@@ -13,172 +13,172 @@ import org.openintents.openpgp.OpenPgpSignatureResult;
 
 
 public enum MessageCryptoDisplayStatus {
-    LOADING (
+    LOADING(
             R.attr.openpgp_grey,
             R.drawable.status_lock_disabled
     ),
 
-    CANCELLED (
+    CANCELLED(
             R.attr.openpgp_black,
             R.drawable.status_lock_unknown,
             R.string.crypto_msg_title_encrypted_unknown,
             R.string.crypto_msg_cancelled
     ),
 
-    DISABLED (
+    DISABLED(
             R.attr.openpgp_grey,
             R.drawable.status_lock_disabled,
             R.string.crypto_msg_title_plaintext,
             null
     ),
-    UNENCRYPTED_SIGN_ERROR (
+    UNENCRYPTED_SIGN_ERROR(
             R.attr.openpgp_grey,
             R.drawable.status_signature_unknown,
             R.string.crypto_msg_title_plaintext,
             R.string.crypto_msg_unencrypted_sign_error
     ),
-    INCOMPLETE_SIGNED (
+    INCOMPLETE_SIGNED(
             R.attr.openpgp_black,
             R.drawable.status_signature_unknown,
             R.string.crypto_msg_title_plaintext,
             R.string.crypto_msg_incomplete_signed
     ),
 
-    UNENCRYPTED_SIGN_VERIFIED (
+    UNENCRYPTED_SIGN_VERIFIED(
             R.attr.openpgp_blue,
             R.drawable.status_signature_dots_3,
             R.string.crypto_msg_title_unencrypted_signed_e2e,
             R.string.crypto_msg_unencrypted_sign_verified
     ),
-    UNENCRYPTED_SIGN_UNVERIFIED (
+    UNENCRYPTED_SIGN_UNVERIFIED(
             R.attr.openpgp_blue,
             R.drawable.status_signature,
             R.string.crypto_msg_title_unencrypted_signed_e2e,
             null
     ),
 
-    UNENCRYPTED_SIGN_UNKNOWN (
+    UNENCRYPTED_SIGN_UNKNOWN(
             R.attr.openpgp_orange,
             R.drawable.status_signature_unknown,
             R.string.crypto_msg_title_unencrypted_signed,
             R.string.crypto_msg_unencrypted_sign_unknown
     ),
-    UNENCRYPTED_SIGN_MISMATCH (
+    UNENCRYPTED_SIGN_MISMATCH(
             R.attr.openpgp_grey,
             R.drawable.status_signature_unknown,
             R.string.crypto_msg_title_unencrypted_signed,
             R.string.crypto_msg_unencrypted_sign_mismatch
     ),
-    UNENCRYPTED_SIGN_EXPIRED (
+    UNENCRYPTED_SIGN_EXPIRED(
             R.attr.openpgp_grey,
             R.drawable.status_signature_unknown,
             R.string.crypto_msg_title_unencrypted_signed,
             R.string.crypto_msg_unencrypted_sign_expired
     ),
-    UNENCRYPTED_SIGN_REVOKED (
+    UNENCRYPTED_SIGN_REVOKED(
             R.attr.openpgp_grey,
             R.drawable.status_signature_unknown,
             R.string.crypto_msg_title_unencrypted_signed,
             R.string.crypto_msg_unencrypted_sign_revoked
     ),
-    UNENCRYPTED_SIGN_INSECURE (
+    UNENCRYPTED_SIGN_INSECURE(
             R.attr.openpgp_grey,
             R.drawable.status_signature_unknown,
             R.string.crypto_msg_title_unencrypted_signed,
             R.string.crypto_msg_unencrypted_sign_insecure
     ),
 
-    ENCRYPTED_SIGN_VERIFIED (
+    ENCRYPTED_SIGN_VERIFIED(
             R.attr.openpgp_green,
             R.drawable.status_lock_dots_3,
             R.string.crypto_msg_title_encrypted_signed_e2e,
             R.string.crypto_msg_encrypted_sign_verified
     ),
-    ENCRYPTED_SIGN_UNVERIFIED (
+    ENCRYPTED_SIGN_UNVERIFIED(
             R.attr.openpgp_green,
             R.drawable.status_lock,
             R.string.crypto_msg_title_encrypted_signed_e2e,
             null
     ),
 
-    ENCRYPTED_SIGN_UNKNOWN (
+    ENCRYPTED_SIGN_UNKNOWN(
             R.attr.openpgp_orange,
             R.drawable.status_lock_unknown,
             R.string.crypto_msg_title_encrypted_signed,
             R.string.crypto_msg_encrypted_sign_unknown
     ),
-    ENCRYPTED_SIGN_MISMATCH (
+    ENCRYPTED_SIGN_MISMATCH(
             R.attr.openpgp_grey,
             R.drawable.status_lock_error,
             R.string.crypto_msg_title_encrypted_signed,
             R.string.crypto_msg_encrypted_sign_mismatch
     ),
-    ENCRYPTED_SIGN_EXPIRED (
+    ENCRYPTED_SIGN_EXPIRED(
             R.attr.openpgp_grey,
             R.drawable.status_lock_error,
             R.string.crypto_msg_title_encrypted_signed,
             R.string.crypto_msg_encrypted_sign_expired
     ),
-    ENCRYPTED_SIGN_REVOKED (
+    ENCRYPTED_SIGN_REVOKED(
             R.attr.openpgp_grey,
             R.drawable.status_lock_error,
             R.string.crypto_msg_title_encrypted_signed,
             R.string.crypto_msg_encrypted_sign_revoked
     ),
-    ENCRYPTED_SIGN_INSECURE (
+    ENCRYPTED_SIGN_INSECURE(
             R.attr.openpgp_grey,
             R.drawable.status_lock_error,
             R.string.crypto_msg_title_encrypted_signed,
             R.string.crypto_msg_encrypted_sign_insecure
     ),
-    ENCRYPTED_SIGN_ERROR (
+    ENCRYPTED_SIGN_ERROR(
             R.attr.openpgp_grey,
             R.drawable.status_lock_error,
             R.string.crypto_msg_title_encrypted_signed,
             R.string.crypto_msg_encrypted_sign_error
     ),
-    ENCRYPTED_INSECURE (
+    ENCRYPTED_INSECURE(
             R.attr.openpgp_red,
             R.drawable.status_lock_error,
             R.string.crypto_msg_title_encrypted_signed,
             R.string.crypto_msg_encrypted_insecure
     ),
 
-    ENCRYPTED_UNSIGNED (
+    ENCRYPTED_UNSIGNED(
             R.attr.openpgp_grey,
             R.drawable.status_lock_error,
             R.string.crypto_msg_title_encrypted_unsigned,
             R.string.crypto_msg_encrypted_unsigned
     ),
 
-    ENCRYPTED_ERROR (
+    ENCRYPTED_ERROR(
             R.attr.openpgp_red,
             R.drawable.status_lock_error,
             R.string.crypto_msg_title_encrypted_unknown,
             R.string.crypto_msg_encrypted_error
     ),
 
-    INCOMPLETE_ENCRYPTED (
+    INCOMPLETE_ENCRYPTED(
             R.attr.openpgp_black,
             R.drawable.status_lock_unknown,
             R.string.crypto_msg_title_encrypted_unknown,
             R.string.crypto_msg_encrypted_incomplete
     ),
 
-    ENCRYPTED_NO_PROVIDER (
+    ENCRYPTED_NO_PROVIDER(
             R.attr.openpgp_red,
             R.drawable.status_lock_error,
             R.string.crypto_msg_title_encrypted_unknown,
             R.string.crypto_msg_encrypted_no_provider
     ),
 
-    UNSUPPORTED_ENCRYPTED (
+    UNSUPPORTED_ENCRYPTED(
             R.attr.openpgp_red,
             R.drawable.status_lock_error,
             R.string.crypto_msg_title_encrypted_unknown,
             R.string.crypto_msg_unsupported_encrypted
     ),
-    UNSUPPORTED_SIGNED (
+    UNSUPPORTED_SIGNED(
             R.attr.openpgp_grey,
             R.drawable.status_lock_disabled,
             R.string.crypto_msg_title_encrypted_unknown,

@@ -91,12 +91,12 @@ public class MessageReference {
 
     @Override
     public int hashCode() {
-        final int MULTIPLIER = 31;
+        final int multiplier = 31;
 
         int result = 1;
-        result = MULTIPLIER * result + accountUuid.hashCode();
-        result = MULTIPLIER * result + folderName.hashCode();
-        result = MULTIPLIER * result + uid.hashCode();
+        result = multiplier * result + accountUuid.hashCode();
+        result = multiplier * result + folderName.hashCode();
+        result = multiplier * result + uid.hashCode();
         return result;
     }
 
