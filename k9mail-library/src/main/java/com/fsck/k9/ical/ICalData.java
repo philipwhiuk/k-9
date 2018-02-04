@@ -154,7 +154,7 @@ public class ICalData {
         }
 
         public String getDateTime() {
-            return new SimpleDateFormat().format(new Date(date));
+            return SimpleDateFormat.getDateTimeInstance().format(new Date(date));
         }
 
         public String getLocation() {
