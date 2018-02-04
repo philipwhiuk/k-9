@@ -19,7 +19,7 @@ class ImapPusher implements Pusher {
     private long lastRefresh = -1;
 
 
-    public ImapPusher(ImapStore store, PushReceiver pushReceiver) {
+    ImapPusher(ImapStore store, PushReceiver pushReceiver) {
         this.store = store;
         this.pushReceiver = pushReceiver;
     }

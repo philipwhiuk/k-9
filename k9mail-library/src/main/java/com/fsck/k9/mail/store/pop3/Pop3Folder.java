@@ -24,7 +24,6 @@ import com.fsck.k9.mail.MessagingException;
 import timber.log.Timber;
 
 import static com.fsck.k9.mail.K9MailLib.DEBUG_PROTOCOL_POP3;
-import static com.fsck.k9.mail.store.pop3.Pop3Commands.*;
 
 
 /**
@@ -63,7 +62,7 @@ class Pop3Folder extends Folder<Pop3Message> {
         connection = pop3Store.createConnection();
         connection.open();
 
-        String response = connection.executeSimpleCommand(STAT_COMMAND);
+        String response = connection.executeSimpleCommand(Pop3Commands.STAT_COMMAND);
         String[] parts = response.split(" ");
         messageCount = Integer.parseInt(parts[1]);
 
@@ -86,7 +85,7 @@ class Pop3Folder extends Folder<Pop3Message> {
     public void close() {
         try {
             if (isOpen()) {
-                connection.executeSimpleCommand(QUIT_COMMAND);
+                connection.executeSimpleCommand(Pop3Commands.QUIT_COMMAND);
             }
         } catch (Exception e) {
             /*
@@ -203,7 +202,7 @@ class Pop3Folder extends Folder<Pop3Message> {
             for (int msgNum = start; msgNum <= end; msgNum++) {
                 Pop3Message message = msgNumToMsgMap.get(msgNum);
                 if (message == null) {
-                    String response = connection.executeSimpleCommand(UIDL_COMMAND + " " + msgNum);
+                    String response = connection.executeSimpleCommand(Pop3Commands.UIDL_COMMAND + " " + msgNum);
                     // response = "+OK msgNum msgUid"
                     String[] uidParts = response.split(" +");
                     if (uidParts.length < 3 || !"+OK".equals(uidParts[0])) {
@@ -216,7 +215,7 @@ class Pop3Folder extends Folder<Pop3Message> {
                 }
             }
         } else {
-            connection.executeSimpleCommand(UIDL_COMMAND);
+            connection.executeSimpleCommand(Pop3Commands.UIDL_COMMAND);
             String response;
             while ((response = connection.readLine()) != null) {
                 if (response.equals(".")) {
@@ -280,7 +279,7 @@ class Pop3Folder extends Folder<Pop3Message> {
          * get them is to do a full UIDL list. A possible optimization
          * would be trying UIDL for the latest X messages and praying.
          */
-        connection.executeSimpleCommand(UIDL_COMMAND);
+        connection.executeSimpleCommand(Pop3Commands.UIDL_COMMAND);
         String response;
         while ((response = connection.readLine()) != null) {
             if (response.equals(".")) {
@@ -408,7 +407,7 @@ class Pop3Folder extends Folder<Pop3Message> {
                     listener.messageStarted(message.getUid(), i, count);
                 }
                 String response = connection.executeSimpleCommand(
-                        String.format(Locale.US, LIST_COMMAND + " %d",
+                        String.format(Locale.US, Pop3Commands.LIST_COMMAND + " %d",
                                 uidToMsgNumMap.get(message.getUid())));
                 String[] listParts = response.split(" ");
                 //int msgNum = Integer.parseInt(listParts[1]);
@@ -424,7 +423,7 @@ class Pop3Folder extends Folder<Pop3Message> {
                 msgUidIndex.add(message.getUid());
             }
             int i = 0, count = messages.size();
-            connection.executeSimpleCommand(LIST_COMMAND);
+            connection.executeSimpleCommand(Pop3Commands.LIST_COMMAND);
             String response;
             while ((response = connection.readLine()) != null) {
                 if (response.equals(".")) {
@@ -469,7 +468,7 @@ class Pop3Folder extends Folder<Pop3Message> {
                 }
 
                 response = connection.executeSimpleCommand(
-                        String.format(Locale.US, TOP_COMMAND + " %d %d",
+                        String.format(Locale.US, Pop3Commands.TOP_COMMAND + " %d %d",
                                 uidToMsgNumMap.get(message.getUid()), lines));
                 // TOP command is supported. Remember this for the next time.
                 connection.setSupportsTop(true);
@@ -490,7 +489,7 @@ class Pop3Folder extends Folder<Pop3Message> {
         }
 
         if (response == null) {
-            connection.executeSimpleCommand(String.format(Locale.US, RETR_COMMAND + " %d",
+            connection.executeSimpleCommand(String.format(Locale.US, Pop3Commands.RETR_COMMAND + " %d",
                                  uidToMsgNumMap.get(message.getUid())));
         }
 
@@ -567,7 +566,7 @@ class Pop3Folder extends Folder<Pop3Message> {
                 throw me;
             }
             open(Folder.OPEN_MODE_RW);
-            connection.executeSimpleCommand(String.format(DELE_COMMAND + " %s", msgNum));
+            connection.executeSimpleCommand(String.format(Pop3Commands.DELE_COMMAND + " %s", msgNum));
         }
     }
 
@@ -605,7 +604,7 @@ class Pop3Folder extends Folder<Pop3Message> {
              * If the server doesn't support UIDL it will return a - response, which causes
              * executeSimpleCommand to throw a MessagingException, exiting this method.
              */
-            connection.executeSimpleCommand(UIDL_COMMAND);
+            connection.executeSimpleCommand(Pop3Commands.UIDL_COMMAND);
         }
     }
 }

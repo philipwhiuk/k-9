@@ -3,7 +3,6 @@ package com.fsck.k9.mail;
 
 import android.content.Context;
 
-import com.fsck.k9.mail.oauth.OAuth2AuthorizationCodeFlowTokenProvider;
 import com.fsck.k9.mail.oauth.OAuth2TokenProvider;
 import com.fsck.k9.mail.ssl.DefaultTrustedSocketFactory;
 import com.fsck.k9.mail.store.StoreConfig;

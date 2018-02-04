@@ -2,13 +2,18 @@ package com.fsck.k9.mail.store.pop3;
 
 import android.support.annotation.NonNull;
 
-import com.fsck.k9.mail.*;
+import com.fsck.k9.mail.AuthType;
+import com.fsck.k9.mail.ConnectionSecurity;
+import com.fsck.k9.mail.Folder;
+import com.fsck.k9.mail.MessagingException;
+import com.fsck.k9.mail.ServerSettings;
 import com.fsck.k9.mail.ServerSettings.Type;
 import com.fsck.k9.mail.ssl.TrustedSocketFactory;
 import com.fsck.k9.mail.store.RemoteStore;
 import com.fsck.k9.mail.store.StoreConfig;
 
-import java.net.*;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.LinkedList;
 import java.util.HashMap;
 import java.util.List;
@@ -88,7 +93,7 @@ public class Pop3Store extends RemoteStore {
             int userIndex = 0, passwordIndex = 1;
             String userinfo = pop3Uri.getUserInfo();
             String[] userInfoParts = userinfo.split(":");
-            if (userInfoParts.length > 2 || userinfo.endsWith(":") ) {
+            if (userInfoParts.length > 2 || userinfo.endsWith(":")) {
                 // If 'userinfo' ends with ":" the password is empty. This can only happen
                 // after an account was imported (so authType and username are present).
                 userIndex++;

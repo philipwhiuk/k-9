@@ -10,7 +10,7 @@ class ImapPushState {
     private static final int PUSH_STATE_PREFIX_LENGTH = 8;
 
 
-    public final long uidNext;
+    final long uidNext;
 
     public static ImapPushState parse(String pushState) {
         if (pushState == null || !pushState.startsWith(PUSH_STATE_PREFIX)) {
@@ -33,7 +33,7 @@ class ImapPushState {
         return new ImapPushState(DEFAULT_UID_NEXT);
     }
 
-    public ImapPushState(long uidNext) {
+    ImapPushState(long uidNext) {
         this.uidNext = uidNext;
     }
 

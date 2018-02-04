@@ -18,14 +18,16 @@ public class WebDavTransport extends Transport {
     public WebDavTransport(StoreConfig storeConfig) throws MessagingException {
         store = new WebDavStore(storeConfig, new WebDavHttpClient.WebDavHttpClientFactory());
 
-        if (K9MailLib.isDebug())
+        if (K9MailLib.isDebug()) {
             Timber.d(">>> New WebDavTransport creation complete");
+        }
     }
 
     @Override
     public void open() throws MessagingException {
-        if (K9MailLib.isDebug())
-            Timber.d( ">>> open called on WebDavTransport ");
+        if (K9MailLib.isDebug()) {
+            Timber.d(">>> open called on WebDavTransport ");
+        }
 
         store.getHttpClient();
     }

@@ -45,8 +45,7 @@ class ImapFolderPusher extends ImapFolder {
     private volatile boolean stop = false;
     private volatile boolean idling = false;
 
-
-    public ImapFolderPusher(ImapStore store, String name, PushReceiver pushReceiver) {
+    ImapFolderPusher(ImapStore store, String name, PushReceiver pushReceiver) {
         super(store, name);
         this.pushReceiver = pushReceiver;
 

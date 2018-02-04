@@ -36,7 +36,7 @@ public class ServerSettings {
          */
         public final int defaultTlsPort;
 
-        private Type(int defaultPort, int defaultTlsPort) {
+        Type(int defaultPort, int defaultTlsPort) {
             this.defaultPort = defaultPort;
             this.defaultTlsPort = defaultTlsPort;
         }
@@ -223,7 +223,7 @@ public class ServerSettings {
 
     @Override
     public boolean equals(Object obj) {
-        if (! (obj instanceof ServerSettings)) {
+        if (!(obj instanceof ServerSettings)) {
             return false;
         }
         ServerSettings that = (ServerSettings) obj;
@@ -235,6 +235,22 @@ public class ServerSettings {
                 (username == null ? that.username == null : username.equals(that.username)) &&
                 (password == null ? that.password == null : password.equals(that.password)) &&
                 (clientCertificateAlias == null ? that.clientCertificateAlias == null :
-                        clientCertificateAlias.equals(that.clientCertificateAlias));
+                        clientCertificateAlias.equals(that.clientCertificateAlias)) &&
+                (extra == null ? that.extra == null :
+                        extra.equals(that.extra));
+    }
+
+    @Override
+    public int hashCode() {
+        int result = type.hashCode();
+        result = 31 * result + host.hashCode();
+        result = 31 * result + port;
+        result = 31 * result + connectionSecurity.hashCode();
+        result = 31 * result + authenticationType.hashCode();
+        result = 31 * result + (username != null ? username.hashCode() : 0);
+        result = 31 * result + (password != null ? password.hashCode() : 0);
+        result = 31 * result + (clientCertificateAlias != null ? clientCertificateAlias.hashCode() : 0);
+        result = 31 * result + (extra != null ? extra.hashCode() : 0);
+        return result;
     }
 }

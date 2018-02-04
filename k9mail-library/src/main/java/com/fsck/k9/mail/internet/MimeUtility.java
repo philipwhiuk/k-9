@@ -954,8 +954,8 @@ public class MimeUtility {
         return null;
     }
 
-    public static Map<String,String> getAllHeaderParameters(String headerValue) {
-        Map<String,String> result = new HashMap<>();
+    public static Map<String, String> getAllHeaderParameters(String headerValue) {
+        Map<String, String> result = new HashMap<>();
 
         headerValue = headerValue.replaceAll("\r|\n", "");
         String[] parts = headerValue.split(";");
@@ -973,7 +973,7 @@ public class MimeUtility {
 
     public static Part findFirstPartByMimeType(Part part, String mimeType) {
         if (part.getBody() instanceof Multipart) {
-            Multipart multipart = (Multipart)part.getBody();
+            Multipart multipart = (Multipart) part.getBody();
             for (BodyPart bodyPart : multipart.getBodyParts()) {
                 Part ret = MimeUtility.findFirstPartByMimeType(bodyPart, mimeType);
                 if (ret != null) {

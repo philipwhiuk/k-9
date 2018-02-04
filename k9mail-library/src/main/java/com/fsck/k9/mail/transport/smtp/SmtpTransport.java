@@ -527,8 +527,9 @@ public class SmtpTransport extends Transport {
             }
         }
         String ret = sb.toString();
-        if (K9MailLib.isDebug() && DEBUG_PROTOCOL_SMTP)
+        if (K9MailLib.isDebug() && DEBUG_PROTOCOL_SMTP) {
             Timber.d("SMTP <<< %s", ret);
+        }
 
         return ret;
     }

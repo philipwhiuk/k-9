@@ -33,6 +33,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import android.annotation.SuppressLint;
+
 import static com.fsck.k9.mail.K9MailLib.DEBUG_PROTOCOL_WEBDAV;
 import static com.fsck.k9.mail.helper.UrlEncodingHelper.encodeUtf8;
 
@@ -51,7 +53,7 @@ class WebDavFolder extends Folder<WebDavMessage> {
         return store;
     }
 
-    public WebDavFolder(WebDavStore nStore, String name) {
+    WebDavFolder(WebDavStore nStore, String name) {
         super();
         store = nStore;
         this.mName = name;
@@ -396,10 +398,11 @@ class WebDavFolder extends Folder<WebDavMessage> {
                             //containing the given line count
                             reader = new BufferedReader(new InputStreamReader(istream), 8192);
 
-                            while ((tempText = reader.readLine()) != null &&
-                                    (currentLines < lines)) {
+                            tempText = reader.readLine();
+                            while (tempText != null && currentLines < lines) {
                                 buffer.append(tempText).append("\r\n");
                                 currentLines++;
+                                tempText = reader.readLine();
                             }
 
                             IOUtils.closeQuietly(istream);
@@ -687,23 +690,30 @@ class WebDavFolder extends Folder<WebDavMessage> {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (o instanceof WebDavFolder) {
-            return ((WebDavFolder) o).mName.equals(mName);
-        }
-        return super.equals(o);
+    public int hashCode() {
+        return mName.hashCode();
     }
 
     @Override
+    public boolean equals(Object o) {
+        return o == this ||
+                o instanceof WebDavFolder
+                        && ((WebDavFolder) o).mName.equals(mName);
+    }
+
+    @SuppressLint("BinaryOperationInTimber")
+    @Override
     public String getUidFromMessageId(Message message) throws MessagingException {
-        Timber.e("Unimplemented method getUidFromMessageId in WebDavStore.WebDavFolder could lead to duplicate messages "
-                        + " being uploaded to the Sent folder");
+        Timber.e("Unimplemented method getUidFromMessageId in WebDavStore.WebDavFolder could lead to " +
+                "duplicate messages  being uploaded to the Sent folder");
         return null;
     }
 
+    @SuppressLint("BinaryOperationInTimber")
     @Override
     public void setFlags(final Set<Flag> flags, boolean value) throws MessagingException {
-        Timber.e("Unimplemented method setFlags(Set<Flag>, boolean) breaks markAllMessagesAsRead and EmptyTrash");
+        Timber.e("Unimplemented method setFlags(Set<Flag>, boolean) " +
+                "breaks markAllMessagesAsRead and EmptyTrash");
         // Try to make this efficient by not retrieving all of the messages
     }
 

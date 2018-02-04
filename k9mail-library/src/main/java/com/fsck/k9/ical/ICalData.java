@@ -13,7 +13,6 @@ import biweekly.property.Attendee;
 import biweekly.property.Method;
 import biweekly.property.Organizer;
 import biweekly.property.RecurrenceRule;
-import com.fsck.k9.mail.Part;
 import timber.log.Timber;
 
 
@@ -66,7 +65,7 @@ public class ICalData {
             organizer = event.getOrganizer();
             location = event.getLocation().getValue();
 
-            if(event.getDateStart() != null) {
+            if (event.getDateStart() != null) {
                 date = event.getDateStart().getValue().getTime();
             }
 
@@ -86,7 +85,7 @@ public class ICalData {
             List<Attendee> needsActionList = new ArrayList<>();
             List<Attendee> tentativeList = new ArrayList<>();
 
-            for(Attendee attendee: attendees) {
+            for (Attendee attendee: attendees) {
                 if (attendee.getParticipationLevel() != null) {
                     if (attendee.getParticipationLevel().equals(ParticipationLevel.REQUIRED)) {
                         requiredList.add(attendee);

@@ -23,13 +23,19 @@ public class AutoconfigureMozilla implements Autoconfigure {
         ProviderInfo providerInfo = new ProviderInfo();
 
         Element incomingElement = document.select("incomingServer").first();
-        if (incomingElement == null) return null;
+        if (incomingElement == null) {
+            return null;
+        }
         Element incomingHostnameElement = incomingElement.select("hostname").first();
-        if (incomingHostnameElement == null) return null;
+        if (incomingHostnameElement == null) {
+            return null;
+        }
         providerInfo.incomingAddr = incomingHostnameElement.text();
         providerInfo.incomingType = incomingElement.attr("type").toLowerCase();
         Element incomingPortElement = incomingElement.select("port").first();
-        if (incomingPortElement != null) providerInfo.incomingPort = Integer.valueOf(incomingPortElement.text());
+        if (incomingPortElement != null) {
+            providerInfo.incomingPort = Integer.valueOf(incomingPortElement.text());
+        }
         Element incomingSocketTypeElement = incomingElement.select("socketType").first();
         String incomingSocketType = incomingSocketTypeElement != null ?
                 incomingSocketTypeElement.text().toLowerCase() :
@@ -46,7 +52,9 @@ public class AutoconfigureMozilla implements Autoconfigure {
                 break;
         }
         final Element usernameElement = incomingElement.select("username").first();
-        if (usernameElement == null) return null;
+        if (usernameElement == null) {
+            return null;
+        }
         final String incomingUsername = usernameElement.text();
         // "\\" to escape '$'
         providerInfo.incomingUsernameTemplate = incomingUsername
@@ -56,11 +64,15 @@ public class AutoconfigureMozilla implements Autoconfigure {
 
         Element outgoingElement = document.select("outgoingServer").first();
         final Element outgoingHostnameElement = outgoingElement.select("hostname").first();
-        if (outgoingHostnameElement == null) return null;
+        if (outgoingHostnameElement == null) {
+            return null;
+        }
         providerInfo.outgoingAddr = outgoingHostnameElement.text();
         providerInfo.outgoingType = outgoingElement.attr("type").toLowerCase();
         Element outgoingPortElement = outgoingElement.select("port").first();
-        if (outgoingPortElement != null) providerInfo.outgoingPort = Integer.valueOf(outgoingPortElement.text());
+        if (outgoingPortElement != null) {
+            providerInfo.outgoingPort = Integer.valueOf(outgoingPortElement.text());
+        }
         final String outgoingSocketType = outgoingElement.select("socketType").first().text().toLowerCase();
         switch (outgoingSocketType) {
             case "ssl":
@@ -86,7 +98,9 @@ public class AutoconfigureMozilla implements Autoconfigure {
     @Override
     public ProviderInfo findProviderInfo(String email) {
         String[] parts = email.split("@");
-        if (parts.length < 2) return null;
+        if (parts.length < 2) {
+            return null;
+        }
         String domain = parts[1];
 
         try {

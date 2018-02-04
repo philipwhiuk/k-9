@@ -31,7 +31,9 @@ public class DNSOperation {
         lookup.setResolver(resolver);
         lookup.setCache(null);
         Record[] records = lookup.run();
-        if (records == null) return null;
+        if (records == null) {
+            return null;
+        }
 
         MXRecord[] mxRecords = Arrays.copyOf(records, records.length, MXRecord[].class);
 
@@ -57,7 +59,9 @@ public class DNSOperation {
         List<SRVRecord> res = new ArrayList<>();
 
         Record[] records = lookup.run();
-        if (records == null) return res;
+        if (records == null) {
+            return res;
+        }
 
         SRVRecord[] srvRecords = Arrays.copyOf(records, records.length, SRVRecord[].class);
 

@@ -95,7 +95,7 @@ class ImapConnection {
     private int lineLengthLimit;
 
 
-    public ImapConnection(ImapSettings settings, TrustedSocketFactory socketFactory,
+    ImapConnection(ImapSettings settings, TrustedSocketFactory socketFactory,
             ConnectivityManager connectivityManager, OAuth2TokenProvider oauthTokenProvider) {
         this.settings = settings;
         this.socketFactory = socketFactory;

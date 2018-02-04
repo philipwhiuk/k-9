@@ -11,7 +11,6 @@ import com.fsck.k9.mail.MessagingException;
 import com.fsck.k9.mail.ServerSettings;
 import com.fsck.k9.mail.ServerSettings.Type;
 import com.fsck.k9.mail.Store;
-import com.fsck.k9.mail.oauth.OAuth2AuthorizationCodeFlowTokenProvider;
 import com.fsck.k9.mail.oauth.OAuth2TokenProvider;
 import com.fsck.k9.mail.ssl.DefaultTrustedSocketFactory;
 import com.fsck.k9.mail.ssl.TrustedSocketFactory;
@@ -42,7 +41,7 @@ public abstract class RemoteStore extends Store {
     /**
      * Get an instance of a remote mail store.
      */
-    public synchronized static Store getInstance(Context context, StoreConfig storeConfig,
+    public static synchronized Store getInstance(Context context, StoreConfig storeConfig,
                                                  OAuth2TokenProvider oAuth2TokenProvider)
             throws MessagingException {
         String uri = storeConfig.getStoreUri();

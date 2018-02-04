@@ -45,14 +45,17 @@ public class WebDavHttpClient extends DefaultHttpClient {
     public static InputStream getUngzippedContent(HttpEntity entity)
             throws IOException {
         InputStream responseStream = entity.getContent();
-        if (responseStream == null)
+        if (responseStream == null) {
             return null;
+        }
         Header header = entity.getContentEncoding();
-        if (header == null)
+        if (header == null) {
             return responseStream;
+        }
         String contentEncoding = header.getValue();
-        if (contentEncoding == null)
+        if (contentEncoding == null) {
             return responseStream;
+        }
         if (contentEncoding.contains("gzip")) {
             Timber.i("Response is gzipped");
             responseStream = new GZIPInputStream(responseStream);

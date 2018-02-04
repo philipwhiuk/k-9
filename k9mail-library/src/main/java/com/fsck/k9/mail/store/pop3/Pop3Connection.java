@@ -33,7 +33,6 @@ import timber.log.Timber;
 
 import static com.fsck.k9.mail.CertificateValidationException.Reason.MissingCapability;
 import static com.fsck.k9.mail.K9MailLib.DEBUG_PROTOCOL_POP3;
-import static com.fsck.k9.mail.store.pop3.Pop3Commands.*;
 
 
 class Pop3Connection {
@@ -111,7 +110,7 @@ class Pop3Connection {
             String host, int port, String clientCertificateAlias)
             throws MessagingException, NoSuchAlgorithmException, KeyManagementException, IOException {
         if (capabilities.stls) {
-            executeSimpleCommand(STLS_COMMAND);
+            executeSimpleCommand(Pop3Commands.STLS_COMMAND);
 
             socket = trustedSocketFactory.createSocket(
                     socket,
@@ -162,7 +161,7 @@ class Pop3Connection {
 
             default:
                 throw new MessagingException(
-                        "Unhandled authentication method: "+authType+" found in the server settings (bug).");
+                        "Unhandled authentication method: " + authType + " found in the server settings (bug).");
         }
 
     }
@@ -186,7 +185,7 @@ class Pop3Connection {
              * While this never became a standard, there are servers that
              * support it, and Thunderbird includes this check.
              */
-            executeSimpleCommand(AUTH_COMMAND);
+            executeSimpleCommand(Pop3Commands.AUTH_COMMAND);
             String response;
             while ((response = readLine()) != null) {
                 if (response.equals(".")) {
@@ -194,13 +193,13 @@ class Pop3Connection {
                 }
                 response = response.toUpperCase(Locale.US);
                 switch (response) {
-                    case AUTH_PLAIN_CAPABILITY:
+                    case Pop3Commands.AUTH_PLAIN_CAPABILITY:
                         capabilities.authPlain = true;
                         break;
-                    case AUTH_CRAM_MD5_CAPABILITY:
+                    case Pop3Commands.AUTH_CRAM_MD5_CAPABILITY:
                         capabilities.cramMD5 = true;
                         break;
-                    case AUTH_EXTERNAL_CAPABILITY:
+                    case Pop3Commands.AUTH_EXTERNAL_CAPABILITY:
                         capabilities.external = true;
                         break;
                 }
@@ -209,25 +208,25 @@ class Pop3Connection {
             // Assume AUTH command with no arguments is not supported.
         }
         try {
-            executeSimpleCommand(CAPA_COMMAND);
+            executeSimpleCommand(Pop3Commands.CAPA_COMMAND);
             String response;
             while ((response = readLine()) != null) {
                 if (response.equals(".")) {
                     break;
                 }
                 response = response.toUpperCase(Locale.US);
-                if (response.equals(STLS_CAPABILITY)) {
+                if (response.equals(Pop3Commands.STLS_CAPABILITY)) {
                     capabilities.stls = true;
-                } else if (response.equals(UIDL_CAPABILITY)) {
+                } else if (response.equals(Pop3Commands.UIDL_CAPABILITY)) {
                     capabilities.uidl = true;
-                } else if (response.equals(TOP_CAPABILITY)) {
+                } else if (response.equals(Pop3Commands.TOP_CAPABILITY)) {
                     capabilities.top = true;
-                } else if (response.startsWith(SASL_CAPABILITY)) {
+                } else if (response.startsWith(Pop3Commands.SASL_CAPABILITY)) {
                     List<String> saslAuthMechanisms = Arrays.asList(response.split(" "));
-                    if (saslAuthMechanisms.contains(AUTH_PLAIN_CAPABILITY)) {
+                    if (saslAuthMechanisms.contains(Pop3Commands.AUTH_PLAIN_CAPABILITY)) {
                         capabilities.authPlain = true;
                     }
-                    if (saslAuthMechanisms.contains(AUTH_CRAM_MD5_CAPABILITY)) {
+                    if (saslAuthMechanisms.contains(Pop3Commands.AUTH_CRAM_MD5_CAPABILITY)) {
                         capabilities.cramMD5 = true;
                     }
                 }
@@ -250,9 +249,9 @@ class Pop3Connection {
     }
 
     private void login() throws MessagingException {
-        executeSimpleCommand(USER_COMMAND + " " + settings.getUsername());
+        executeSimpleCommand(Pop3Commands.USER_COMMAND + " " + settings.getUsername());
         try {
-            executeSimpleCommand(PASS_COMMAND + " " + settings.getPassword(), true);
+            executeSimpleCommand(Pop3Commands.PASS_COMMAND + " " + settings.getPassword(), true);
         } catch (Pop3ErrorResponse e) {
             throw new AuthenticationFailedException(
                     "POP3 login authentication failed: " + e.getMessage(), e);
@@ -374,15 +373,16 @@ class Pop3Connection {
             throw new IOException("End of stream reached while trying to read line.");
         }
         do {
-            if (((char)d) == '\r') {
-                //noinspection UnnecessaryContinue Makes it easier to follow
-                continue;
-            } else if (((char)d) == '\n') {
+            //noinspection StatementWithEmptyBody
+            if (((char) d) == '\r') {
+                
+            } else if (((char) d) == '\n') {
                 break;
             } else {
-                sb.append((char)d);
+                sb.append((char) d);
             }
-        } while ((d = in.read()) != -1);
+            d = in.read();
+        } while (d != -1);
         String ret = sb.toString();
         if (K9MailLib.isDebug() && DEBUG_PROTOCOL_POP3) {
             Timber.d("<<< %s", ret);

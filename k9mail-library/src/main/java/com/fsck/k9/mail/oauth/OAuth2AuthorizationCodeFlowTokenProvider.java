@@ -14,7 +14,7 @@ public abstract class OAuth2AuthorizationCodeFlowTokenProvider {
      */
     public static int OAUTH2_TIMEOUT = 30000;
 
-    private Map<String,String> authTokens = new HashMap<>();
+    private Map<String, String> authTokens = new HashMap<>();
 
     public void exchangeCode(String email, String code) throws AuthenticationFailedException {
         SpecificOAuth2TokenProvider specificProvider = getSpecificProviderFromEmail(email);

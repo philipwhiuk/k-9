@@ -13,7 +13,7 @@ class NegativeImapResponseException extends MessagingException {
     private final List<ImapResponse> responses;
     private String alertText;
 
-    public NegativeImapResponseException(String message, List<ImapResponse> responses) {
+    NegativeImapResponseException(String message, List<ImapResponse> responses) {
         super(message, true);
         this.responses = responses;
     }

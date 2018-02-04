@@ -64,7 +64,7 @@ class ImapFolder extends Folder<ImapMessage> {
     private boolean canCreateKeywords = false;
 
 
-    public ImapFolder(ImapStore store, String name) {
+    ImapFolder(ImapStore store, String name) {
         this(store, name, store.getFolderNameCodec());
     }
 
@@ -1028,11 +1028,14 @@ class ImapFolder extends Folder<ImapMessage> {
             int size = bs.getNumber(6);
 
             if (MimeUtility.isMessage(mimeType)) {
-//                  A body type of type MESSAGE and subtype RFC822
-//                  contains, immediately after the basic fields, the
-//                  envelope structure, body structure, and size in
-//                  text lines of the encapsulated message.
-//                    [MESSAGE, RFC822, [NAME, Fwd: [#HTR-517941]:  update plans at 1am Friday - Memory allocation - displayware.eml], NIL, NIL, 7BIT, 5974, NIL, [INLINE, [FILENAME*0, Fwd: [#HTR-517941]:  update plans at 1am Friday - Memory all, FILENAME*1, ocation - displayware.eml]], NIL]
+                //TODO: Move to test and add support
+                /* A body type of type MESSAGE and subtype RFC822 contains, immediately after the basic fields, the
+                  envelope structure, body structure, and size in text lines of the encapsulated message.
+[MESSAGE, RFC822, [NAME, Fwd: [#HTR-517941]:  update plans at 1am Friday - Memory allocation - displayware.eml],
+NIL, NIL, 7BIT, 5974, NIL, [INLINE, [FILENAME*0, Fwd: [#HTR-517941]:  update plans at 1am Friday - Memory all,
+FILENAME*1, ocation - displayware.eml]], NIL]
+                 */
+
                 /*
                  * This will be caught by fetch and handled appropriately.
                  */

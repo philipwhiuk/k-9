@@ -53,7 +53,7 @@ class KeyChainKeyManager extends X509ExtendedKeyManager {
      *          Indicates an error in retrieving the certificate for the alias
      *          (likely because the alias is invalid or the certificate was deleted)
      */
-    public KeyChainKeyManager(Context context, String alias) throws MessagingException {
+    KeyChainKeyManager(Context context, String alias) throws MessagingException {
         mAlias = alias;
 
         try {

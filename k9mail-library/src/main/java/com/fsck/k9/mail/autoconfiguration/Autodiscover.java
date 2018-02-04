@@ -20,15 +20,16 @@ import timber.log.Timber;
  */
 
 public class Autodiscover implements Autoconfigure {
-    private final static String AUTODISCOVER_URL1 = "https://%s/autodiscover/autodiscover.xml";
-    private final static String AUTODISCOVER_URL2 = "https://autodiscover.%s/autodiscover/autodiscover.xml";
-    private final static String AUTODISCOVER_URL3 = "http://autodiscover.%s/autodiscover/autodiscover.xml";
-    private final static String AUTODISCOVER_SRV = "_autodiscover._tcp.%s";
+    private static final String AUTODISCOVER_URL1 = "https://%s/autodiscover/autodiscover.xml";
+    private static final String AUTODISCOVER_URL2 = "https://autodiscover.%s/autodiscover/autodiscover.xml";
+    private static final String AUTODISCOVER_URL3 = "http://autodiscover.%s/autodiscover/autodiscover.xml";
+    private static final String AUTODISCOVER_SRV = "_autodiscover._tcp.%s";
 
-    private final static String AUTODISCOVER_POST_BODY = "<?xml version=\"1.0\" encoding=\"utf-8\" ?>\n" +
+    private static final String AUTODISCOVER_POST_BODY = "<?xml version=\"1.0\" encoding=\"utf-8\" ?>\n" +
             "<Autodiscover xmlns=\"http://schemas.microsoft.com/exchange/autodiscover/outlook/requestschema/2006\">\n" +
             "<Request>\n" +
-            "<AcceptableResponseSchema>http://schemas.microsoft.com/exchange/autodiscover/outlook/responseschema/2006a</AcceptableResponseSchema>\n" +
+            "<AcceptableResponseSchema>http://schemas.microsoft.com/exchange/autodiscover/outlook/responseschema/2006a" +
+            "</AcceptableResponseSchema>\n" +
             "\n" +
             "<EMailAddress>%s</EMailAddress>\n" +
             "</Request>\n" +
@@ -37,7 +38,9 @@ public class Autodiscover implements Autoconfigure {
     @Override
     public ProviderInfo findProviderInfo(String email) {
         String[] parts = email.split("@");
-        if (parts.length < 2) return null;
+        if (parts.length < 2) {
+            return null;
+        }
         String domain = parts[1];
 
         ProviderInfo providerInfo;
@@ -45,12 +48,16 @@ public class Autodiscover implements Autoconfigure {
         String url = String.format(AUTODISCOVER_URL1, domain);
         providerInfo = findProviderInfoByUrl(url, email);
 
-        if (providerInfo != null) return providerInfo;
+        if (providerInfo != null) {
+            return providerInfo;
+        }
 
         url = String.format(AUTODISCOVER_URL2, domain);
         providerInfo = findProviderInfoByUrl(url, email);
 
-        if (providerInfo != null) return providerInfo;
+        if (providerInfo != null) {
+            return providerInfo;
+        }
 
         url = String.format(AUTODISCOVER_URL3, domain);
         providerInfo = findProviderInfoByUrl(url, email, true);
@@ -154,15 +161,15 @@ public class Autodiscover implements Autoconfigure {
                     }
                 }
 
-                Element SSL = protocol.select("SSL").first();
-                if (SSL != null && SSL.text().equalsIgnoreCase("on")) {
+                Element ssl = protocol.select("SSL").first();
+                if (ssl != null && ssl.text().equalsIgnoreCase("on")) {
                     providerInfo.incomingSocketType = ProviderInfo.SOCKET_TYPE_SSL_OR_TLS;
                 } else {
                     providerInfo.incomingSocketType = ProviderInfo.SOCKET_TYPE_STARTTLS;
                 }
 
-                Element TLS = protocol.select("TLS").first();
-                if (TLS != null && TLS.text().equalsIgnoreCase("on")) {
+                Element tls = protocol.select("TLS").first();
+                if (tls != null && tls.text().equalsIgnoreCase("on")) {
                     providerInfo.incomingSocketType = ProviderInfo.SOCKET_TYPE_STARTTLS;
                 }
 
@@ -222,14 +229,14 @@ public class Autodiscover implements Autoconfigure {
                     }
                 }
 
-                Element SSL = protocol.select("SSL").first();
-                if (SSL != null && SSL.text().equalsIgnoreCase("on") &&
+                Element ssl = protocol.select("SSL").first();
+                if (ssl != null && ssl.text().equalsIgnoreCase("on") &&
                         providerInfo.outgoingSocketType.isEmpty()) {
                     providerInfo.outgoingSocketType = ProviderInfo.SOCKET_TYPE_SSL_OR_TLS;
                 }
 
-                Element TLS = protocol.select("TLS").first();
-                if (TLS != null && TLS.text().equalsIgnoreCase("on") &&
+                Element tls = protocol.select("TLS").first();
+                if (tls != null && tls.text().equalsIgnoreCase("on") &&
                         providerInfo.outgoingSocketType.isEmpty()) {
                     providerInfo.outgoingSocketType = ProviderInfo.SOCKET_TYPE_STARTTLS;
                 }

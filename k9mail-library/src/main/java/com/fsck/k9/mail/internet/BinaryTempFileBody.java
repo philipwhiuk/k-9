@@ -125,7 +125,7 @@ public class BinaryTempFileBody implements RawDataBody, SizeAware {
     }
 
     class BinaryTempFileBodyInputStream extends FilterInputStream {
-        public BinaryTempFileBodyInputStream(InputStream in) {
+        BinaryTempFileBodyInputStream(InputStream in) {
             super(in);
         }
 

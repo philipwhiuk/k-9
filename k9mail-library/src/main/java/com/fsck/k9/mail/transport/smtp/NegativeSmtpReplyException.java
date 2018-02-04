@@ -12,12 +12,10 @@ import com.fsck.k9.mail.MessagingException;
 class NegativeSmtpReplyException extends MessagingException {
     private static final long serialVersionUID = 8696043577357897135L;
 
-
     private final int replyCode;
     private final String replyText;
 
-
-    public NegativeSmtpReplyException(int replyCode, String replyText) {
+    NegativeSmtpReplyException(int replyCode, String replyText) {
         super(buildErrorMessage(replyCode, replyText), isPermanentSmtpError(replyCode));
         this.replyCode = replyCode;
         this.replyText = replyText;

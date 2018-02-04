@@ -77,7 +77,7 @@ public class Base64 {
      * Thanks to "commons" project in ws.apache.org for this code.
      * http://svn.apache.org/repos/asf/webservices/commons/trunk/modules/util/
      */
-    private static final byte[] intToBase64 = {
+    private static final byte[] INT_TO_BASE_64 = {
         'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
         'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
         'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
@@ -100,7 +100,7 @@ public class Base64 {
      * Thanks to "commons" project in ws.apache.org for this code.
      * http://svn.apache.org/repos/asf/webservices/commons/trunk/modules/util/
      */
-    private static final byte[] base64ToInt = {
+    private static final byte[] BASE_64_TO_INT = {
         -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
         -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
         -1, -1, -1, -1, -1, -1, -1, -1, -1, 62, -1, -1, -1, 63, 52, 53, 54,
@@ -359,16 +359,16 @@ public class Base64 {
             }
             switch (modulus) {
             case 1:
-                buf[pos++] = intToBase64[(x >> 2) & MASK_6BITS];
-                buf[pos++] = intToBase64[(x << 4) & MASK_6BITS];
+                buf[pos++] = INT_TO_BASE_64[(x >> 2) & MASK_6BITS];
+                buf[pos++] = INT_TO_BASE_64[(x << 4) & MASK_6BITS];
                 buf[pos++] = PAD;
                 buf[pos++] = PAD;
                 break;
 
             case 2:
-                buf[pos++] = intToBase64[(x >> 10) & MASK_6BITS];
-                buf[pos++] = intToBase64[(x >> 4) & MASK_6BITS];
-                buf[pos++] = intToBase64[(x << 2) & MASK_6BITS];
+                buf[pos++] = INT_TO_BASE_64[(x >> 10) & MASK_6BITS];
+                buf[pos++] = INT_TO_BASE_64[(x >> 4) & MASK_6BITS];
+                buf[pos++] = INT_TO_BASE_64[(x << 2) & MASK_6BITS];
                 buf[pos++] = PAD;
                 break;
             }
@@ -388,10 +388,10 @@ public class Base64 {
                 }
                 x = (x << 8) + b;
                 if (0 == modulus) {
-                    buf[pos++] = intToBase64[(x >> 18) & MASK_6BITS];
-                    buf[pos++] = intToBase64[(x >> 12) & MASK_6BITS];
-                    buf[pos++] = intToBase64[(x >> 6) & MASK_6BITS];
-                    buf[pos++] = intToBase64[x & MASK_6BITS];
+                    buf[pos++] = INT_TO_BASE_64[(x >> 18) & MASK_6BITS];
+                    buf[pos++] = INT_TO_BASE_64[(x >> 12) & MASK_6BITS];
+                    buf[pos++] = INT_TO_BASE_64[(x >> 6) & MASK_6BITS];
+                    buf[pos++] = INT_TO_BASE_64[x & MASK_6BITS];
                     currentLinePos += 4;
                     if (lineLength > 0 && lineLength <= currentLinePos) {
                         System.arraycopy(lineSeparator, 0, buf, pos, lineSeparator.length);
@@ -441,26 +441,26 @@ public class Base64 {
                 switch (modulus) {
                 case 2:
                     x = x << 6;
-                    buf[pos++] = (byte)((x >> 16) & MASK_8BITS);
+                    buf[pos++] = (byte) ((x >> 16) & MASK_8BITS);
                     break;
                 case 3:
-                    buf[pos++] = (byte)((x >> 16) & MASK_8BITS);
-                    buf[pos++] = (byte)((x >> 8) & MASK_8BITS);
+                    buf[pos++] = (byte) ((x >> 16) & MASK_8BITS);
+                    buf[pos++] = (byte) ((x >> 8) & MASK_8BITS);
                     break;
                 }
                 // WE'RE DONE!!!!
                 eof = true;
                 return;
             } else {
-                if (b >= 0 && b < base64ToInt.length) {
-                    int result = base64ToInt[b];
+                if (b >= 0 && b < BASE_64_TO_INT.length) {
+                    int result = BASE_64_TO_INT[b];
                     if (result >= 0) {
                         modulus = (++modulus) % 4;
                         x = (x << 6) + result;
                         if (modulus == 0) {
-                            buf[pos++] = (byte)((x >> 16) & MASK_8BITS);
-                            buf[pos++] = (byte)((x >> 8) & MASK_8BITS);
-                            buf[pos++] = (byte)(x & MASK_8BITS);
+                            buf[pos++] = (byte) ((x >> 16) & MASK_8BITS);
+                            buf[pos++] = (byte) ((x >> 8) & MASK_8BITS);
+                            buf[pos++] = (byte) (x & MASK_8BITS);
                         }
                     }
                 }
@@ -476,7 +476,7 @@ public class Base64 {
      * @return <code>true</code> if the value is defined in the the base 64 alphabet, <code>false</code> otherwise.
      */
     public static boolean isBase64(byte octet) {
-        return octet == PAD || (octet >= 0 && octet < base64ToInt.length && base64ToInt[octet] != -1);
+        return octet == PAD || (octet >= 0 && octet < BASE_64_TO_INT.length && BASE_64_TO_INT[octet] != -1);
     }
 
     /**

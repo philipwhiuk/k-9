@@ -20,7 +20,7 @@ class ImapResponseParser {
     private Exception exception;
 
 
-    public ImapResponseParser(PeekableInputStream in) {
+    ImapResponseParser(PeekableInputStream in) {
         this.inputStream = in;
     }
 

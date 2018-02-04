@@ -15,7 +15,6 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.TimeZone;
 
-import android.provider.ContactsContract.CommonDataKinds.Im;
 import android.support.annotation.NonNull;
 
 import com.fsck.k9.mail.Address;
@@ -38,6 +37,7 @@ import org.apache.james.mime4j.parser.MimeStreamParser;
 import org.apache.james.mime4j.stream.BodyDescriptor;
 import org.apache.james.mime4j.stream.Field;
 import org.apache.james.mime4j.stream.MimeConfig;
+import timber.log.Timber;
 
 
 /**
@@ -133,11 +133,11 @@ public class MimeMessage extends Message {
     public Date getSentDate() {
         if (mSentDate == null) {
             try {
-                DateTimeField field = (DateTimeField)DefaultFieldParser.parse("Date: "
+                DateTimeField field = (DateTimeField) DefaultFieldParser.parse("Date: "
                                       + MimeUtility.unfoldAndDecode(getFirstHeader("Date")));
                 mSentDate = field.getDate();
             } catch (Exception e) {
-
+                Timber.w(e, "Unable to parse date");
             }
         }
         return mSentDate;
@@ -523,10 +523,10 @@ public class MimeMessage extends Message {
     public void setCharset(String charset) throws MessagingException {
         mHeader.setCharset(charset);
         if (mBody instanceof Multipart) {
-            ((Multipart)mBody).setCharset(charset);
+            ((Multipart) mBody).setCharset(charset);
         } else if (mBody instanceof TextBody) {
             CharsetSupport.setCharset(charset, this);
-            ((TextBody)mBody).setCharset(charset);
+            ((TextBody) mBody).setCharset(charset);
         }
     }
 
@@ -547,7 +547,7 @@ public class MimeMessage extends Message {
         private final LinkedList<Object> stack = new LinkedList<>();
         private final BodyFactory bodyFactory;
 
-        public MimeMessageBuilder(BodyFactory bodyFactory) {
+        MimeMessageBuilder(BodyFactory bodyFactory) {
             this.bodyFactory = bodyFactory;
         }
 
@@ -592,7 +592,7 @@ public class MimeMessage extends Message {
         public void startMultipart(BodyDescriptor bd) throws MimeException {
             expect(Part.class);
 
-            Part e = (Part)stack.peek();
+            Part e = (Part) stack.peek();
             String mimeType = bd.getMimeType();
             String boundary = bd.getBoundary();
             MimeMultipart multiPart = new MimeMultipart(mimeType, boundary);
@@ -604,7 +604,7 @@ public class MimeMessage extends Message {
         public void body(BodyDescriptor bd, InputStream in) throws IOException, MimeException {
             expect(Part.class);
             Body body = bodyFactory.createBody(bd.getTransferEncoding(), bd.getMimeType(), in);
-            ((Part)stack.peek()).setBody(body);
+            ((Part) stack.peek()).setBody(body);
         }
 
         @Override
@@ -632,7 +632,7 @@ public class MimeMessage extends Message {
 
             try {
                 MimeBodyPart bodyPart = new MimeBodyPart();
-                ((MimeMultipart)stack.peek()).addBodyPart(bodyPart);
+                ((MimeMultipart) stack.peek()).addBodyPart(bodyPart);
                 stack.addFirst(bodyPart);
             } catch (MessagingException me) {
                 throw new MimeException(me);
@@ -650,7 +650,7 @@ public class MimeMessage extends Message {
             expect(MimeMultipart.class);
             ByteArrayOutputStream preamble = new ByteArrayOutputStream();
             IOUtils.copy(is, preamble);
-            ((MimeMultipart)stack.peek()).setPreamble(preamble.toByteArray());
+            ((MimeMultipart) stack.peek()).setPreamble(preamble.toByteArray());
         }
 
         @Override
