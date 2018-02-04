@@ -12,6 +12,9 @@
         <change>K-2 Mail first release</change>
         <change>Updating to Target SDK 23</change>
         <change>Using AppCompat theming</change>
+        <change>New accounts setup process</change>
+        <change>Added support for Google's token-based signon</change>
+        <change>Added support for Outlook's token-based signon</change>
         <change>External storage runtime permissions</change>
         <change>Contacts runtime permissions</change>
         <change>Internal refactoring of MessagingController</change>
@@ -20,6 +23,9 @@
         <change>Improving encryption error handling</change>
         <change>Adding Reply-To-List option</change>
         <change>Adding support for Priority/Importance in email</change>
+        <change>Added attachment resize function</change>
+        <change>Improved display of ongoing network activity</change>
+        <change>Warnings and errors are now logged to a file</change>
     </release>
     <release version="5.500" versioncode="23700">
         <change>Import/Export maintain account ordering</change>
