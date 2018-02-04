@@ -15,7 +15,7 @@ import com.fsck.k9.Account;
 import com.fsck.k9.AccountStats;
 import com.fsck.k9.activity.ActivityListener;
 import com.fsck.k9.activity.MessageReference;
-import com.fsck.k9.activity.setup.AccountSetupCheckSettings.CheckDirection;
+import com.fsck.k9.activity.setup.CheckDirection;
 import com.fsck.k9.mail.Flag;
 import com.fsck.k9.mail.Folder;
 import com.fsck.k9.mail.Message;

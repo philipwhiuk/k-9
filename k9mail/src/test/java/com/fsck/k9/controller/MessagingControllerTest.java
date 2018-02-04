@@ -15,9 +15,10 @@ import com.fsck.k9.AccountStats;
 import com.fsck.k9.K9RobolectricTestRunner;
 import com.fsck.k9.Preferences;
 import com.fsck.k9.controller.tasks.SearchResultsLoader;
+import com.fsck.k9.GlobalsHelper;
+import com.fsck.k9.account.K9OAuth2TokenProvider;
 import com.fsck.k9.helper.Contacts;
 import com.fsck.k9.mail.FetchProfile;
-import com.fsck.k9.mail.FetchProfile.Item;
 import com.fsck.k9.mail.Folder;
 import com.fsck.k9.mail.Message;
 import com.fsck.k9.mail.MessageRetrievalListener;
@@ -35,7 +36,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
@@ -99,11 +99,6 @@ public class MessagingControllerTest {
     private ArgumentCaptor<MessageRetrievalListener<LocalMessage>> messageRetrievalListenerCaptor;
 
     private Context appContext;
-
-    @Mock
-    private Message remoteNewMessage1;
-    @Mock
-    private LocalMessage localNewMessage1;
     private MessageDownloader messageDownloader;
 
 
@@ -112,6 +107,8 @@ public class MessagingControllerTest {
         ShadowLog.stream = System.out;
         MockitoAnnotations.initMocks(this);
         appContext = ShadowApplication.getInstance().getApplicationContext();
+        GlobalsHelper.setContext(appContext);
+        GlobalsHelper.setOAuth2TokenProvider(new K9OAuth2TokenProvider(appContext));
 
         messageDownloader = new MessageDownloader();
 
