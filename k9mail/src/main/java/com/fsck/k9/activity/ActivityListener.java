@@ -128,6 +128,7 @@ public class ActivityListener extends SimpleMessagingListener {
             case MessagingControllerCommands.COMMAND_EMPTY_TRASH:
                 return context.getString(R.string.status_command_empty_trash);
         }
+        return "";
     }
 
     public void onResume(Context context) {
