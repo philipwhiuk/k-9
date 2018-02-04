@@ -1370,4 +1370,5 @@ Please submit bug reports, contribute new features and ask questions to
     <string name="linked_webview_title_gmail">Gmail Authorization</string>
     <string name="linked_webview_title_outlook">Outlook Authorization</string>
     <string name="OAuth2_not_supported">OAuth 2.0 is not supported for this email</string>
+    <string name="check_settings_please_wait">Please wait</string>
 </resources>
