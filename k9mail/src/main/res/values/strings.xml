@@ -104,6 +104,11 @@ Please submit bug reports, contribute new features and ask questions to
     <string name="status_loading_account_folder_headers">Fetching headers <xliff:g id="account">%s</xliff:g>:<xliff:g id="folder">%s</xliff:g><xliff:g id="progress">%s</xliff:g></string>
     <string name="status_sending_account">Sending <xliff:g id="account">%s</xliff:g><xliff:g id="progress">%s</xliff:g></string>
     <string name="status_processing_account">Proc <xliff:g id="account">%s</xliff:g>:<xliff:g id="command">%s</xliff:g><xliff:g id="progress">%s</xliff:g></string>
+    <string name="status_command_append">Append</string>
+    <string name="status_command_mark_all_as_read">Marking read</string>
+    <string name="status_command_set_flag">Setting flags</string>
+    <string name="status_command_move_or_copy">Move/copy</string>
+    <string name="status_command_empty_trash">Emptying trash</string>
     <string name="folder_progress">\u0020<xliff:g id="completed">%d</xliff:g>/<xliff:g id="total">%d</xliff:g></string>
 
     <string name="status_next_poll">Next poll <xliff:g id="nexttime">%s</xliff:g></string>

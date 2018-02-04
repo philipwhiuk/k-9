@@ -11,6 +11,8 @@ import com.fsck.k9.Account;
 import com.fsck.k9.AccountStats;
 import com.fsck.k9.K9;
 import com.fsck.k9.R;
+import com.fsck.k9.controller.MessagingControllerCommands;
+import com.fsck.k9.controller.MessagingControllerCommands.PendingCommand;
 import com.fsck.k9.controller.SimpleMessagingListener;
 import com.fsck.k9.service.MailService;
 import net.jcip.annotations.GuardedBy;
@@ -27,7 +29,7 @@ public class ActivityListener extends SimpleMessagingListener {
     @GuardedBy("lock") private int folderCompleted = 0;
     @GuardedBy("lock") private int folderTotal = 0;
     @GuardedBy("lock") private String processingAccountDescription = null;
-    @GuardedBy("lock") private String processingCommandTitle = null;
+    @GuardedBy("lock") private String processingCommandName = null;
 
     private BroadcastReceiver tickReceiver = new BroadcastReceiver() {
         @Override
@@ -105,9 +107,26 @@ public class ActivityListener extends SimpleMessagingListener {
             return context.getString(R.string.status_sending_account, sendingAccountDescription, progress);
         } else if (processingAccountDescription != null) {
             return context.getString(R.string.status_processing_account, processingAccountDescription,
-                    processingCommandTitle != null ? processingCommandTitle : "", progress);
+                    processingCommandName != null ? commandTitleForName(context, processingCommandName) : "", progress);
         } else {
             return "";
+        }
+    }
+
+    private String commandTitleForName(Context context, String processingCommandName) {
+        switch (processingCommandName) {
+            case MessagingControllerCommands.COMMAND_APPEND:
+                return context.getString(R.string.status_command_append);
+            case MessagingControllerCommands.COMMAND_MARK_ALL_AS_READ:
+                return context.getString(R.string.status_command_mark_all_as_read);
+            case MessagingControllerCommands.COMMAND_SET_FLAG:
+                return context.getString(R.string.status_command_set_flag);
+            case MessagingControllerCommands.COMMAND_EXPUNGE:
+                return context.getString(R.string.status_command_expunge);
+            case MessagingControllerCommands.COMMAND_MOVE_OR_COPY:
+                return context.getString(R.string.status_command_move_or_copy);
+            case MessagingControllerCommands.COMMAND_EMPTY_TRASH:
+                return context.getString(R.string.status_command_empty_trash);
         }
     }
 
@@ -247,18 +266,18 @@ public class ActivityListener extends SimpleMessagingListener {
     }
 
     @Override
-    public void pendingCommandStarted(Account account, String commandTitle) {
+    public void pendingCommandStarted(Account account, String commandName) {
         synchronized (lock) {
-            processingCommandTitle = commandTitle;
+            processingCommandName = commandName;
 
         }
         informUserOfStatus();
     }
 
     @Override
-    public void pendingCommandCompleted(Account account, String commandTitle) {
+    public void pendingCommandCompleted(Account account, String commandName) {
         synchronized (lock) {
-            processingCommandTitle = null;
+            processingCommandName = null;
         }
 
         informUserOfStatus();
