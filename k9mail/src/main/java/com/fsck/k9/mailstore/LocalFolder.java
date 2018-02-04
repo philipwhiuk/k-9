@@ -121,8 +121,7 @@ public class LocalFolder extends Folder<LocalMessage> {
         return databaseId;
     }
 
-    public String getAccountUuid()
-    {
+    public String getAccountUuid() {
         return getAccount().getUuid();
     }
 
@@ -894,7 +893,7 @@ public class LocalFolder extends Folder<LocalMessage> {
         }
     }
 
-    public Map<String,Long> getAllMessagesAndEffectiveDates() throws MessagingException {
+    public Map<String, Long> getAllMessagesAndEffectiveDates() throws MessagingException {
         try {
             return  localStore.getDatabase().execute(false, new DbCallback<Map<String, Long>>() {
                 @Override
@@ -1048,7 +1047,7 @@ public class LocalFolder extends Folder<LocalMessage> {
             throw new MessagingException("moveMessages called with non-LocalFolder");
         }
 
-        final LocalFolder lDestFolder = (LocalFolder)destFolder;
+        final LocalFolder lDestFolder = (LocalFolder) destFolder;
 
         final Map<String, String> uidMap = new HashMap<>();
 
@@ -1059,7 +1058,7 @@ public class LocalFolder extends Folder<LocalMessage> {
                     try {
                         lDestFolder.open(OPEN_MODE_RW);
                         for (Message message : msgs) {
-                            LocalMessage lMessage = (LocalMessage)message;
+                            LocalMessage lMessage = (LocalMessage) message;
 
                             String oldUID = message.getUid();
 
@@ -1171,7 +1170,8 @@ public class LocalFolder extends Folder<LocalMessage> {
     }
 
     /**
-     * Convenience transaction wrapper for storing a message and set it as fully downloaded. Implemented mainly to speed up DB transaction commit.
+     * Convenience transaction wrapper for storing a message and set it as fully downloaded.
+     * Implemented mainly to speed up DB transaction commit.
      *
      * @param message Message to store. Never <code>null</code>.
      * @param runnable What to do before setting {@link Flag#X_DOWNLOADED_FULL}. Never <code>null</code>.
@@ -1854,7 +1854,7 @@ public class LocalFolder extends Folder<LocalMessage> {
     @Override
     public boolean equals(Object o) {
         if (o instanceof LocalFolder) {
-            return ((LocalFolder)o).name.equals(name);
+            return ((LocalFolder) o).name.equals(name);
         }
         return super.equals(o);
     }

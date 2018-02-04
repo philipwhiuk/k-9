@@ -401,7 +401,7 @@ public class LocalStore extends Store {
     public List<LocalFolder> getPersonalNamespaces(boolean forceListAll) throws MessagingException {
         final List<LocalFolder> folders = new LinkedList<>();
         try {
-            database.execute(false, new DbCallback<List<? extends Folder>> () {
+            database.execute(false, new DbCallback<List<? extends Folder>>() {
                 @Override
                 public List<? extends Folder> doDbWork(final SQLiteDatabase db) throws WrappedException {
                     Cursor cursor = null;

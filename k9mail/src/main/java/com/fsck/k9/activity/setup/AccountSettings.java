@@ -1026,7 +1026,7 @@ public class AccountSettings extends K9PreferenceActivity {
 
     private void doVibrateTest(Preference preference) {
         // Do the vibration to show the user what it's like.
-        Vibrator vibrate = (Vibrator)preference.getContext().getSystemService(Context.VIBRATOR_SERVICE);
+        Vibrator vibrate = (Vibrator) preference.getContext().getSystemService(Context.VIBRATOR_SERVICE);
         vibrate.vibrate(NotificationSetting.getVibration(
                             Integer.parseInt(accountVibratePattern.getValue()),
                             Integer.parseInt(accountVibrateTimes.getValue())), -1);
@@ -1050,14 +1050,15 @@ public class AccountSettings extends K9PreferenceActivity {
     private void updateResizeFactor(int factor) {
         account.setResizeFactor(factor);
         if (factor != 1) {
-            resizeFactor.setSummary(String.format(getString(R.string.account_settings_attachment_resize_factor_summary), String.valueOf(factor)));
+            resizeFactor.setSummary(String.format(getString(R.string.account_settings_attachment_resize_factor_summary),
+                    String.valueOf(factor)));
         } else {
             resizeFactor.setSummary(getString(R.string.account_settings_attachment_resize_factor_summary_default));
         }
     }
 
     private class PopulateFolderPrefsTask extends AsyncTask<Void, Void, Void> {
-        List <? extends Folder > folders = new LinkedList<>();
+        List<? extends Folder> folders = new LinkedList<>();
         String[] allFolderValues;
         String[] allFolderLabels;
 
@@ -1071,7 +1072,7 @@ public class AccountSettings extends K9PreferenceActivity {
 
             // TODO: In the future the call above should be changed to only return remote folders.
             // For now we just remove the Outbox folder if present.
-            Iterator <? extends Folder > iter = folders.iterator();
+            Iterator<? extends Folder> iter = folders.iterator();
             while (iter.hasNext()) {
                 Folder folder = iter.next();
                 if (account.getOutboxFolderName().equals(folder.getName())) {
