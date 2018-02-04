@@ -11,8 +11,9 @@ import retrofit2.http.POST;
 
 public class GmailOAuth2TokenStore extends AndroidSpecificOAuth2TokenProvider {
     private static final String GOOGLE_API_BASE_URL = "https://www.googleapis.com/";
+    //TODO: Change these
     private static final String CLIENT_ID = "486728022013-39d7vq9t06r004r7ec9m2eti0p1ihs12.apps.googleusercontent.com";
-    private static final String REDIRECT_URI = "com.fsck.k9.debug:/oauth2redirect";
+    private static final String REDIRECT_URI = "com.whiuk.philip.k2:/oauth2redirect";
     private static final String AUTHORIZATION_URL = "https://accounts.google.com/o/oauth2/v2/auth?" +
             "scope=https://mail.google.com/&" +
             "response_type=code&" +

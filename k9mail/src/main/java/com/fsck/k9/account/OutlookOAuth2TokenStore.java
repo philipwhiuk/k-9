@@ -18,6 +18,7 @@ import retrofit2.http.POST;
 class OutlookOAuth2TokenStore extends SpecificOAuth2TokenProvider {
     private Oauth2PromptRequestHandler promptRequestHandler;
     private static final String OUTLOOK_BASE_URL = "https://login.live.com/";
+    //TODO: Change these
     private static final String REDIRECT_URI = "msala41aa976-c5ad-405f-a8e3-ed18c07bb13a://auth";
     private static final String CLIENT_ID = "a41aa976-c5ad-405f-a8e3-ed18c07bb13a";
     private static final String AUTHORIZATION_URL = "https://login.live.com/oauth20_authorize.srf?" +
