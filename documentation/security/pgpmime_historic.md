@@ -1,6 +1,6 @@
 ---
 title: Pre 5.2x PGP Integration
-nav_hide: true 
+nav_hide: true
 layout: default
 ---
 
@@ -14,7 +14,7 @@ layout: default
 
 When an OpenPGP provider has been set-up in the [account settings](/documentation/settings/account.html) a new set of options are shown in the message compose window:
 
-<img src="/assets/img/encryption_current_compose_dialog.png" alt="Encrypting email" width="300" />
+<img src="{{site.url}}/assets/img/encryption_current_compose_dialog.png" alt="Encrypting email" width="300" />
 
 Selecting Sign and Encrypt accordingly allows e-mails to be sent in a verified and secure way (respectively).
 
@@ -22,4 +22,4 @@ Selecting Sign and Encrypt accordingly allows e-mails to be sent in a verified a
 
 Decryption and verification of e-mail is done automatically and corresponding header is shown when viewing the e-mail:
 
-<img src="/assets/img/encryption_current_decryption.png" alt="Viewing encrypted email" width="300" />
+<img src="{{site.url}}/assets/img/encryption_current_decryption.png" alt="Viewing encrypted email" width="300" />

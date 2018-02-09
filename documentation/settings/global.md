@@ -1,4 +1,4 @@
----
+{{site.url}}---
 title: Global Settings
 nav_hide: true
 layout: default
@@ -12,7 +12,7 @@ layout: default
 
 *Global settings* are account-independent settings. Most of them define how the user interface should look like.
 
-<img src="/assets/img/settings_global.png" width="300" alt="Global Settings menu" />
+<img src="{{site.url}}/assets/img/settings_global.png" width="300" alt="Global Settings menu" />
 
 [Display](#display) | [Interaction](#interaction) | [Notifications](#notifications) | [Network](#network) | [Miscellaneous](#miscellaneous) | [Privacy](#privacy) | [Debugging](#debugging)
 
