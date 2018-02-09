@@ -10,7 +10,7 @@ layout: default
 
 # POP3 Server Settings
 
-<img src="/assets/img/account_setup_step3_pop3_incoming_server.png" width="300" alt="WebDAV server settings" />
+<img src="{{site.url}}/assets/img/account_setup_step3_pop3_incoming_server.png" width="300" alt="WebDAV server settings" />
 
 **POP3 server**: This is the hostname or IP address of your POP3 server. Note that this address must resolve to your mail server no matter what network you're connected to -- if you provide a name or IP that's only resolvable *inside your private network*, that's the only place you'll be able to pick up email. (If you don't understand the preceding, then you probably don't need to worry about it.) Some firewalls can also cause trouble here.
 
@@ -22,7 +22,7 @@ layout: default
 * STARTTLS (if available): The STARTTLS method is used if available; the certificate isn't checked. If STARTTLS is not available, no encryption is used at all and email will be moved in the clear.
 * **STARTTLS (always)**: The STARTTLS method is used and the certificate is checked for validity.
 
-*Note*: Avoid using the options *"None"*, *"SSL/TLS (if available)"*, and *"STARTTLS (if available)"* if you can. Check the [Security](/documentation/security.html) entry for more information on this.
+*Note*: Avoid using the options *"None"*, *"SSL/TLS (if available)"*, and *"STARTTLS (if available)"* if you can. Check the [Security]({{site.url}}/documentation/security.html) entry for more information on this.
 
 **Port**: This is the port number the POP3 server is listening on. Most of the time you don't want to change this. It will generally be port 110 for non-encrypted connections or 95 for encrypted ones. If your port number is something else, the mail server administrator should have told you.
 
@@ -36,4 +36,4 @@ layout: default
 **Password**: Here you enter the password to access your emails. The password you entered at the first step of the account creation process is pre-entered here. So you shouldn't need to change it. This password is the one which an administrator set for you or gave to you, which you use to retrieve mail from the mailbox.
 
 After the server settings are checked you can now continue to
-[configure the outgoing server](/documentation/accounts/add.html#outgoing-server).
+[configure the outgoing server]({{site.url}}/documentation/accounts/add.html#outgoing-server).
