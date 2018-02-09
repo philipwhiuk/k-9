@@ -23,6 +23,7 @@
 
 package microsoft.exchange.webservices.data.core;
 
+import javax.xml.namespace.QName;
 import microsoft.exchange.webservices.data.core.enumeration.misc.XmlNamespace;
 import microsoft.exchange.webservices.data.core.exception.service.local.ServiceXmlDeserializationException;
 import microsoft.exchange.webservices.data.misc.OutParam;
@@ -498,11 +499,11 @@ public class EwsXmlReader {
    *
    * @param value the value
    * @return boolean
-   * @throws XMLStreamException the XML stream exception
+   * @throws IOException the XML stream exception
    * @throws ServiceXmlDeserializationException  the service xml deserialization exception
    */
   public boolean tryReadValue(OutParam<String> value)
-      throws XMLStreamException, ServiceXmlDeserializationException {
+          throws IOException, ServiceXmlDeserializationException, XmlPullParserException {
     if (!this.isEmptyElement()) {
       this.read();
 
@@ -564,7 +565,7 @@ public class EwsXmlReader {
     this.ensureCurrentNodeIsStartElement();
 
     byte[] buffer = null;
-    buffer = Base64.decodeBase64(this.xmlReader.getElementText().toString());
+    buffer = android.util.Base64.decode(this.xmlReader.getText().toString(), android.util.Base64.DEFAULT);
     outputStream.write(buffer);
     outputStream.flush();
   }

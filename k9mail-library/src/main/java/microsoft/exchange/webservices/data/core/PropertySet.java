@@ -37,8 +37,7 @@ import microsoft.exchange.webservices.data.core.exception.service.local.ServiceX
 import microsoft.exchange.webservices.data.property.definition.PropertyDefinition;
 import microsoft.exchange.webservices.data.property.definition.PropertyDefinitionBase;
 
-import javax.xml.stream.XMLStreamException;
-
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -445,12 +444,12 @@ public final class PropertySet implements ISelfValidate,
    *
    * @param writer              The writer to write to
    * @param propertyDefinitions The property definitions to write
-   * @throws XMLStreamException the XML stream exception
+   * @throws IOException the XML stream exception
    * @throws ServiceXmlSerializationException the service xml serialization exception
    */
   public static void writeAdditionalPropertiesToXml(EwsServiceXmlWriter writer,
       Iterator<PropertyDefinitionBase> propertyDefinitions)
-      throws XMLStreamException, ServiceXmlSerializationException {
+      throws IOException, ServiceXmlSerializationException {
     writer.writeStartElement(XmlNamespace.Types,
         XmlElementNames.AdditionalProperties);
 
@@ -460,7 +459,7 @@ public final class PropertySet implements ISelfValidate,
       propertyDefinition.writeToXml(writer);
     }
 
-    writer.writeEndElement();
+    writer.writeEndElement(XmlNamespace.Types, XmlElementNames.AdditionalProperties);
   }
 
   /**
@@ -535,10 +534,10 @@ public final class PropertySet implements ISelfValidate,
    *
    * @param writer            The writer to write to
    * @param serviceObjectType The type of service object the property set is emitted for
-   * @throws XMLStreamException the XML stream exception
+   * @throws IOException the XML stream exception
    * @throws ServiceXmlSerializationException the service xml serialization exception
    */
-  public void writeToXml(EwsServiceXmlWriter writer, ServiceObjectType serviceObjectType) throws XMLStreamException, ServiceXmlSerializationException {
+  public void writeToXml(EwsServiceXmlWriter writer, ServiceObjectType serviceObjectType) throws IOException, ServiceXmlSerializationException {
     writer
         .writeStartElement(
             XmlNamespace.Messages,
@@ -575,7 +574,10 @@ public final class PropertySet implements ISelfValidate,
           .iterator());
     }
 
-    writer.writeEndElement(); // Item/FolderShape
+    writer.writeEndElement(XmlNamespace.Messages,
+            serviceObjectType == ServiceObjectType.Item ?
+                    XmlElementNames.ItemShape
+                    : XmlElementNames.FolderShape);
   }
 
   /*

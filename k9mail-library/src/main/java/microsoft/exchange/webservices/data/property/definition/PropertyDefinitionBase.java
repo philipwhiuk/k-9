@@ -23,6 +23,8 @@
 
 package microsoft.exchange.webservices.data.property.definition;
 
+import java.io.IOException;
+
 import microsoft.exchange.webservices.data.core.EwsServiceXmlReader;
 import microsoft.exchange.webservices.data.core.EwsServiceXmlWriter;
 import microsoft.exchange.webservices.data.core.XmlAttributeNames;
@@ -32,8 +34,6 @@ import microsoft.exchange.webservices.data.core.enumeration.misc.ExchangeVersion
 import microsoft.exchange.webservices.data.core.enumeration.misc.XmlNamespace;
 import microsoft.exchange.webservices.data.core.exception.service.local.ServiceXmlSerializationException;
 import microsoft.exchange.webservices.data.misc.OutParam;
-
-import javax.xml.stream.XMLStreamException;
 
 /**
  * Represents the base class for all property definitions.
@@ -117,14 +117,14 @@ public abstract class PropertyDefinitionBase {
    * Writes to XML.
    *
    * @param writer The writer.
-   * @throws XMLStreamException the XML stream exception
+   * @throws IOException the XML stream exception
    * @throws ServiceXmlSerializationException the service xml serialization exception
    */
   public void writeToXml(EwsServiceXmlWriter writer)
-      throws XMLStreamException, ServiceXmlSerializationException {
+      throws IOException, ServiceXmlSerializationException {
     writer.writeStartElement(XmlNamespace.Types, this.getXmlElementName());
     this.writeAttributesToXml(writer);
-    writer.writeEndElement();
+    writer.writeEndElement(XmlNamespace.Types, this.getXmlElementName());
   }
 
   /*
