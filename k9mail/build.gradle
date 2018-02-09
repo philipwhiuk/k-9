@@ -53,7 +53,7 @@ dependencies {
     implementation 'net.sf.biweekly:biweekly:0.6.0'
     implementation 'me.zhanghai.android.materialprogressbar:library:1.4.1'
 
-    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
+    androidTestImplementation "com.android.support.test.espresso:espresso-core:${espressoVersion}"
 
     testImplementation "org.robolectric:robolectric:${robolectricVersion}"
     testImplementation "junit:junit:${junitVersion}"
