@@ -1,0 +1,51 @@
+apply plugin: 'com.android.library'
+
+if (!rootProject.optimizeForDevelopment) {
+    apply from: '../gradle/plugins/checkstyle-android.gradle'
+    apply from: '../gradle/plugins/findbugs-android.gradle'
+}
+
+if (rootProject.testCoverage) {
+    apply plugin: 'jacoco'
+}
+
+repositories {
+    jcenter()
+    google()
+}
+
+android {
+    compileSdkVersion androidCompileSdkVersion.toInteger()
+    buildToolsVersion androidBuildToolsVersion
+
+    defaultConfig {
+        minSdkVersion 15
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        debug {
+            testCoverageEnabled rootProject.testCoverage
+        }
+    }
+
+    lintOptions {
+        abortOnError false
+        lintConfig file("$rootProject.projectDir/config/lint/lint.xml")
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation "com.jakewharton.timber:timber:${timberVersion}"
+
+    testImplementation "junit:junit:${junitVersion}"
+    androidTestImplementation 'com.android.support.test:runner:1.0.1'
+    androidTestImplementation "com.android.support.test.espresso:espresso-core:${espressoVersion}"
+}
