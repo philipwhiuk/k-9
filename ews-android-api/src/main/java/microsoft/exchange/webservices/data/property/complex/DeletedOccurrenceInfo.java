@@ -26,10 +26,9 @@ package microsoft.exchange.webservices.data.property.complex;
 import microsoft.exchange.webservices.data.core.EwsServiceXmlReader;
 import microsoft.exchange.webservices.data.core.XmlElementNames;
 import microsoft.exchange.webservices.data.core.exception.service.local.ServiceXmlDeserializationException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import javax.xml.stream.XMLStreamException;
+import timber.log.Timber;
 
 import java.util.Date;
 
@@ -38,8 +37,6 @@ import java.util.Date;
  * appointment.
  */
 public class DeletedOccurrenceInfo extends ComplexProperty {
-
-  private static final Log LOG = LogFactory.getLog(DeletedOccurrenceInfo.class);
 
   /**
    * The original start date and time of the deleted occurrence. The EWS
@@ -68,9 +65,9 @@ public class DeletedOccurrenceInfo extends ComplexProperty {
       try {
         this.originalStart = reader.readElementValueAsDateTime();
       } catch (ServiceXmlDeserializationException e) {
-        LOG.error(e);
+        Timber.e(e);
       } catch (XMLStreamException e) {
-        LOG.error(e);
+        Timber.e(e);
       }
       return true;
     } else {

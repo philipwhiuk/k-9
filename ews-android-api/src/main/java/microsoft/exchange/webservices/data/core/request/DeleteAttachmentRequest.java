@@ -37,8 +37,7 @@ import microsoft.exchange.webservices.data.core.enumeration.misc.ExchangeVersion
 import microsoft.exchange.webservices.data.core.enumeration.misc.XmlNamespace;
 import microsoft.exchange.webservices.data.core.exception.service.local.ServiceLocalException;
 import microsoft.exchange.webservices.data.property.complex.Attachment;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import timber.log.Timber;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,8 +47,6 @@ import java.util.List;
  */
 public final class DeleteAttachmentRequest extends
     MultiResponseServiceRequest<DeleteAttachmentResponse> {
-
-  private static final Log LOG = LogFactory.getLog(DeleteAttachmentRequest.class);
 
   /**
    * The attachments.
@@ -81,9 +78,9 @@ public final class DeleteAttachmentRequest extends
             String.format("Attachment[%d].Id ", i));
       }
     } catch (ServiceLocalException e) {
-      LOG.error(e);
+      Timber.e(e);
     } catch (Exception e) {
-      LOG.error(e);
+      Timber.e(e);
     }
   }
 

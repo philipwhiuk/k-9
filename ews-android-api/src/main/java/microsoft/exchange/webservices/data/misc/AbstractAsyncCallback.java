@@ -23,14 +23,12 @@
 
 package microsoft.exchange.webservices.data.misc;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import java.util.concurrent.Future;
 
-public abstract class AbstractAsyncCallback implements Runnable, Callback<Object> {
+import timber.log.Timber;
 
-  private static final Log LOG = LogFactory.getLog(AbstractAsyncCallback.class);
+
+public abstract class AbstractAsyncCallback implements Runnable, Callback<Object> {
 
   Future<?> task;
   static boolean callbackProcessed = false;
@@ -52,7 +50,7 @@ public abstract class AbstractAsyncCallback implements Runnable, Callback<Object
           Thread.sleep(1000);
         } catch (InterruptedException e) {
           // TODO Auto-generated catch block
-          LOG.error(e);
+          Timber.e(e);
         }
         break;
       }

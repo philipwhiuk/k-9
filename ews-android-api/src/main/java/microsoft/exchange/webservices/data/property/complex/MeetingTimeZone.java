@@ -32,16 +32,13 @@ import microsoft.exchange.webservices.data.core.enumeration.misc.XmlNamespace;
 import microsoft.exchange.webservices.data.core.exception.service.local.ServiceXmlSerializationException;
 import microsoft.exchange.webservices.data.misc.TimeSpan;
 import microsoft.exchange.webservices.data.property.complex.time.TimeZoneDefinition;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import timber.log.Timber;
+
 
 /**
  * Represents a time zone in which a meeting is defined.
  */
 public final class MeetingTimeZone extends ComplexProperty {
-
-  private static final Log LOG = LogFactory.getLog(MeetingTimeZone.class);
-
   /**
    * The name.
    */
@@ -185,7 +182,7 @@ public final class MeetingTimeZone extends ComplexProperty {
       result.setId(this.getName());
     } catch (Exception e) {
       // Could not find a time zone with that Id on the local system.
-      LOG.error(e);
+      Timber.e(e);
     }
 
     // Again, we cannot accurately convert MeetingTimeZone into TimeZoneInfo

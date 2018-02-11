@@ -23,8 +23,6 @@
 
 package microsoft.exchange.webservices.data.security;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 import org.xml.sax.EntityResolver;
@@ -37,6 +35,7 @@ import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
+import timber.log.Timber;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -49,8 +48,6 @@ import java.io.StringReader;
  * XmlDocument that does not allow DTD parsing.
  */
 public class SafeXmlDocument extends DocumentBuilder {
-
-  private static final Log LOG = LogFactory.getLog(SafeXmlDocument.class);
 
   /**
    * Initializes a new instance of the SafeXmlDocument class.
@@ -97,10 +94,10 @@ public class SafeXmlDocument extends DocumentBuilder {
         this.load((InputStream) reader);
       } catch (XMLStreamException e) {
         // TODO Auto-generated catch block
-        LOG.error(e);
+        Timber.e(e);
       } catch (FileNotFoundException e) {
         // TODO Auto-generated catch block
-        LOG.error(e);
+        Timber.e(e);
       }
     }
   }
@@ -121,7 +118,7 @@ public class SafeXmlDocument extends DocumentBuilder {
         this.load((InputStream) reader);
       } catch (XMLStreamException e) {
         // TODO Auto-generated catch block
-        LOG.error(e);
+        Timber.e(e);
       }
     }
   }
@@ -152,7 +149,7 @@ public class SafeXmlDocument extends DocumentBuilder {
         this.load((InputStream) reader);
       } catch (XMLStreamException e) {
         // TODO Auto-generated catch block
-        LOG.error(e);
+        Timber.e(e);
       }
     }
 

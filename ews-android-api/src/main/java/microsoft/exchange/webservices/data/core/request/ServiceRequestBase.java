@@ -23,6 +23,7 @@
 
 package microsoft.exchange.webservices.data.core.request;
 
+import com.whiuk.philip.utils.IOUtils;
 import microsoft.exchange.webservices.data.core.EwsServiceXmlReader;
 import microsoft.exchange.webservices.data.core.EwsServiceXmlWriter;
 import microsoft.exchange.webservices.data.core.EwsUtilities;
@@ -46,12 +47,9 @@ import microsoft.exchange.webservices.data.core.exception.service.local.ServiceX
 import microsoft.exchange.webservices.data.core.exception.xml.XmlException;
 import microsoft.exchange.webservices.data.misc.SoapFaultDetails;
 import microsoft.exchange.webservices.data.security.XmlNodeType;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import javax.xml.stream.XMLStreamException;
-import javax.xml.ws.http.HTTPException;
+import timber.log.Timber;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -64,8 +62,6 @@ import java.util.zip.InflaterInputStream;
  * Represents an abstract service request.
  */
 public abstract class ServiceRequestBase<T> {
-
-  private static final Log LOG = LogFactory.getLog(ServiceRequestBase.class);
 
   /**
    * The service.
@@ -403,11 +399,6 @@ public abstract class ServiceRequestBase<T> {
       }
 
       return serviceResponse;
-    } catch (HTTPException e) {
-      if (e.getMessage() != null) {
-        this.getService().processHttpResponseHeaders(TraceFlags.EwsResponseHttpHeaders, response);
-      }
-      throw new ServiceRequestException(String.format("The request failed. %s", e.getMessage()), e);
     } catch (IOException e) {
       throw new ServiceRequestException(String.format("The request failed. %s", e.getMessage()), e);
     } finally { // close the underlying response
@@ -618,7 +609,7 @@ public abstract class ServiceRequestBase<T> {
       // If response doesn't contain a valid SOAP fault, just ignore
       // exception and
       // return null for SOAP fault details.
-      LOG.error(e);
+      Timber.e(e);
     }
 
     return soapFaultDetails;

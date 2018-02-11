@@ -41,21 +41,20 @@ import microsoft.exchange.webservices.data.property.complex.FolderId;
 import microsoft.exchange.webservices.data.property.complex.ItemId;
 import microsoft.exchange.webservices.data.property.complex.UserConfigurationDictionary;
 import microsoft.exchange.webservices.data.security.XmlNodeType;
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import javax.xml.stream.XMLStreamException;
+import timber.log.Timber;
 
 import java.util.EnumSet;
+
+import android.util.Base64;
+
 
 /**
  * Represents an object that can be used to store user-defined configuration
  * settings.
  */
 public class UserConfiguration {
-
-  private static final Log LOG = LogFactory.getLog(UserConfiguration.class);
 
   /**
    * The object version.
@@ -159,7 +158,7 @@ public class UserConfiguration {
     writer.writeStartElement(XmlNamespace.Types, xmlElementName);
 
     if (byteArray != null && byteArray.length > 0) {
-      writer.writeValue(Base64.encodeBase64String(byteArray), xmlElementName);
+      writer.writeValue(Base64.encodeToString(byteArray, Base64.DEFAULT), xmlElementName);
     }
 
     writer.writeEndElement();
@@ -605,10 +604,10 @@ public class UserConfiguration {
               XmlElementNames.Dictionary);
         } else if (reader.getLocalName()
             .equals(XmlElementNames.XmlData)) {
-          this.xmlData = Base64.decodeBase64(reader.readElementValue());
+          this.xmlData = Base64.decode(reader.readElementValue(), Base64.DEFAULT);
         } else if (reader.getLocalName().equals(
             XmlElementNames.BinaryData)) {
-          this.binaryData = Base64.decodeBase64(reader.readElementValue());
+          this.binaryData = Base64.decode(reader.readElementValue(), Base64.DEFAULT);
         } else {
           EwsUtilities.ewsAssert(false, "UserConfiguration.loadFromXml",
                                  "Xml element not supported: " + reader.getLocalName());
@@ -650,7 +649,7 @@ public class UserConfiguration {
     try {
       this.updatedProperties = EnumSet.of(NoProperties);
     } catch (Exception e) {
-      LOG.error(e);
+      Timber.e(e);
     }
     this.dictionary.setIsDirty(false);
   }

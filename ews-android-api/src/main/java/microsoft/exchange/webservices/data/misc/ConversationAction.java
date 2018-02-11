@@ -32,8 +32,7 @@ import microsoft.exchange.webservices.data.core.enumeration.misc.XmlNamespace;
 import microsoft.exchange.webservices.data.core.exception.misc.ArgumentException;
 import microsoft.exchange.webservices.data.property.complex.ConversationId;
 import microsoft.exchange.webservices.data.property.complex.StringList;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import timber.log.Timber;
 
 import java.util.Date;
 
@@ -45,8 +44,6 @@ import java.util.Date;
  * be taken on a conversation.
  */
 public class ConversationAction {
-
-  private static final Log LOG = LogFactory.getLog(ConversationAction.class);
 
   private ConversationActionType action;
   private ConversationId conversationId;
@@ -378,7 +375,7 @@ public class ConversationAction {
         }
       }
     } catch (Exception e) {
-      LOG.error(e);
+      Timber.e(e);
     } finally {
       writer.writeEndElement();
     }

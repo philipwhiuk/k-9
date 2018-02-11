@@ -32,8 +32,8 @@ import microsoft.exchange.webservices.data.core.response.ServiceResponse;
 import microsoft.exchange.webservices.data.core.service.folder.Folder;
 import microsoft.exchange.webservices.data.core.enumeration.misc.XmlNamespace;
 import microsoft.exchange.webservices.data.misc.FolderIdWrapperList;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import timber.log.Timber;
+
 
 /**
  * Represents an abstract Move/Copy Folder request.
@@ -42,8 +42,6 @@ import org.apache.commons.logging.LogFactory;
  */
 abstract class MoveCopyFolderRequest<TResponse extends ServiceResponse> extends
     MoveCopyRequest<Folder, TResponse> {
-
-  private static final Log LOG = LogFactory.getLog(MoveCopyFolderRequest.class);
 
   /**
    * The folder ids.
@@ -88,7 +86,7 @@ abstract class MoveCopyFolderRequest<TResponse extends ServiceResponse> extends
       this.folderIds.writeToXml(writer, XmlNamespace.Messages,
           XmlElementNames.FolderIds);
     } catch (Exception e) {
-      LOG.error(e);
+      Timber.e(e);
     }
   }
 

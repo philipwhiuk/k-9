@@ -37,8 +37,8 @@ import microsoft.exchange.webservices.data.misc.FolderIdWrapperList;
 import microsoft.exchange.webservices.data.search.Grouping;
 import microsoft.exchange.webservices.data.search.ViewBase;
 import microsoft.exchange.webservices.data.search.filter.SearchFilter;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import timber.log.Timber;
+
 
 /**
  * Represents an abstract Find request.
@@ -47,8 +47,6 @@ import org.apache.commons.logging.LogFactory;
  */
 abstract class FindRequest<TResponse extends ServiceResponse> extends
     MultiResponseServiceRequest<TResponse> {
-
-  private static final Log LOG = LogFactory.getLog(FindRequest.class);
 
   /**
    * The parent folder ids.
@@ -170,7 +168,7 @@ abstract class FindRequest<TResponse extends ServiceResponse> extends
       this.getParentFolderIds().writeToXml(writer, XmlNamespace.Messages,
           XmlElementNames.ParentFolderIds);
     } catch (Exception e) {
-      LOG.error(e);
+      Timber.e(e);
     }
 
     if (!(this.queryString == null || this.queryString.isEmpty())) {

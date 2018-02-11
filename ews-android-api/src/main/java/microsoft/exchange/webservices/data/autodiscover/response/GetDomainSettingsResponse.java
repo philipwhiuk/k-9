@@ -31,8 +31,7 @@ import microsoft.exchange.webservices.data.core.XmlElementNames;
 import microsoft.exchange.webservices.data.autodiscover.enumeration.DomainSettingName;
 import microsoft.exchange.webservices.data.core.enumeration.misc.XmlNamespace;
 import microsoft.exchange.webservices.data.security.XmlNodeType;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import timber.log.Timber;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -43,8 +42,6 @@ import java.util.Map;
  * Represents the response to a GetDomainSettings call for an individual domain.
  */
 public final class GetDomainSettingsResponse extends AutodiscoverResponse {
-
-  private static final Log LOG = LogFactory.getLog(GetDomainSettingsResponse.class);
 
   /**
    * The domain.
@@ -145,7 +142,7 @@ public final class GetDomainSettingsResponse extends AutodiscoverResponse {
           try {
             this.loadDomainSettingsFromXml(reader);
           } catch (Exception e) {
-            LOG.error(e);
+            Timber.e(e);
           }
         } else {
           super.loadFromXml(reader, endElementName);

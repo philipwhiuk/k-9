@@ -23,7 +23,7 @@
 
 package microsoft.exchange.webservices.data.util;
 
-import org.apache.commons.lang3.StringUtils;
+import com.whiuk.philip.utils.StringUtils;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 

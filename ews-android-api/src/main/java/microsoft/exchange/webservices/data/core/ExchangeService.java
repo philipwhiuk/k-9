@@ -196,17 +196,15 @@ import microsoft.exchange.webservices.data.sync.ChangeCollection;
 import microsoft.exchange.webservices.data.sync.FolderChange;
 import microsoft.exchange.webservices.data.sync.ItemChange;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
+import timber.log.Timber;
+
 
 /**
  * Represents a binding to the Exchange Web Services.
  */
 public class ExchangeService extends ExchangeServiceBase implements IAutodiscoverRedirectionUrl {
-
-  private static final Log LOG = LogFactory.getLog(ExchangeService.class);
 
   /**
    * The url.
@@ -3744,7 +3742,7 @@ public class ExchangeService extends ExchangeServiceBase implements IAutodiscove
     try {
       this.url = this.adjustServiceUriFromCredentials(this.getUrl());
     } catch (Exception e) {
-      LOG.error(e);
+      Timber.e(e);
     }
     return this.prepareHttpWebRequestForUrl(url, this
         .getAcceptGzipEncoding(), true);
@@ -3762,7 +3760,7 @@ public class ExchangeService extends ExchangeServiceBase implements IAutodiscove
 	    try {
 	      this.url = this.adjustServiceUriFromCredentials(this.getUrl());
 	    } catch (Exception e) {
-	      LOG.error(e);
+	      Timber.e(e);
 	    }
 	    return this.prepareHttpPoolingWebRequestForUrl(url, this
 	        .getAcceptGzipEncoding(), true);

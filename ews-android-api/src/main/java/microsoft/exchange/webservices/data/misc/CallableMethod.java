@@ -27,15 +27,12 @@ import microsoft.exchange.webservices.data.core.request.HttpClientWebRequest;
 import microsoft.exchange.webservices.data.core.request.HttpWebRequest;
 import microsoft.exchange.webservices.data.core.exception.http.EWSHttpException;
 import microsoft.exchange.webservices.data.core.exception.http.HttpErrorException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import timber.log.Timber;
 
 import java.io.IOException;
 import java.util.concurrent.Callable;
 
 public class CallableMethod implements Callable<Object> {
-
-  private static final Log LOG = LogFactory.getLog(CallableMethod.class);
 
   HttpWebRequest request;
 
@@ -55,13 +52,13 @@ public class CallableMethod implements Callable<Object> {
       return executeMethod();
     } catch (EWSHttpException e) {
       // TODO Auto-generated catch block
-      LOG.error(e);
+      Timber.e(e);
     } catch (HttpErrorException e) {
       // TODO Auto-generated catch block
-      LOG.error(e);
+      Timber.e(e);
     } catch (IOException e) {
       // TODO Auto-generated catch block
-      LOG.error(e);
+      Timber.e(e);
     }
     return request;
   }

@@ -31,7 +31,6 @@ import microsoft.exchange.webservices.data.core.enumeration.misc.XmlNamespace;
 import microsoft.exchange.webservices.data.core.exception.service.local.ServiceXmlSerializationException;
 import microsoft.exchange.webservices.data.misc.MapiTypeConverter;
 import microsoft.exchange.webservices.data.property.definition.ExtendedPropertyDefinition;
-import org.apache.commons.lang3.StringUtils;
 
 import javax.xml.stream.XMLStreamException;
 
@@ -218,7 +217,8 @@ public final class ExtendedProperty extends ComplexProperty {
     if (obj instanceof ExtendedProperty) {
       final ExtendedProperty other = (ExtendedProperty) obj;
       return other.getPropertyDefinition().equals(this.getPropertyDefinition())
-        && StringUtils.equals(this.getStringValue(), other.getStringValue());
+        && ((this.getStringValue() == null && other.getStringValue() == null)
+              || (this.getStringValue() != null && this.getStringValue().equals(other.getStringValue())));
     }
     return false;
   }

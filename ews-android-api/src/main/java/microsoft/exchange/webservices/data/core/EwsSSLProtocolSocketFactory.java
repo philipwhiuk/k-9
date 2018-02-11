@@ -23,9 +23,9 @@
 
 package microsoft.exchange.webservices.data.core;
 
-import org.apache.http.conn.ssl.DefaultHostnameVerifier;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.ssl.SSLContexts;
+import okhttp3.internal.tls.OkHostnameVerifier;
+import com.whiuk.philip.org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import com.whiuk.philip.org.apache.http.ssl.SSLContexts;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
@@ -81,7 +81,7 @@ public class EwsSSLProtocolSocketFactory extends SSLConnectionSocketFactory {
   /**
    * Default hostname verifier.
    */
-  private static final HostnameVerifier DEFAULT_HOSTNAME_VERIFIER = new DefaultHostnameVerifier();
+  private static final HostnameVerifier DEFAULT_HOSTNAME_VERIFIER = OkHostnameVerifier.INSTANCE;
 
 
   /**

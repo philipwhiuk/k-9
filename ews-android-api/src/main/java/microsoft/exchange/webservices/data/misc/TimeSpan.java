@@ -24,15 +24,13 @@
 package microsoft.exchange.webservices.data.misc;
 
 import microsoft.exchange.webservices.data.core.exception.misc.FormatException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import timber.log.Timber;
+
 
 /**
  * The Class TimeSpan.
  */
 public class TimeSpan implements Comparable<TimeSpan>, java.io.Serializable, Cloneable {
-
-  private static final Log LOG = LogFactory.getLog(TimeSpan.class);
 
   /**
    * Constant serialized ID used for compatibility.
@@ -225,7 +223,7 @@ public class TimeSpan implements Comparable<TimeSpan>, java.io.Serializable, Clo
     try {
       return super.clone();
     } catch (CloneNotSupportedException e) {
-      LOG.error(e);
+      Timber.e(e);
       throw new InternalError();
     }
   }

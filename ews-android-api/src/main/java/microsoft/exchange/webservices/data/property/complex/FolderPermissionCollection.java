@@ -32,8 +32,7 @@ import microsoft.exchange.webservices.data.core.service.folder.Folder;
 import microsoft.exchange.webservices.data.core.enumeration.misc.XmlNamespace;
 import microsoft.exchange.webservices.data.core.exception.service.local.ServiceLocalException;
 import microsoft.exchange.webservices.data.core.exception.service.local.ServiceValidationException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import timber.log.Timber;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -43,8 +42,6 @@ import java.util.Iterator;
  * Represents a collection of folder permissions.
  */
 public final class FolderPermissionCollection extends ComplexPropertyCollection<FolderPermission> {
-
-  private static final Log LOG = LogFactory.getLog(FolderPermissionCollection.class);
 
   /**
    * The is calendar folder.
@@ -140,9 +137,9 @@ public final class FolderPermissionCollection extends ComplexPropertyCollection<
       try {
         permission.validate(this.isCalendarFolder, permissionIndex);
       } catch (ServiceValidationException e) {
-        LOG.error(e);
+        Timber.e(e);
       } catch (ServiceLocalException e) {
-        LOG.error(e);
+        Timber.e(e);
       }
     }
   }

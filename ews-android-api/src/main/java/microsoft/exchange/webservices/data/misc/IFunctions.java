@@ -24,10 +24,12 @@
 package microsoft.exchange.webservices.data.misc;
 
 import microsoft.exchange.webservices.data.core.EwsUtilities;
-import org.apache.commons.codec.binary.Base64;
 
 import java.util.Date;
 import java.util.UUID;
+
+import android.util.Base64;
+
 
 /**
  * Class with re-usable function implementations.
@@ -75,7 +77,7 @@ public final class IFunctions {
     public static final Base64Decoder INSTANCE = new Base64Decoder();
 
     public Object func(final String s) {
-      return Base64.decodeBase64(s);
+      return Base64.decode(s, Base64.DEFAULT);
     }
   }
 
@@ -83,7 +85,7 @@ public final class IFunctions {
     public static final Base64Encoder INSTANCE = new Base64Encoder();
 
     public String func(final Object o) {
-      return Base64.encodeBase64String((byte[]) o);
+      return Base64.encodeToString((byte[]) o, Base64.DEFAULT);
     }
   }
 

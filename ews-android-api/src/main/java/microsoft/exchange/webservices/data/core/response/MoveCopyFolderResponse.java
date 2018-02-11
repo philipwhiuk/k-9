@@ -30,8 +30,7 @@ import microsoft.exchange.webservices.data.core.XmlElementNames;
 import microsoft.exchange.webservices.data.core.service.ServiceObject;
 import microsoft.exchange.webservices.data.core.service.folder.Folder;
 import microsoft.exchange.webservices.data.core.exception.service.local.ServiceLocalException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import timber.log.Timber;
 
 import java.util.List;
 
@@ -41,8 +40,6 @@ import java.util.List;
  */
 public final class MoveCopyFolderResponse extends ServiceResponse implements
                                                                   IGetObjectInstanceDelegate<ServiceObject> {
-
-  private static final Log LOG = LogFactory.getLog(MoveCopyFolderResponse.class);
 
   /**
    * The folder.
@@ -90,7 +87,7 @@ public final class MoveCopyFolderResponse extends ServiceResponse implements
 
       this.folder = folders.get(0);
     } catch (ServiceLocalException e) {
-      LOG.error(e);
+      Timber.e(e);
     }
 
   }

@@ -31,8 +31,7 @@ import microsoft.exchange.webservices.data.core.enumeration.misc.error.ServiceEr
 import microsoft.exchange.webservices.data.core.enumeration.misc.XmlNamespace;
 import microsoft.exchange.webservices.data.core.exception.service.local.ServiceXmlDeserializationException;
 import microsoft.exchange.webservices.data.security.XmlNodeType;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import timber.log.Timber;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -41,8 +40,6 @@ import java.util.Map;
  * Represents SoapFault details.
  */
 public class SoapFaultDetails {
-
-  private static final Log LOG = LogFactory.getLog(SoapFaultDetails.class);
 
   /**
    * The fault code.
@@ -150,7 +147,7 @@ public class SoapFaultDetails {
             this.setResponseCode(reader
                 .readElementValue(ServiceError.class));
           } catch (Exception e) {
-            LOG.error(e);
+            Timber.e(e);
 
             // ServiceError couldn't be mapped to enum value, treat
             // as an ISE
@@ -174,7 +171,7 @@ public class SoapFaultDetails {
             this.setErrorCode(reader
                 .readElementValue(ServiceError.class));
           } catch (Exception e) {
-            LOG.error(e);
+            Timber.e(e);
 
             // ServiceError couldn't be mapped to enum value, treat
             // as an ISE
@@ -188,7 +185,7 @@ public class SoapFaultDetails {
           try {
             this.setExceptionType(reader.readElementValue());
           } catch (Exception e) {
-            LOG.error(e);
+            Timber.e(e);
             this.setExceptionType(null);
           }
         } else if (localName.equals(XmlElementNames.MessageXml)) {

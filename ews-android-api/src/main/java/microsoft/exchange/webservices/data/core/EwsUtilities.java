@@ -51,8 +51,6 @@ import microsoft.exchange.webservices.data.core.exception.service.local.ServiceV
 import microsoft.exchange.webservices.data.misc.TimeSpan;
 import microsoft.exchange.webservices.data.property.complex.ItemAttachment;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.joda.time.Period;
 import org.joda.time.format.ISOPeriodFormat;
 
@@ -83,8 +81,6 @@ import java.util.regex.Pattern;
  * EWS utilities.
  */
 public final class EwsUtilities {
-
-  private static final Log LOG = LogFactory.getLog(EwsUtilities.class);
 
   /**
    * The Constant XSFalse.

@@ -32,14 +32,13 @@ import microsoft.exchange.webservices.data.core.response.ServiceResponse;
 import microsoft.exchange.webservices.data.core.enumeration.misc.ExchangeVersion;
 import microsoft.exchange.webservices.data.core.enumeration.misc.XmlNamespace;
 import microsoft.exchange.webservices.data.misc.FolderIdWrapperList;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import timber.log.Timber;
+
 
 /**
  * Represents a DeleteFolder request.
  */
 public final class DeleteFolderRequest extends DeleteRequest<ServiceResponse> {
-  private static final Log LOG = LogFactory.getLog(DeleteFolderRequest.class);
   /**
    * The folder ids.
    */
@@ -133,7 +132,7 @@ public final class DeleteFolderRequest extends DeleteRequest<ServiceResponse> {
       this.getFolderIds().writeToXml(writer, XmlNamespace.Messages,
           XmlElementNames.FolderIds);
     } catch (Exception e) {
-      LOG.error(e);
+      Timber.e(e);
     }
   }
 

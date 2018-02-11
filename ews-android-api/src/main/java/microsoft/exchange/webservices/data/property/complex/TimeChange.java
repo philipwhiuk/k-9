@@ -33,21 +33,19 @@ import microsoft.exchange.webservices.data.core.exception.service.local.ServiceX
 import microsoft.exchange.webservices.data.misc.Time;
 import microsoft.exchange.webservices.data.misc.TimeSpan;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 import java.util.TimeZone;
 
-import javax.xml.bind.DatatypeConverter;
+import org.joda.time.format.ISODateTimeFormat;
+import timber.log.Timber;
+
 
 /**
  * Represents a change of time for a time zone.
  */
 public final class TimeChange extends ComplexProperty {
-
-  private static final Log LOG = LogFactory.getLog(TimeChange.class);
 
   /**
    * The time zone name.
@@ -221,13 +219,10 @@ public final class TimeChange extends ComplexProperty {
       return true;
     } else if (reader.getLocalName().equalsIgnoreCase(
         XmlElementNames.AbsoluteDate)) {
-      Calendar cal = DatatypeConverter.parseDate(reader.readElementValue());
-      cal.setTimeZone(TimeZone.getTimeZone("UTC"));
-      this.absoluteDate = cal.getTime();
+      this.absoluteDate = ISODateTimeFormat.dateTimeParser().parseDateTime(reader.readElementValue()).toDate();
       return true;
     } else if (reader.getLocalName().equalsIgnoreCase(XmlElementNames.Time)) {
-      Calendar cal = DatatypeConverter.parseTime(reader.readElementValue());
-      this.time = new Time(cal.getTime());
+      this.time = new Time(ISODateTimeFormat.timeParser().parseDateTime(reader.readElementValue()).toDate());
       return true;
     } else {
       return false;
@@ -258,7 +253,7 @@ public final class TimeChange extends ComplexProperty {
       writer.writeAttributeValue(XmlAttributeNames.TimeZoneName,
           this.timeZoneName);
     } catch (ServiceXmlSerializationException e) {
-      LOG.error(e);
+      Timber.e(e);
     }
   }
 

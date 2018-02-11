@@ -23,6 +23,7 @@
 
 package microsoft.exchange.webservices.data.core.request;
 
+import com.whiuk.philip.utils.IOUtils;
 import microsoft.exchange.webservices.data.core.EwsServiceMultiResponseXmlReader;
 import microsoft.exchange.webservices.data.core.EwsServiceXmlReader;
 import microsoft.exchange.webservices.data.core.ExchangeService;
@@ -36,11 +37,9 @@ import microsoft.exchange.webservices.data.core.exception.service.remote.Service
 import microsoft.exchange.webservices.data.core.exception.xml.XmlException;
 import microsoft.exchange.webservices.data.misc.HangingTraceStream;
 import microsoft.exchange.webservices.data.security.XmlNodeType;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import javax.xml.stream.XMLStreamException;
+import timber.log.Timber;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -59,8 +58,6 @@ import java.util.concurrent.TimeUnit;
  * Represents an abstract, hanging service request.
  */
 public abstract class HangingServiceRequestBase<T> extends ServiceRequestBase<T> {
-
-  private static final Log LOG = LogFactory.getLog(HangingServiceRequestBase.class);
 
 
   public interface IHandleResponseObject {
@@ -232,7 +229,7 @@ public abstract class HangingServiceRequestBase<T> extends ServiceRequestBase<T>
       // Stream is closed, so disconnect.
       this.disconnect(HangingRequestDisconnectReason.Exception, ex);
     } catch (UnsupportedOperationException ex) {
-      LOG.error(ex);
+      Timber.e(ex);
       // This is thrown if we close the stream during a
       //read operation due to a user method call.
       // Trying to delay closing until the read finishes

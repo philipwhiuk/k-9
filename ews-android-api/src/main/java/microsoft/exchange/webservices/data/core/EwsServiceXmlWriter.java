@@ -27,9 +27,6 @@ import microsoft.exchange.webservices.data.core.enumeration.misc.XmlNamespace;
 import microsoft.exchange.webservices.data.core.exception.service.local.ServiceXmlSerializationException;
 import microsoft.exchange.webservices.data.misc.OutParam;
 import microsoft.exchange.webservices.data.property.complex.ISearchStringProvider;
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.CDATASection;
 import org.w3c.dom.Comment;
 import org.w3c.dom.Document;
@@ -44,6 +41,7 @@ import org.w3c.dom.Text;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
+import timber.log.Timber;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -51,12 +49,13 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Date;
 
+import android.util.Base64;
+
+
 /**
  * Stax based XML Writer implementation.
  */
 public class EwsServiceXmlWriter implements IDisposable {
-
-  private static final Log LOG = LogFactory.getLog(EwsServiceXmlWriter.class);
 
   /**
    * The is disposed.
@@ -152,7 +151,7 @@ public class EwsServiceXmlWriter implements IDisposable {
       try {
         this.xmlWriter.close();
       } catch (XMLStreamException e) {
-        LOG.error(e);
+        Timber.e(e);
       }
       this.isDisposed = true;
     }
@@ -497,7 +496,7 @@ public class EwsServiceXmlWriter implements IDisposable {
   public void writeBase64ElementValue(byte[] buffer)
       throws XMLStreamException {
 
-    String strValue = Base64.encodeBase64String(buffer);
+    String strValue = Base64.encodeToString(buffer, Base64.DEFAULT);
     this.xmlWriter.writeCharacters(strValue);//Base64.encode(buffer));
   }
 
@@ -518,12 +517,12 @@ public class EwsServiceXmlWriter implements IDisposable {
         bos.write(buf, 0, readNum);
       }
     } catch (IOException ex) {
-      LOG.error(ex);
+      Timber.e(ex);
     } finally {
       bos.close();
     }
     byte[] bytes = bos.toByteArray();
-    String strValue = Base64.encodeBase64String(bytes);
+    String strValue = Base64.encodeToString(bytes, Base64.DEFAULT);
     this.xmlWriter.writeCharacters(strValue);
 
   }

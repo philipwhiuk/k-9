@@ -29,15 +29,13 @@ import microsoft.exchange.webservices.data.core.EwsUtilities;
 import microsoft.exchange.webservices.data.core.XmlElementNames;
 import microsoft.exchange.webservices.data.core.enumeration.property.MailboxType;
 import microsoft.exchange.webservices.data.core.enumeration.misc.XmlNamespace;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import timber.log.Timber;
+
 
 /**
  * Represents an e-mail address.
  */
 public class EmailAddress extends ComplexProperty implements ISearchStringProvider {
-
-  private static final Log LOG = LogFactory.getLog(EmailAddress.class);
 
   // SMTP routing type.
   /**
@@ -318,7 +316,7 @@ public class EmailAddress extends ComplexProperty implements ISearchStringProvid
         return false;
       }
     } catch (Exception e) {
-      LOG.error(e);
+      Timber.e(e);
       return false;
     }
   }

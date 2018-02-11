@@ -33,8 +33,8 @@ import microsoft.exchange.webservices.data.core.exception.service.local.ServiceL
 import microsoft.exchange.webservices.data.misc.CalendarActionResults;
 import microsoft.exchange.webservices.data.property.complex.ItemAttachment;
 import microsoft.exchange.webservices.data.property.complex.ItemId;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import timber.log.Timber;
+
 
 /**
  * Represents a meeting cancellation message. Properties available on meeting
@@ -42,8 +42,6 @@ import org.apache.commons.logging.LogFactory;
  */
 @ServiceObjectDefinition(xmlElementName = XmlElementNames.MeetingCancellation)
 public class MeetingCancellation extends MeetingMessage {
-
-  private static final Log LOG = LogFactory.getLog(MeetingCancellation.class);
 
   /**
    * Initializes a new instance of the class.
@@ -83,7 +81,7 @@ public class MeetingCancellation extends MeetingMessage {
       return service.bindToItem(MeetingCancellation.class, id,
           propertySet);
     } catch (Exception e) {
-      LOG.error(e);
+      Timber.e(e);
       return null;
     }
   }

@@ -23,17 +23,17 @@
 
 package microsoft.exchange.webservices.data.core;
 
-import org.apache.http.Header;
-import org.apache.http.HttpException;
-import org.apache.http.HttpHost;
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpResponse;
-import org.apache.http.auth.MalformedChallengeException;
-import org.apache.http.client.protocol.HttpClientContext;
-import org.apache.http.client.protocol.RequestAddCookies;
-import org.apache.http.client.protocol.ResponseProcessCookies;
-import org.apache.http.impl.client.TargetAuthenticationStrategy;
-import org.apache.http.protocol.HttpContext;
+import com.whiuk.philip.org.apache.http.Header;
+import com.whiuk.philip.org.apache.http.HttpException;
+import com.whiuk.philip.org.apache.http.HttpHost;
+import com.whiuk.philip.org.apache.http.HttpRequest;
+import com.whiuk.philip.org.apache.http.HttpResponse;
+import com.whiuk.philip.org.apache.http.auth.MalformedChallengeException;
+import com.whiuk.philip.org.apache.http.client.protocol.HttpClientContext;
+import com.whiuk.philip.org.apache.http.client.protocol.RequestAddCookies;
+import com.whiuk.philip.org.apache.http.client.protocol.ResponseProcessCookies;
+import com.whiuk.philip.org.apache.http.impl.client.TargetAuthenticationStrategy;
+import com.whiuk.philip.org.apache.http.protocol.HttpContext;
 
 import java.io.IOException;
 import java.util.Map;

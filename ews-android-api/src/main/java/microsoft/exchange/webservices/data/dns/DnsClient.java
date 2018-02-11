@@ -26,14 +26,9 @@ package microsoft.exchange.webservices.data.dns;
 import microsoft.exchange.webservices.data.EWSConstants;
 import microsoft.exchange.webservices.data.core.exception.dns.DnsException;
 
-import javax.naming.NamingEnumeration;
-import javax.naming.NamingException;
-import javax.naming.directory.Attribute;
-import javax.naming.directory.Attributes;
-import javax.naming.directory.DirContext;
-import javax.naming.directory.InitialDirContext;
-
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Hashtable;
 import java.util.List;
 
@@ -70,9 +65,11 @@ public class DnsClient {
    * @throws DnsException the dns exception
    */
 
-  public static <T extends DnsRecord> List<T> dnsQuery(Class<T> cls, String domain, String dnsServerAddress) throws
-                                                                                                             DnsException {
-
+  public static <T extends DnsRecord> List<T> dnsQuery(Class<T> cls, String domain, String dnsServerAddress)
+          throws DnsException {
+    return Collections.emptyList();
+    //TODO:
+    /**
     List<T> dnsRecordList = new ArrayList<T>();
     try {
       // Create initial context
@@ -105,5 +102,6 @@ public class DnsClient {
       throw new DnsException(e.getMessage());
     }
     return dnsRecordList;
+     **/
   }
 }

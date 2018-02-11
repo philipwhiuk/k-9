@@ -23,12 +23,12 @@
 
 package microsoft.exchange.webservices.data.property.complex;
 
+import com.whiuk.philip.utils.StringUtils;
 import microsoft.exchange.webservices.data.core.EwsServiceXmlReader;
 import microsoft.exchange.webservices.data.core.EwsServiceXmlWriter;
 import microsoft.exchange.webservices.data.core.EwsUtilities;
 import microsoft.exchange.webservices.data.core.XmlAttributeNames;
 import microsoft.exchange.webservices.data.core.exception.service.local.ServiceXmlSerializationException;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * Represents the Id of an Exchange object.

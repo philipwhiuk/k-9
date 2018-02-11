@@ -42,6 +42,9 @@ import javax.xml.stream.XMLStreamException;
 import java.net.URI;
 import java.util.List;
 
+import android.util.Base64;
+
+
 /**
  * Represents a GetUserSettings request.
  */
@@ -217,8 +220,7 @@ public class GetUserSettingsRequest extends AutodiscoverRequest {
       writer
           .writeElementValue(XmlNamespace.Autodiscover,
               XmlElementNames.BinarySecret,
-              new String(org.apache.commons.codec.binary.Base64.
-                  encodeBase64(ExchangeServiceBase.getSessionKey())));
+              new String(Base64.encode(ExchangeServiceBase.getSessionKey(), Base64.DEFAULT)));
     }
   }
 

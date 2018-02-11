@@ -41,6 +41,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.TimeZone;
 
+import com.whiuk.philip.utils.IOUtils;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
@@ -56,30 +57,25 @@ import microsoft.exchange.webservices.data.credential.ExchangeCredentials;
 import microsoft.exchange.webservices.data.misc.EwsTraceListener;
 import microsoft.exchange.webservices.data.misc.ITraceListener;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.http.client.AuthenticationStrategy;
-import org.apache.http.client.CookieStore;
-import org.apache.http.client.protocol.HttpClientContext;
-import org.apache.http.config.Registry;
-import org.apache.http.config.RegistryBuilder;
-import org.apache.http.conn.HttpClientConnectionManager;
-import org.apache.http.conn.socket.ConnectionSocketFactory;
-import org.apache.http.conn.socket.PlainConnectionSocketFactory;
-import org.apache.http.impl.client.BasicCookieStore;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.impl.conn.BasicHttpClientConnectionManager;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import com.whiuk.philip.org.apache.http.client.AuthenticationStrategy;
+import com.whiuk.philip.org.apache.http.client.CookieStore;
+import com.whiuk.philip.org.apache.http.client.protocol.HttpClientContext;
+import com.whiuk.philip.org.apache.http.config.Registry;
+import com.whiuk.philip.org.apache.http.config.RegistryBuilder;
+import com.whiuk.philip.org.apache.http.conn.HttpClientConnectionManager;
+import com.whiuk.philip.org.apache.http.conn.socket.ConnectionSocketFactory;
+import com.whiuk.philip.org.apache.http.conn.socket.PlainConnectionSocketFactory;
+import com.whiuk.philip.org.apache.http.impl.client.BasicCookieStore;
+import com.whiuk.philip.org.apache.http.impl.client.CloseableHttpClient;
+import com.whiuk.philip.org.apache.http.impl.client.HttpClients;
+import com.whiuk.philip.org.apache.http.impl.conn.BasicHttpClientConnectionManager;
+import com.whiuk.philip.org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 
 /**
  * Represents an abstract binding to an Exchange Service.
  */
 public abstract class ExchangeServiceBase implements Closeable {
   
-  private static final Log LOG = LogFactory.getLog(ExchangeService.class);
-
   /**
    * The credential.
    */

@@ -45,10 +45,9 @@ import microsoft.exchange.webservices.data.core.exception.service.local.ServiceX
 import microsoft.exchange.webservices.data.core.exception.service.local.ServiceXmlSerializationException;
 import microsoft.exchange.webservices.data.misc.SoapFaultDetails;
 import microsoft.exchange.webservices.data.security.XmlNodeType;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import javax.xml.stream.XMLStreamException;
+import timber.log.Timber;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -64,8 +63,6 @@ import java.util.zip.InflaterInputStream;
  * Represents the base class for all requested made to the Autodiscover service.
  */
 public abstract class AutodiscoverRequest {
-
-  private static final Log LOG = LogFactory.getLog(AutodiscoverRequest.class);
 
   /**
    * The service.
@@ -312,7 +309,7 @@ public abstract class AutodiscoverRequest {
           this.service.processHttpErrorResponse(req, exception);
         }
       } catch (Exception e) {
-        LOG.error(e);
+        Timber.e(e);
       }
     }
   }
@@ -443,7 +440,7 @@ public abstract class AutodiscoverRequest {
       // If response doesn't contain a valid SOAP fault, just ignore
       // exception and
       // return null for SOAP fault details.
-      LOG.error(e);
+      Timber.e(e);
     }
 
     return soapFaultDetails;

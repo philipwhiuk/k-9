@@ -44,6 +44,8 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "com.jakewharton.timber:timber:${timberVersion}"
+    implementation 'com.squareup.okhttp3:okhttp:3.9.1' //For hostname verification
+    implementation 'net.danlew:android.joda:2.9.9.2' //Joda Time replacement
 
     testImplementation "junit:junit:${junitVersion}"
     androidTestImplementation 'com.android.support.test:runner:1.0.1'

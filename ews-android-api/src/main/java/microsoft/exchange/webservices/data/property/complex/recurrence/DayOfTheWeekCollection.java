@@ -23,6 +23,7 @@
 
 package microsoft.exchange.webservices.data.property.complex.recurrence;
 
+import com.whiuk.philip.utils.StringUtils;
 import microsoft.exchange.webservices.data.core.EwsServiceXmlReader;
 import microsoft.exchange.webservices.data.core.EwsServiceXmlWriter;
 import microsoft.exchange.webservices.data.core.EwsUtilities;
@@ -32,7 +33,6 @@ import microsoft.exchange.webservices.data.core.enumeration.misc.XmlNamespace;
 import microsoft.exchange.webservices.data.core.exception.misc.ArgumentOutOfRangeException;
 import microsoft.exchange.webservices.data.core.exception.service.local.ServiceXmlSerializationException;
 import microsoft.exchange.webservices.data.property.complex.ComplexProperty;
-import org.apache.commons.lang3.StringUtils;
 
 import javax.xml.stream.XMLStreamException;
 
