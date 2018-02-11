@@ -28,7 +28,6 @@ import static org.junit.Assert.assertNotNull;
 
 import microsoft.exchange.webservices.data.core.enumeration.misc.ExchangeVersion;
 import microsoft.exchange.webservices.data.core.enumeration.property.PropertyDefinitionFlags;
-import org.apache.commons.codec.binary.Base64;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,13 +35,16 @@ import org.junit.runners.JUnit4;
 
 import java.util.EnumSet;
 
+import android.util.Base64;
+
+
 @RunWith(JUnit4.class)
 public class ByteArrayPropertyDefinitionTest {
 
   private ByteArrayPropertyDefinition testObject;
 
   private static final String TEST_STRING = "Lorem ipsum dolor sit amet";
-  private static final String BASE64_ENCODEDSTRING = Base64.encodeBase64String(TEST_STRING.getBytes());
+  private static final String BASE64_ENCODEDSTRING = Base64.encodeToString(TEST_STRING.getBytes(), Base64.DEFAULT);
 
   /**
    * setup

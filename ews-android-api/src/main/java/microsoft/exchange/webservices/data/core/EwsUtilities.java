@@ -249,7 +249,7 @@ public final class EwsUtilities {
    * @return the builds the version
    */
   public static String getBuildVersion() {
-    return "0.0.0.0";
+    return "1.0.0.0";
   }
 
   /**

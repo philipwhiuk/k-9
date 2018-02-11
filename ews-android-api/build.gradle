@@ -48,6 +48,9 @@ dependencies {
     implementation 'net.danlew:android.joda:2.9.9.2' //Joda Time replacement
 
     testImplementation "junit:junit:${junitVersion}"
+    testImplementation group: 'org.mockito', name: 'mockito-core', version: '2.13.0'
+    testImplementation "org.hamcrest:hamcrest-library:1.3"
+    testImplementation "org.robolectric:robolectric:${robolectricVersion}"
     androidTestImplementation 'com.android.support.test:runner:1.0.1'
     androidTestImplementation "com.android.support.test.espresso:espresso-core:${espressoVersion}"
 }

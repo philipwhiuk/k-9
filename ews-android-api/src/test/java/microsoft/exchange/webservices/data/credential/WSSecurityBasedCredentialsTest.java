@@ -25,13 +25,11 @@ package microsoft.exchange.webservices.data.credential;
 
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.text.IsEmptyString.isEmptyString;
 import static org.hamcrest.core.StringContains.containsString;
-import static org.hamcrest.text.IsEmptyString.isEmptyOrNullString;
 import static org.junit.Assert.assertThat;
 
 import microsoft.exchange.webservices.data.core.EwsUtilities;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -41,14 +39,13 @@ import org.junit.runners.JUnit4;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
+import timber.log.Timber;
 
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 
-@RunWith(JUnit4.class) public class WSSecurityBasedCredentialsTest {
-
-  private static final Log LOG = LogFactory.getLog(WSSecurityBasedCredentialsTest.class);
+@RunWith(JUnit4.class) public class WSSecurityBasedCredentialsTest {;
 
   private WSSecurityBasedCredentials wsSecurityBasedCredentials;
   private XMLStreamWriter xmlStreamWriter = null;
@@ -70,14 +67,14 @@ import java.io.Writer;
       try {
         stringWriter.close();
       } catch (IOException e) {
-        LOG.warn(e.getMessage(), e);
+        Timber.w(e);
       }
     }
     if (xmlStreamWriter != null) {
       try {
         xmlStreamWriter.close();
       } catch (XMLStreamException e) {
-        LOG.warn(e.getMessage(), e);
+        Timber.w(e);
       }
     }
   }
@@ -93,7 +90,7 @@ import java.io.Writer;
     xmlStreamWriter.flush();
 
     assertThat(stringWriter.toString(),
-               allOf(not(isEmptyOrNullString()), containsString("xmlns"), containsString("test"),
+               allOf(not(isEmptyString()), containsString("xmlns"), containsString("test"),
                      containsString(EwsUtilities.WSSecuritySecExtNamespacePrefix),
                      containsString(EwsUtilities.WSAddressingNamespacePrefix),
                      containsString(EwsUtilities.WSSecuritySecExtNamespace),

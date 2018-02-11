@@ -369,8 +369,8 @@ public class SSLConnectionSocketFactory implements LayeredConnectionSocketFactor
             sslsock.setEnabledCipherSuites(supportedCipherSuites);
         }
         
-        Timber.d("Enabled protocols: " + Arrays.asList(sslsock.getEnabledProtocols()));
-        Timber.d("Enabled cipher suites:" + Arrays.asList(sslsock.getEnabledCipherSuites()));
+        Timber.d("Enabled protocols: %s", Arrays.asList(sslsock.getEnabledProtocols()));
+        Timber.d("Enabled cipher suites: %s", Arrays.asList(sslsock.getEnabledCipherSuites()));
 
         prepareSocket(sslsock);
         Timber.d("Starting handshake");
@@ -425,7 +425,7 @@ public class SSLConnectionSocketFactory implements LayeredConnectionSocketFactor
                     }
 
                     final X500Principal issuer = x509.getIssuerX500Principal();
-                    Timber.d(" issuer principal: " + issuer.toString());
+                    Timber.d(" issuer principal: %s", issuer.toString());
                     final Collection<List<?>> altNames2 = x509.getIssuerAlternativeNames();
                     if (altNames2 != null) {
                         final List<String> altNames = new ArrayList<String>();
@@ -434,7 +434,7 @@ public class SSLConnectionSocketFactory implements LayeredConnectionSocketFactor
                                 altNames.add((String) aC.get(1));
                             }
                         }
-                        Timber.d(" issuer alternative names: " + altNames);
+                        Timber.d(" issuer alternative names: %s", altNames);
                     }
                 } catch (Exception ignore) {
                 }
